@@ -138,7 +138,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.18.6
-%global baserelease 1
+%global baserelease 3
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -233,6 +233,11 @@ Source17:       samba-usershares-systemd-sysusers.conf
 
 Source201:      README.downgrade
 Source202:      samba.abignore
+
+Patch0:         CVE-2023-3961-pipename-4.18.6.patch
+Patch1:         CVE-2023-4091-truncate-4.18.patch
+Patch2:         CVE-2023-42669-remove-rpcecho-4.18.patch
+Patch3:         samba-4.18-fix-nss-winbind-memory-corruption.patch
 
 Requires(pre): /usr/sbin/groupadd
 
@@ -2024,7 +2029,6 @@ fi
 %{_libexecdir}/samba/rpcd_fsrvp
 %{_libexecdir}/samba/rpcd_lsad
 %{_libexecdir}/samba/rpcd_mdssvc
-%{_libexecdir}/samba/rpcd_rpcecho
 %{_libexecdir}/samba/rpcd_spoolss
 %{_libexecdir}/samba/rpcd_winreg
 %{_mandir}/man8/samba-dcerpcd.8*
@@ -4328,6 +4332,17 @@ fi
 %endif
 
 %changelog
+* Tue Jan 23 2024 Andreas Schneider <asn@redhat.com> - 4.18.6-3
+- resolves: RHEL-21073 - Fix libnss_winbind memory corruption
+
+* Mon Oct 09 2023 Pavel Filipenský <pfilipen@redhat.com> - 4.18.6-2
+- resolves: RHEL-11956
+  Fix CVE-2023-3961 - smbd must check the pipename
+- resolves: RHEL-11956
+  Fix CVE-2023-4091 - SMB clients can truncate files
+- resolves: RHEL-11956
+  Fix CVE-2023-42669 - Remove rpcecho server
+
 * Thu Aug 17 2023 Andreas Schneider <asn@redhat.com> - 4.18.6-1
 - related: rhbz#2190417 - Update to version 4.18.6
 - resolves: rhbz#2232564 - Fix the rpc dsgetinfo command
