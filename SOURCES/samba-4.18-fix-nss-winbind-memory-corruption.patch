@@ -1,0 +1,614 @@
+From ced40c5a805dcfb06d5f3d68aa45a0aaa44bfdca Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Fri, 8 Sep 2023 13:57:26 +0200
+Subject: [PATCH 1/5] nsswitch: add test for pthread_key_delete missuse (bug
+ 15464)
+
+This is based on https://bugzilla.samba.org/attachment.cgi?id=18081
+written by Krzysztof Piotr Oledzki <ole@ans.pl>
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15464
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Jeremy Allison <jra@samba.org>
+(cherry picked from commit 62af25d44e542548d8cdecb061a6001e0071ee76)
+---
+ nsswitch/b15464-testcase.c            | 77 +++++++++++++++++++++++++++
+ nsswitch/wscript_build                |  5 ++
+ selftest/knownfail.d/b15464_testcase  |  1 +
+ source3/selftest/tests.py             |  6 +++
+ testprogs/blackbox/b15464-testcase.sh | 21 ++++++++
+ 5 files changed, 110 insertions(+)
+ create mode 100644 nsswitch/b15464-testcase.c
+ create mode 100644 selftest/knownfail.d/b15464_testcase
+ create mode 100755 testprogs/blackbox/b15464-testcase.sh
+
+diff --git a/nsswitch/b15464-testcase.c b/nsswitch/b15464-testcase.c
+new file mode 100644
+index 000000000000..decb474a81ee
+--- /dev/null
++++ b/nsswitch/b15464-testcase.c
+@@ -0,0 +1,77 @@
++#include "replace.h"
++#include "system/wait.h"
++#include "system/threads.h"
++#include <assert.h>
++
++int main(int argc, const char *argv[])
++{
++	pid_t pid;
++	int wstatus;
++	pthread_key_t k1;
++	pthread_key_t k2;
++	pthread_key_t k3;
++	char *val = NULL;
++	const char *nss_winbind = (argc >= 2 ? argv[1] : "bin/plugins/libnss_winbind.so.2");
++	void *nss_winbind_handle = NULL;
++	union {
++		int (*fn)(void);
++		void *symbol;
++	} nss_winbind_endpwent = { .symbol = NULL, };
++
++	/*
++	 * load and invoke something simple like
++	 * _nss_winbind_endpwent in order to
++	 * get the libnss_winbind internal going
++	 */
++	nss_winbind_handle = dlopen(nss_winbind, RTLD_NOW);
++	printf("%d: nss_winbind[%s] nss_winbind_handle[%p]\n",
++	       getpid(), nss_winbind, nss_winbind_handle);
++	assert(nss_winbind_handle != NULL);
++
++	nss_winbind_endpwent.symbol = dlsym(nss_winbind_handle,
++					    "_nss_winbind_endpwent");
++	printf("%d: nss_winbind_handle[%p] _nss_winbind_endpwent[%p]\n",
++	       getpid(), nss_winbind_handle, nss_winbind_endpwent.symbol);
++	assert(nss_winbind_endpwent.symbol != NULL);
++	(void)nss_winbind_endpwent.fn();
++
++	val = malloc(1);
++	assert(val != NULL);
++
++	pthread_key_create(&k1, NULL);
++	pthread_setspecific(k1, val);
++	printf("%d: k1=%d\n", getpid(), k1);
++
++	pid = fork();
++	if (pid) {
++		free(val);
++		wait(&wstatus);
++		return WEXITSTATUS(wstatus);
++	}
++
++	pthread_key_create(&k2, NULL);
++	pthread_setspecific(k2, val);
++
++	printf("%d: Hello after fork, k1=%d, k2=%d\n", getpid(), k1, k2);
++
++	pid = fork();
++
++	if (pid) {
++		free(val);
++		wait(&wstatus);
++		return WEXITSTATUS(wstatus);
++	}
++
++	pthread_key_create(&k3, NULL);
++	pthread_setspecific(k3, val);
++
++	printf("%d: Hello after fork2, k1=%d, k2=%d, k3=%d\n", getpid(), k1, k2, k3);
++
++	if (k1 == k2 || k2 == k3) {
++		printf("%d: FAIL inconsistent keys\n", getpid());
++		return 1;
++	}
++
++	printf("%d: OK consistent keys\n", getpid());
++	return 0;
++}
+diff --git a/nsswitch/wscript_build b/nsswitch/wscript_build
+index 3247b6c2b7c3..4e62bb4c9461 100644
+--- a/nsswitch/wscript_build
++++ b/nsswitch/wscript_build
+@@ -15,6 +15,11 @@ if bld.CONFIG_SET('HAVE_PTHREAD'):
+ 		     deps='wbclient pthread',
+ 		     for_selftest=True
+ 		     )
++    bld.SAMBA_BINARY('b15464-testcase',
++		     source='b15464-testcase.c',
++		     deps='replace pthread dl',
++		     for_selftest=True
++		     )
+ 
+ # The nss_wrapper code relies strictly on the linux implementation and
+ # name, so compile but do not install a copy under this name.
+diff --git a/selftest/knownfail.d/b15464_testcase b/selftest/knownfail.d/b15464_testcase
+new file mode 100644
+index 000000000000..94dd7db7c2a5
+--- /dev/null
++++ b/selftest/knownfail.d/b15464_testcase
+@@ -0,0 +1 @@
++^b15464_testcase.run.b15464-testcase
+diff --git a/source3/selftest/tests.py b/source3/selftest/tests.py
+index 0c834ed48b5e..ea17ead3eda7 100755
+--- a/source3/selftest/tests.py
++++ b/source3/selftest/tests.py
+@@ -67,6 +67,8 @@ except KeyError:
+     samba4bindir = bindir()
+     config_h = os.path.join(samba4bindir, "default/include/config.h")
+ 
++bbdir = os.path.join(srcdir(), "testprogs/blackbox")
++
+ # check available features
+ config_hash = dict()
+ f = open(config_h, 'r')
+@@ -936,6 +938,10 @@ if with_pthreadpool:
+                   [os.path.join(samba3srcdir,
+                                 "script/tests/test_libwbclient_threads.sh"),
+                    "$DOMAIN", "$DC_USERNAME"])
++    plantestsuite("b15464_testcase", "none",
++                  [os.path.join(bbdir, "b15464-testcase.sh"),
++                   binpath("b15464-testcase"),
++                   binpath("plugins/libnss_winbind.so.2")])
+ 
+ plantestsuite("samba3.test_nfs4_acl", "none",
+               [os.path.join(bindir(), "test_nfs4_acls"),
+diff --git a/testprogs/blackbox/b15464-testcase.sh b/testprogs/blackbox/b15464-testcase.sh
+new file mode 100755
+index 000000000000..b0c88260d4cc
+--- /dev/null
++++ b/testprogs/blackbox/b15464-testcase.sh
+@@ -0,0 +1,21 @@
++#!/bin/sh
++# Blackbox wrapper for bug 15464
++# Copyright (C) 2023 Stefan Metzmacher
++
++if [ $# -lt 2 ]; then
++	cat <<EOF
++Usage: b15464-testcase.sh B15464_TESTCASE LIBNSS_WINBIND
++EOF
++	exit 1
++fi
++
++b15464_testcase=$1
++libnss_winbind=$2
++shift 2
++failed=0
++
++. $(dirname $0)/subunit.sh
++
++testit "run b15464-testcase" $VALGRIND $b15464_testcase $libnss_winbind || failed=$(expr $failed + 1)
++
++testok $0 $failed
+-- 
+2.34.1
+
+
+From 08728ee7847d7864d4c72a4ac1ddfeca78934326 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Thu, 7 Sep 2023 16:02:32 +0200
+Subject: [PATCH 2/5] nsswitch/wb_common.c: fix build without HAVE_PTHREAD
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15464
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Jeremy Allison <jra@samba.org>
+(cherry picked from commit 4faf806412c4408db25448b1f67c09359ec2f81f)
+---
+ nsswitch/wb_common.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/nsswitch/wb_common.c b/nsswitch/wb_common.c
+index d569e761ebe4..c382a44c1209 100644
+--- a/nsswitch/wb_common.c
++++ b/nsswitch/wb_common.c
+@@ -104,7 +104,6 @@ static void wb_thread_ctx_initialize(void)
+ 				 wb_thread_ctx_destructor);
+ 	assert(ret == 0);
+ }
+-#endif
+ 
+ static struct winbindd_context *get_wb_thread_ctx(void)
+ {
+@@ -139,6 +138,7 @@ static struct winbindd_context *get_wb_thread_ctx(void)
+ 	}
+ 	return ctx;
+ }
++#endif /* HAVE_PTHREAD */
+ 
+ static struct winbindd_context *get_wb_global_ctx(void)
+ {
+-- 
+2.34.1
+
+
+From d1f43cd4cc6aeb2ac9fcaee9aa512012ca92ecb3 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Fri, 8 Sep 2023 09:53:42 +0200
+Subject: [PATCH 3/5] nsswitch/wb_common.c: winbind_destructor can always use
+ get_wb_global_ctx()
+
+The HAVE_PTHREAD logic inside of get_wb_global_ctx() will do all
+required magic.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15464
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Jeremy Allison <jra@samba.org>
+(cherry picked from commit 836823e5047d0eb18e66707386ba03b812adfaf8)
+---
+ nsswitch/wb_common.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/nsswitch/wb_common.c b/nsswitch/wb_common.c
+index c382a44c1209..d56e48d9bdb8 100644
+--- a/nsswitch/wb_common.c
++++ b/nsswitch/wb_common.c
+@@ -246,14 +246,10 @@ static void winbind_destructor(void)
+ 		return;
+ 	}
+ 
+-#ifdef HAVE_PTHREAD_H
+-	ctx = (struct winbindd_context *)pthread_getspecific(wb_global_ctx.key);
++	ctx = get_wb_global_ctx();
+ 	if (ctx == NULL) {
+ 		return;
+ 	}
+-#else
+-	ctx = get_wb_global_ctx();
+-#endif
+ 
+ 	winbind_close_sock(ctx);
+ }
+-- 
+2.34.1
+
+
+From 6e29ea5b9efe5cf166cc9d633c1dc4eb8f192736 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Fri, 8 Sep 2023 09:56:47 +0200
+Subject: [PATCH 4/5] nsswitch/wb_common.c: don't operate on a stale
+ wb_global_ctx.key
+
+If nss_winbind is loaded into a process that uses fork multiple times
+without any further calls into nss_winbind, wb_atfork_child handler
+was using a wb_global_ctx.key that was no longer registered in the
+pthread library, so we operated on a slot that was potentially
+reused by other libraries or the main application. Which is likely
+to cause memory corruption.
+
+So we better don't call pthread_key_delete() in wb_atfork_child().
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15464
+
+Reported-by: Krzysztof Piotr Oledzki <ole@ans.pl>
+Tested-by: Krzysztof Piotr Oledzki <ole@ans.pl>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Jeremy Allison <jra@samba.org>
+(cherry picked from commit 91b30a7261e6455d3a4f31728c23e4849e3945b9)
+---
+ nsswitch/wb_common.c                 | 5 -----
+ selftest/knownfail.d/b15464_testcase | 1 -
+ 2 files changed, 6 deletions(-)
+ delete mode 100644 selftest/knownfail.d/b15464_testcase
+
+diff --git a/nsswitch/wb_common.c b/nsswitch/wb_common.c
+index d56e48d9bdb8..38f9f334016b 100644
+--- a/nsswitch/wb_common.c
++++ b/nsswitch/wb_common.c
+@@ -76,11 +76,6 @@ static void wb_atfork_child(void)
+ 
+ 	winbind_close_sock(ctx);
+ 	free(ctx);
+-
+-	ret = pthread_key_delete(wb_global_ctx.key);
+-	assert(ret == 0);
+-
+-	wb_global_ctx.control = (pthread_once_t)PTHREAD_ONCE_INIT;
+ }
+ 
+ static void wb_thread_ctx_destructor(void *p)
+diff --git a/selftest/knownfail.d/b15464_testcase b/selftest/knownfail.d/b15464_testcase
+deleted file mode 100644
+index 94dd7db7c2a5..000000000000
+--- a/selftest/knownfail.d/b15464_testcase
++++ /dev/null
+@@ -1 +0,0 @@
+-^b15464_testcase.run.b15464-testcase
+-- 
+2.34.1
+
+
+From 61ca2c66e0a3c837f2c542b8d9321a8d8cd03382 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Thu, 7 Sep 2023 15:59:59 +0200
+Subject: [PATCH 5/5] nsswitch/wb_common.c: fix socket fd and memory leaks of
+ global state
+
+When we are called in wb_atfork_child() or winbind_destructor(),
+wb_thread_ctx_destructor() is not called for the global state
+of the current nor any other thread, which means we would
+leak the related memory and socket fds.
+
+Now we maintain a global list protected by a global mutex.
+We traverse the list and close all socket fds, which are no
+longer used (winbind_destructor) or no longer valid in the
+current process (wb_atfork_child), in addition we 'autofree'
+the ones, which are only visible internally as global (per thread)
+context.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15464
+
+Tested-by: Krzysztof Piotr Oledzki <ole@ans.pl>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Jeremy Allison <jra@samba.org>
+
+Autobuild-User(master): Stefan Metzmacher <metze@samba.org>
+Autobuild-Date(master): Thu Sep 14 18:53:07 UTC 2023 on atb-devel-224
+
+(cherry picked from commit 4af3faace481d23869b64485b791bdd43d8972c5)
+---
+ nsswitch/wb_common.c | 143 ++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 113 insertions(+), 30 deletions(-)
+
+diff --git a/nsswitch/wb_common.c b/nsswitch/wb_common.c
+index 38f9f334016b..b7f84435a4ee 100644
+--- a/nsswitch/wb_common.c
++++ b/nsswitch/wb_common.c
+@@ -26,6 +26,7 @@
+ #include "replace.h"
+ #include "system/select.h"
+ #include "winbind_client.h"
++#include "lib/util/dlinklist.h"
+ #include <assert.h>
+ 
+ #ifdef HAVE_PTHREAD_H
+@@ -37,67 +38,112 @@ static __thread char client_name[32];
+ /* Global context */
+ 
+ struct winbindd_context {
++	struct winbindd_context *prev, *next;
+ 	int winbindd_fd;	/* winbind file descriptor */
+ 	bool is_privileged;	/* using the privileged socket? */
+ 	pid_t our_pid;		/* calling process pid */
++	bool autofree;		/* this is a thread global context */
+ };
+ 
+ static struct wb_global_ctx {
+-	bool initialized;
+ #ifdef HAVE_PTHREAD
+ 	pthread_once_t control;
+ 	pthread_key_t key;
++	bool key_initialized;
++#ifdef PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
++#define WB_GLOBAL_MUTEX_INITIALIZER PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
+ #else
+-	bool dummy;
++#define WB_GLOBAL_MUTEX_INITIALIZER PTHREAD_MUTEX_INITIALIZER
+ #endif
++#define WB_GLOBAL_LIST_LOCK do { \
++	int __pret = pthread_mutex_lock(&wb_global_ctx.list_mutex); \
++	assert(__pret == 0); \
++} while(0)
++#define WB_GLOBAL_LIST_UNLOCK do { \
++	int __pret = pthread_mutex_unlock(&wb_global_ctx.list_mutex); \
++	assert(__pret == 0); \
++} while(0)
++	pthread_mutex_t list_mutex;
++#else /* => not HAVE_PTHREAD */
++#define WB_GLOBAL_LIST_LOCK do { } while(0)
++#define WB_GLOBAL_LIST_UNLOCK do { } while(0)
++#endif /* not HAVE_PTHREAD */
++	struct winbindd_context *list;
+ } wb_global_ctx = {
+ #ifdef HAVE_PTHREAD
+ 	.control = PTHREAD_ONCE_INIT,
++	.list_mutex = WB_GLOBAL_MUTEX_INITIALIZER,
+ #endif
++	.list = NULL,
+ };
+ 
+ static void winbind_close_sock(struct winbindd_context *ctx);
++static void winbind_ctx_free_locked(struct winbindd_context *ctx);
++static void winbind_cleanup_list(void);
+ 
+ #ifdef HAVE_PTHREAD
+ static void wb_thread_ctx_initialize(void);
+ 
++static void wb_atfork_prepare(void)
++{
++	WB_GLOBAL_LIST_LOCK;
++}
++
++static void wb_atfork_parent(void)
++{
++	WB_GLOBAL_LIST_UNLOCK;
++}
++
+ static void wb_atfork_child(void)
+ {
+-	struct winbindd_context *ctx = NULL;
+-	int ret;
++	wb_global_ctx.list_mutex = (pthread_mutex_t)WB_GLOBAL_MUTEX_INITIALIZER;
+ 
+-	ctx = (struct winbindd_context *)pthread_getspecific(wb_global_ctx.key);
+-	if (ctx == NULL) {
+-		return;
+-	}
++	if (wb_global_ctx.key_initialized) {
++		int ret;
+ 
+-	ret = pthread_setspecific(wb_global_ctx.key, NULL);
+-	assert(ret == 0);
++		/*
++		 * After a fork the child still believes
++		 * it is the same thread as in the parent.
++		 * So pthread_getspecific() would return the
++		 * value of the thread that called fork().
++		 *
++		 * But we don't want that behavior, so
++		 * we just clear the reference and let
++		 * winbind_cleanup_list() below 'autofree'
++		 * the parent threads global context.
++		 */
++		ret = pthread_setspecific(wb_global_ctx.key, NULL);
++		assert(ret == 0);
++	}
+ 
+-	winbind_close_sock(ctx);
+-	free(ctx);
++	/*
++	 * But we need to close/cleanup the global state
++	 * of the parents threads.
++	 */
++	winbind_cleanup_list();
+ }
+ 
+ static void wb_thread_ctx_destructor(void *p)
+ {
+ 	struct winbindd_context *ctx = (struct winbindd_context *)p;
+ 
+-	winbind_close_sock(ctx);
+-	free(ctx);
++	winbindd_ctx_free(ctx);
+ }
+ 
+ static void wb_thread_ctx_initialize(void)
+ {
+ 	int ret;
+ 
+-	ret = pthread_atfork(NULL,
+-			     NULL,
++	ret = pthread_atfork(wb_atfork_prepare,
++			     wb_atfork_parent,
+ 			     wb_atfork_child);
+ 	assert(ret == 0);
+ 
+ 	ret = pthread_key_create(&wb_global_ctx.key,
+ 				 wb_thread_ctx_destructor);
+ 	assert(ret == 0);
++
++	wb_global_ctx.key_initialized = true;
+ }
+ 
+ static struct winbindd_context *get_wb_thread_ctx(void)
+@@ -123,9 +169,14 @@ static struct winbindd_context *get_wb_thread_ctx(void)
+ 	*ctx = (struct winbindd_context) {
+ 		.winbindd_fd = -1,
+ 		.is_privileged = false,
+-		.our_pid = 0
++		.our_pid = 0,
++		.autofree = true,
+ 	};
+ 
++	WB_GLOBAL_LIST_LOCK;
++	DLIST_ADD_END(wb_global_ctx.list, ctx);
++	WB_GLOBAL_LIST_UNLOCK;
++
+ 	ret = pthread_setspecific(wb_global_ctx.key, ctx);
+ 	if (ret != 0) {
+ 		free(ctx);
+@@ -142,7 +193,8 @@ static struct winbindd_context *get_wb_global_ctx(void)
+ 	static struct winbindd_context _ctx = {
+ 		.winbindd_fd = -1,
+ 		.is_privileged = false,
+-		.our_pid = 0
++		.our_pid = 0,
++		.autofree = false,
+ 	};
+ #endif
+ 
+@@ -150,9 +202,11 @@ static struct winbindd_context *get_wb_global_ctx(void)
+ 	ctx = get_wb_thread_ctx();
+ #else
+ 	ctx = &_ctx;
++	if (ctx->prev == NULL && ctx->next == NULL) {
++		DLIST_ADD_END(wb_global_ctx.list, ctx);
++	}
+ #endif
+ 
+-	wb_global_ctx.initialized = true;
+ 	return ctx;
+ }
+ 
+@@ -226,6 +280,30 @@ static void winbind_close_sock(struct winbindd_context *ctx)
+ 	}
+ }
+ 
++static void winbind_ctx_free_locked(struct winbindd_context *ctx)
++{
++	winbind_close_sock(ctx);
++	DLIST_REMOVE(wb_global_ctx.list, ctx);
++	free(ctx);
++}
++
++static void winbind_cleanup_list(void)
++{
++	struct winbindd_context *ctx = NULL, *next = NULL;
++
++	WB_GLOBAL_LIST_LOCK;
++	for (ctx = wb_global_ctx.list; ctx != NULL; ctx = next) {
++		next = ctx->next;
++
++		if (ctx->autofree) {
++			winbind_ctx_free_locked(ctx);
++		} else {
++			winbind_close_sock(ctx);
++		}
++	}
++	WB_GLOBAL_LIST_UNLOCK;
++}
++
+ /* Destructor for global context to ensure fd is closed */
+ 
+ #ifdef HAVE_DESTRUCTOR_ATTRIBUTE
+@@ -235,18 +313,18 @@ __attribute__((destructor))
+ #endif
+ static void winbind_destructor(void)
+ {
+-	struct winbindd_context *ctx;
+-
+-	if (!wb_global_ctx.initialized) {
+-		return;
++#ifdef HAVE_PTHREAD
++	if (wb_global_ctx.key_initialized) {
++		int ret;
++		ret = pthread_key_delete(wb_global_ctx.key);
++		assert(ret == 0);
++		wb_global_ctx.key_initialized = false;
+ 	}
+ 
+-	ctx = get_wb_global_ctx();
+-	if (ctx == NULL) {
+-		return;
+-	}
++	wb_global_ctx.control = (pthread_once_t)PTHREAD_ONCE_INIT;
++#endif /* HAVE_PTHREAD */
+ 
+-	winbind_close_sock(ctx);
++	winbind_cleanup_list();
+ }
+ 
+ #define CONNECT_TIMEOUT 30
+@@ -928,11 +1006,16 @@ struct winbindd_context *winbindd_ctx_create(void)
+ 
+ 	ctx->winbindd_fd = -1;
+ 
++	WB_GLOBAL_LIST_LOCK;
++	DLIST_ADD_END(wb_global_ctx.list, ctx);
++	WB_GLOBAL_LIST_UNLOCK;
++
+ 	return ctx;
+ }
+ 
+ void winbindd_ctx_free(struct winbindd_context *ctx)
+ {
+-	winbind_close_sock(ctx);
+-	free(ctx);
++	WB_GLOBAL_LIST_LOCK;
++	winbind_ctx_free_locked(ctx);
++	WB_GLOBAL_LIST_UNLOCK;
+ }
+-- 
+2.34.1
+

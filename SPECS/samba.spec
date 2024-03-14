@@ -138,7 +138,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.18.6
-%global baserelease 101
+%global baserelease 102
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -237,6 +237,7 @@ Source202:      samba.abignore
 Patch0:         CVE-2023-3961-pipename-4.18.6.patch
 Patch1:         CVE-2023-4091-truncate-4.18.patch
 Patch2:         CVE-2023-42669-remove-rpcecho-4.18.patch
+Patch3:         samba-4.18-fix-nss-winbind-memory-corruption.patch
 
 Requires(pre): /usr/sbin/groupadd
 
@@ -4331,6 +4332,9 @@ fi
 %endif
 
 %changelog
+* Tue Jan 23 2024 Andreas Schneider <asn@redhat.com> - 4.18.6-102
+- resolves: RHEL-21072 - Fix libnss_winbind memory corruption
+
 * Mon Oct 09 2023 Pavel Filipenský <pfilipen@redhat.com> - 4.18.6-101
 - resolves: RHEL-11937
   Fix CVE-2023-3961 - smbd must check the pipename
