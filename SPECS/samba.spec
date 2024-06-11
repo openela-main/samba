@@ -147,7 +147,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.19.4
-%global baserelease 104
+%global baserelease 105
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -4473,6 +4473,9 @@ fi
 %endif
 
 %changelog
+* Wed Apr 24 2024 Pavel Filipenský <pfilipen@redhat.com> - 4.19.4-105
+- resolves: RHEL-33783 - Add option to request only POSIX groups from AD in idmap_ad
+
 * Mon Feb 19 2024 Andreas Schneider <asn@redhat.com> - 4.19.4-104
 - related: RHEL-2109 - Disable support for certificate auto enrollment
 

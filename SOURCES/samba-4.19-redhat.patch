@@ -1,7 +1,7 @@
 From 3c29fc78029e1274f931e171c9e04c19ad0182c1 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:05:54 +0300
-Subject: [PATCH 01/21] gp: Support more global trust directories
+Subject: [PATCH 01/25] gp: Support more global trust directories
 
 In addition to the SUSE global trust directory, add support for RHEL and
 Debian-based distributions (including Ubuntu).
@@ -60,13 +60,13 @@ index 312c8ddf467..1b90ab46e90 100644
          # Symlink the certs to global trust dir
          dst = os.path.join(global_trust_dir, os.path.basename(src))
 -- 
-2.43.0
+2.41.0
 
 
 From 063606e8ec83a58972df47eb561ab267f8937ba4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:09:28 +0300
-Subject: [PATCH 02/21] gp: Support update-ca-trust helper
+Subject: [PATCH 02/25] gp: Support update-ca-trust helper
 
 This is used on RHEL/Fedora instead of update-ca-certificates. They
 behave similarly so it's enough to change the command name.
@@ -104,13 +104,13 @@ index 1b90ab46e90..cefdafa21b2 100644
          Popen([update]).wait()
      # Setup Certificate Auto Enrollment
 -- 
-2.43.0
+2.41.0
 
 
 From 3b548bf280ca59ef12a7af10a9131813067a850a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 11 Aug 2023 18:46:42 +0300
-Subject: [PATCH 03/21] gp: Change root cert extension suffix
+Subject: [PATCH 03/25] gp: Change root cert extension suffix
 
 On Ubuntu, certificates must end in '.crt' in order to be considered by
 the `update-ca-certificates` helper.
@@ -138,13 +138,13 @@ index cefdafa21b2..c562722906b 100644
                  w.write(cert)
              root_certs.append(dest)
 -- 
-2.43.0
+2.41.0
 
 
 From 7592ed5032836dc43f657f66607a0a4661edcdb4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:06:43 +0300
-Subject: [PATCH 04/21] gp: Test with binary content for certificate data
+Subject: [PATCH 04/25] gp: Test with binary content for certificate data
 
 This fails all GPO-related tests that call `gpupdate --rsop`.
 
@@ -216,13 +216,13 @@ index 00000000000..0aad59607c2
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.43.0
+2.41.0
 
 
 From 7f7b235bda9e85c5ea330e52e734d1113a884571 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:20:11 +0300
-Subject: [PATCH 05/21] gp: Convert CA certificates to base64
+Subject: [PATCH 05/25] gp: Convert CA certificates to base64
 
 I don't know whether this applies universally, but in our case the
 contents of `es['cACertificate'][0]` are binary, so cleanly converting
@@ -289,13 +289,13 @@ index 0aad59607c2..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.43.0
+2.41.0
 
 
 From 49cc74015a603e80048a38fe635cd1ac28938ee4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:16:23 +0300
-Subject: [PATCH 06/21] gp: Test adding new cert templates enforces changes
+Subject: [PATCH 06/25] gp: Test adding new cert templates enforces changes
 
 Ensure that cepces-submit reporting additional templates and re-applying
 will enforce the updated policy.
@@ -422,13 +422,13 @@ index 00000000000..4edc1dce730
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.43.0
+2.41.0
 
 
 From 4c0906bd79f030e591701234bc54bc749a42d686 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:37:17 +0300
-Subject: [PATCH 07/21] gp: Template changes should invalidate cache
+Subject: [PATCH 07/25] gp: Template changes should invalidate cache
 
 If certificate templates are added or removed, the autoenroll extension
 should react to this and reapply the policy. Previously this wasn't
@@ -487,13 +487,13 @@ index 4edc1dce730..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.43.0
+2.41.0
 
 
 From e61f30dc2518d5a1c239f090baea4a309307f3f8 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:26:59 +0300
-Subject: [PATCH 08/21] gp: Test disabled enrollment unapplies policy
+Subject: [PATCH 08/25] gp: Test disabled enrollment unapplies policy
 
 For this we need to stage a Registry.pol file with certificate
 autoenrollment enabled, but with checkboxes unticked.
@@ -588,13 +588,13 @@ index 00000000000..83bc9f0ac1f
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.43.0
+2.41.0
 
 
 From 7757b9b48546d71e19798d1260da97780caa99c3 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:33:59 +0300
-Subject: [PATCH 09/21] gp: Send list of keys instead of dict to remove
+Subject: [PATCH 09/25] gp: Send list of keys instead of dict to remove
 
 `cache_get_all_attribute_values` returns a dict whereas we need to pass
 a list of keys to `remove`. These will be interpolated in the gpdb search.
@@ -634,13 +634,13 @@ index 83bc9f0ac1f..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.43.0
+2.41.0
 
 
 From 4e9b2e6409c5764ec0e66cc6c90b08e70f702e7c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 9 Jan 2024 08:50:01 +0100
-Subject: [PATCH 10/21] python:gp: Print a nice message if cepces-submit can't
+Subject: [PATCH 10/25] python:gp: Print a nice message if cepces-submit can't
  be found
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15552
@@ -691,13 +691,13 @@ index 64c35782ae8..08d1a7348cd 100644
  
  def getca(ca, url, trust_dir):
 -- 
-2.43.0
+2.41.0
 
 
 From fb3aefff51c02cf8ba3f8dfeb7d3f971e8d4902a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Mon, 8 Jan 2024 18:05:08 +0200
-Subject: [PATCH 11/21] gpo: Test certificate policy without NDES
+Subject: [PATCH 11/25] gpo: Test certificate policy without NDES
 
 As of 8231eaf856b, the NDES feature is no longer required on Windows, as
 cert auto-enroll can use the certificate from the LDAP request.
@@ -895,13 +895,13 @@ index 00000000000..f1e590bc7d8
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.43.0
+2.41.0
 
 
 From 1a9af36177c7491687c75df151474bb10285f00e Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 18 Jan 2024 20:23:24 +0200
-Subject: [PATCH 12/21] gpo: Decode base64 root cert before importing
+Subject: [PATCH 12/25] gpo: Decode base64 root cert before importing
 
 The reasoning behind this is described in the previous commit message,
 but essentially this should either be wrapped in certificate blocks and
@@ -948,13 +948,13 @@ index f1e590bc7d8..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.43.0
+2.41.0
 
 
 From f5fc88f9ae255f4dc135580f0fa4a02f5addc390 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 19 Jan 2024 11:36:19 +0200
-Subject: [PATCH 13/21] gpo: Do not get templates list on first run
+Subject: [PATCH 13/25] gpo: Do not get templates list on first run
 
 This is a visual fix and has no impact on functionality apart from
 cleaner log messages.
@@ -997,13 +997,13 @@ index cd5e54f1110..559c903e1a2 100644
          if changed(new_data, old_data) or self.cache_get_apply_state() == GPOSTATE.ENFORCE:
              self.unapply(guid, attribute, old_val)
 -- 
-2.43.0
+2.41.0
 
 
 From e8a6219181f2af87813b53fd09684650c1aa6f90 Mon Sep 17 00:00:00 2001
 From: David Mulder <dmulder@samba.org>
 Date: Fri, 5 Jan 2024 08:47:07 -0700
-Subject: [PATCH 14/21] gp: Skip site GP list if no site is found
+Subject: [PATCH 14/25] gp: Skip site GP list if no site is found
 
 [MS-GPOL] 3.2.5.1.4 Site Search says if the site
 search returns ERROR_NO_SITENAME, the GP site
@@ -1065,13 +1065,13 @@ index 617ef79350c..babd8f90748 100644
      # (L)ocal
      gpo_list.insert(0, gpo.GROUP_POLICY_OBJECT("Local Policy",
 -- 
-2.43.0
+2.41.0
 
 
 From d0d1a890d6f2466691fa4ee663232ee0bd1c3776 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:14:30 +0100
-Subject: [PATCH 15/21] python:gp: Avoid path check for cepces-submit
+Subject: [PATCH 15/25] python:gp: Avoid path check for cepces-submit
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1111,13 +1111,13 @@ index 559c903e1a2..7325d5132cf 100644
                    '%s --server=%s --auth=%s' % (cepces_submit,
                    ca['hostname'], auth)],
 -- 
-2.43.0
+2.41.0
 
 
 From 7f6c9a4945635c6eb8ada2255bd0febbf0f4e540 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:07:47 +0100
-Subject: [PATCH 16/21] python:gp: Improve logging for certificate enrollment
+Subject: [PATCH 16/25] python:gp: Improve logging for certificate enrollment
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1171,13 +1171,13 @@ index 7325d5132cf..a25a9678587 100644
      getcert = which('getcert')
      cepces_submit = find_cepces_submit()
 -- 
-2.43.0
+2.41.0
 
 
 From 5321d5b5bd24d7659743576f2e12a7dc0a93a828 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:04:36 +0100
-Subject: [PATCH 17/21] python:gp: Do not print an error, if CA already exists
+Subject: [PATCH 17/25] python:gp: Do not print an error, if CA already exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1217,13 +1217,13 @@ index a25a9678587..0b23cd688db 100644
          for template in supported_templates:
              attrs = fetch_template_attrs(ldb, template)
 -- 
-2.43.0
+2.41.0
 
 
 From 6a7a8a4090b8cdb8e71f4ad590260ceeda253ce2 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:02 +0100
-Subject: [PATCH 18/21] python:gp: Do not print an error if template already
+Subject: [PATCH 18/25] python:gp: Do not print an error if template already
  exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1264,13 +1264,13 @@ index 0b23cd688db..db681cb6f69 100644
              data['templates'].append(nickname)
          if update is not None:
 -- 
-2.43.0
+2.41.0
 
 
 From 43dc3d5d833bc1db885eb45402decd3225a7c946 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:24 +0100
-Subject: [PATCH 19/21] python:gp: Log an error if update fails
+Subject: [PATCH 19/25] python:gp: Log an error if update fails
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1301,13 +1301,13 @@ index db681cb6f69..c8ad2039dc6 100644
          log.warn('certmonger and cepces must be installed for ' +
                   'certificate auto enrollment to work')
 -- 
-2.43.0
+2.41.0
 
 
 From d8276d6a098d10f405b8f24c4dfb82af4496607c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:46:24 +0100
-Subject: [PATCH 20/21] python:gp: Improve working of log messages to avoid
+Subject: [PATCH 20/25] python:gp: Improve working of log messages to avoid
  confusion
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1354,13 +1354,13 @@ index c8ad2039dc6..2b7f7d22c2b 100644
              log.warn('Installing the server certificate only.')
              der_certificate = base64.b64decode(ca['cACertificate'])
 -- 
-2.43.0
+2.41.0
 
 
 From 585357bf0d8889747a2769c2451ee34766087d95 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 29 Jan 2024 17:46:30 +0100
-Subject: [PATCH 21/21] python:gp: Fix logging with gp
+Subject: [PATCH 21/25] python:gp: Fix logging with gp
 
 This allows enable INFO level logging with: `samba-gpupdate -d3`
 
@@ -1396,5 +1396,237 @@ index a74a8707d50..c3de32825db 100644
      logger.setLevel(logging.CRITICAL)
      if log_level == 1:
 -- 
-2.43.0
+2.41.0
+
+
+From c188f44cf1037f751763db853ab3758d564c0bcd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Wed, 13 Mar 2024 13:55:41 +0100
+Subject: [PATCH 22/25] docs-xml: Add parameter all_groupmem to idmap_ad
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15605
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit a485d9de2f2d6a9815dcac6addb988a8987e111c)
+---
+ docs-xml/manpages/idmap_ad.8.xml | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/docs-xml/manpages/idmap_ad.8.xml b/docs-xml/manpages/idmap_ad.8.xml
+index b364bbfa231..de6d36afe95 100644
+--- a/docs-xml/manpages/idmap_ad.8.xml
++++ b/docs-xml/manpages/idmap_ad.8.xml
+@@ -100,6 +100,16 @@
+ 		</listitem>
+ 		</varlistentry>
+ 		<varlistentry>
++		<term>all_groupmem = yes/no</term>
++		<listitem><para>
++		  If set to <parameter>yes</parameter> winbind will retrieve all
++		  group members for getgrnam(3), getgrgid(3) and getgrent(3) calls,
++		  including those with missing uidNumber.
++		</para>
++		<para>Default: no</para>
++		</listitem>
++		</varlistentry>
++		<varlistentry>
+ 		<term>deny ous</term>
+ 		<listitem><para>This parameter is a list of OUs from
+ 		which objects will not be mapped via the ad idmap
+-- 
+2.41.0
+
+
+From 270121c01a04e81704c33e1ce72fe3679dc55911 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Tue, 12 Mar 2024 13:20:24 +0100
+Subject: [PATCH 23/25] s3:winbindd: Improve performance of lookup_groupmem()
+ in idmap_ad
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The LDAP query of lookup_groupmem() returns all group members from AD
+even those with missing uidNumber.  Such group members are useless in
+UNIX environment for idmap_ad backend since there is no uid mapping.
+
+'test_user' is member of group "Domanin Users" with 200K members,
+only 20K members have set uidNumber.
+
+Without this fix:
+
+$ time id test_user
+
+real    1m5.946s
+user    0m0.019s
+sys     0m0.012s
+
+With this fix:
+
+$ time id test_user
+
+real    0m3.544s
+user    0m0.004s
+sys     0m0.007s
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15605
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 5d475d26a3d545f04791a04e85a06b8b192e3fcf)
+---
+ source3/winbindd/winbindd_ads.c | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
+
+diff --git a/source3/winbindd/winbindd_ads.c b/source3/winbindd/winbindd_ads.c
+index d7a665abbc6..e625aa6473f 100644
+--- a/source3/winbindd/winbindd_ads.c
++++ b/source3/winbindd/winbindd_ads.c
+@@ -1037,7 +1037,7 @@ static NTSTATUS lookup_useraliases(struct winbindd_domain *domain,
+ }
+ 
+ static NTSTATUS add_primary_group_members(
+-	ADS_STRUCT *ads, TALLOC_CTX *mem_ctx, uint32_t rid,
++	ADS_STRUCT *ads, TALLOC_CTX *mem_ctx, uint32_t rid, const char *domname,
+ 	char ***all_members, size_t *num_all_members)
+ {
+ 	char *filter;
+@@ -1049,10 +1049,13 @@ static NTSTATUS add_primary_group_members(
+ 	char **members;
+ 	size_t num_members;
+ 	ads_control args;
++	bool all_groupmem = idmap_config_bool(domname, "all_groupmem", false);
+ 
+ 	filter = talloc_asprintf(
+-		mem_ctx, "(&(objectCategory=user)(primaryGroupID=%u))",
+-		(unsigned)rid);
++		mem_ctx,
++		"(&(objectCategory=user)(primaryGroupID=%u)%s)",
++		(unsigned)rid,
++		all_groupmem ? "" : "(uidNumber=*)(!(uidNumber=0))");
+ 	if (filter == NULL) {
+ 		goto done;
+ 	}
+@@ -1204,7 +1207,7 @@ static NTSTATUS lookup_groupmem(struct winbindd_domain *domain,
+ 
+ 	DEBUG(10, ("ads lookup_groupmem: got %d sids via extended dn call\n", (int)num_members));
+ 
+-	status = add_primary_group_members(ads, mem_ctx, rid,
++	status = add_primary_group_members(ads, mem_ctx, rid, domain->name,
+ 					   &members, &num_members);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		DEBUG(10, ("%s: add_primary_group_members failed: %s\n",
+-- 
+2.41.0
+
+
+From 4f9f3c9b8d5d229c0c1da17af3a457b1b49ae353 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 25 Mar 2024 22:38:18 +0100
+Subject: [PATCH 24/25] selftest: Add "winbind expand groups = 1" to
+ setup_ad_member_idmap_ad
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15605
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 2dab3a331b5511b4f2253f2b3b4513db7e52ea9a)
+---
+ selftest/target/Samba3.pm | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/selftest/target/Samba3.pm b/selftest/target/Samba3.pm
+index 44ac4a5901a..606c65f8ab1 100755
+--- a/selftest/target/Samba3.pm
++++ b/selftest/target/Samba3.pm
+@@ -1412,6 +1412,7 @@ sub setup_ad_member_idmap_ad
+ 	idmap config $dcvars->{TRUST_DOMAIN} : backend = ad
+ 	idmap config $dcvars->{TRUST_DOMAIN} : range = 2000000-2999999
+ 	gensec_gssapi:requested_life_time = 5
++	winbind expand groups = 1
+ ";
+ 
+ 	my $ret = $self->provision(
+-- 
+2.41.0
+
+
+From 569d942a39154bcf1267339bbb79253ac8c89416 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Thu, 14 Mar 2024 15:24:21 +0100
+Subject: [PATCH 25/25] tests: Add a test for "all_groups=no" to
+ test_idmap_ad.sh
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15605
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Tue Apr  2 13:25:39 UTC 2024 on atb-devel-224
+
+(cherry picked from commit f8b72aa1f72881989990fabc9f4888968bb81967)
+---
+ nsswitch/tests/test_idmap_ad.sh | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
+
+diff --git a/nsswitch/tests/test_idmap_ad.sh b/nsswitch/tests/test_idmap_ad.sh
+index 7ae112ada71..1d4bd395ba9 100755
+--- a/nsswitch/tests/test_idmap_ad.sh
++++ b/nsswitch/tests/test_idmap_ad.sh
+@@ -94,6 +94,14 @@ gidNumber: 2000001
+ unixHomeDirectory: /home/forbidden
+ loginShell: /bin/tcsh
+ gecos: User in forbidden OU
++
++dn: CN=no_posix_id,CN=Users,$BASE_DN
++changetype: add
++objectClass: user
++samaccountName: no_posix_id
++unixHomeDirectory: /home/no_posix_id
++loginShell: /bin/sh
++gecos: User without uidNumber and gidNumber
+ EOF
+ 
+ #
+@@ -171,6 +179,17 @@ then
+ 	failed=$(($failed + 1))
+ fi
+ 
++#
++# Test 6: Make sure that with the default "all_groups=no"
++# the group "domain users" will not show user "no_posix_id"
++# but will show "SAMBA2008R2/administrator"
++#
++
++dom_users="$DOMAIN/domain users"  # Extra step to make sure that all is one word
++out="$($wbinfo --group-info "$dom_users")"
++testit_grep_count "no_posix_id1" "no_posix_id" 0 echo "$out" || failed=$(expr $failed + 1)
++testit_grep "no_posix_id2" "SAMBA2008R2/administrator" echo "$out" || failed=$(expr $failed + 1)
++
+ #
+ # Trusted domain test 1: Test uid of Administrator, should be 2500000
+ #
+@@ -241,6 +260,9 @@ gidNumber: 2000002
+ dn: cn=forbidden,ou=sub,$BASE_DN
+ changetype: delete
+ 
++dn: CN=no_posix_id,CN=Users,$BASE_DN
++changetype: delete
++
+ dn: ou=sub,$BASE_DN
+ changetype: delete
+ EOF
+-- 
+2.41.0
 
