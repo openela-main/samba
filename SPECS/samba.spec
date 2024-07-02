@@ -147,7 +147,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.19.4
-%global baserelease 3
+%global baserelease 4
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -243,6 +243,12 @@ Source18:       samba-winbind-systemd-sysusers.conf
 
 Source201:      README.downgrade
 Source202:      samba.abignore
+
+# Backport bug fixes to https://gitlab.com/samba-redhat/samba/-/tree/v4-19-redhat
+# This will give us CI and makes it easy to generate patchsets.
+#
+# Generate the patchset using: git format-patch -l1 --stdout -N > samba-4.19-redhat.patch
+Patch0:        samba-4.19-redhat.patch
 
 Requires(pre): /usr/sbin/groupadd
 
@@ -4473,6 +4479,9 @@ fi
 %endif
 
 %changelog
+* Thu May 02 2024 Pavel Filipenský <pfilipen@redhat.com> - 4.19.4-4
+- resolves: RHEL-33813 - Add option to request only POSIX groups from AD in idmap_ad
+
 * Thu Jan 18 2024 Pavel Filipenský <pfilipen@redhat.com> - 4.19.4-3
 - resolves: RHEL-19753 - Fix smbget interactive authentication
 
