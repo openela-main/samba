@@ -1,0 +1,102 @@
+From dddbbec2cb10b05a6ec3b4f1fcc877d60a44080a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Thu, 4 Jul 2024 11:08:03 +0200
+Subject: [PATCH 1/2] .gitlab-ci-main.yml: Add safe.directory '*'
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This is to fix the error when pushing to personal gitlab repo:
+
+2024-07-04 08:16:05,460 Running: 'git clone --recursive --shared /builds/pfilipen/samba /builds/samba-testbase/master' in '/builds/pfilipen/samba'
+Cloning into '/builds/samba-testbase/master'...
+fatal: detected dubious ownership in repository at '/builds/pfilipen/samba/.git'
+To add an exception for this directory, call:
+	git config --global --add safe.directory /builds/pfilipen/samba/.git
+fatal: Could not read from remote repository.
+
+Instead of adding more and more explicit repositories
+we should just allow any, we're in an isolated environment...
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15660
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Stefan Metzmacher <metze@samba.org>
+Autobuild-Date(master): Wed Jul 10 10:35:00 UTC 2024 on atb-devel-224
+
+(cherry picked from commit 3a21b7d9a4e7e9814d0be8c0ebf72b9821a5dc36)
+---
+ .gitlab-ci-main.yml | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/.gitlab-ci-main.yml b/.gitlab-ci-main.yml
+index face2103327..08865ca2c42 100644
+--- a/.gitlab-ci-main.yml
++++ b/.gitlab-ci-main.yml
+@@ -146,8 +146,7 @@ include:
+     - ccache -z -M 500M
+     - ccache -s
+       # We are already running .gitlab-ci directives from this repo, remove additional checks that break our CI
+-    - git config --global --add safe.directory `pwd`
+-    - git config --global --add safe.directory /builds/samba-team/devel/samba/.git
++    - git config --global --add safe.directory '*'
+   after_script:
+     - mount
+     - df -h
+-- 
+2.45.2
+
+
+From 1c69964d34d2cf66532b23ffde76a839a65b0db2 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Fri, 12 Jul 2024 14:18:26 +0200
+Subject: [PATCH 2/2] s3:printing: Allow to run samba-bgqd as a standalone
+ systemd service
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15683
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+(cherry picked from commit 0a532378322661b23b3393eb2ebde29402a16e62)
+
+Autobuild-User(v4-20-test): Jule Anger <janger@samba.org>
+Autobuild-Date(v4-20-test): Tue Jul 23 08:56:24 UTC 2024 on atb-devel-224
+
+(cherry picked from commit 4cf9af9186d7829f11bd07c7d6e526a51dcf0d61)
+---
+ source3/printing/samba-bgqd.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/source3/printing/samba-bgqd.c b/source3/printing/samba-bgqd.c
+index 59ed0cc40db..9560fcf9e35 100644
+--- a/source3/printing/samba-bgqd.c
++++ b/source3/printing/samba-bgqd.c
+@@ -253,7 +253,9 @@ int main(int argc, const char *argv[])
+ 	log_stdout = (debug_get_log_type() == DEBUG_STDOUT);
+ 
+ 	/* main process will notify systemd */
+-	daemon_sd_notifications(false);
++	if (ready_signal_fd != -1 || watch_fd != -1) {
++		daemon_sd_notifications(false);
++	}
+ 
+ 	if (!cmdline_daemon_cfg->fork) {
+ 		daemon_status(progname, "Starting process ... ");
+@@ -325,6 +327,10 @@ int main(int argc, const char *argv[])
+ 		goto done;
+ 	}
+ 
++	if (!cmdline_daemon_cfg->fork) {
++		daemon_ready(progname);
++	}
++
+ 	if (ready_signal_fd != -1) {
+ 		pid_t pid = getpid();
+ 		ssize_t written;
+-- 
+2.45.2
+
