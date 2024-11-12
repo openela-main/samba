@@ -1371,9 +1371,11 @@ popd
 install -d -m 0755 %{buildroot}/usr/{sbin,bin}
 install -d -m 0755 %{buildroot}%{_libdir}/security
 install -d -m 0755 %{buildroot}/var/lib/samba
+install -d -m 0755 %{buildroot}/var/lib/samba/certs
 install -d -m 0755 %{buildroot}/var/lib/samba/drivers
 install -d -m 0755 %{buildroot}/var/lib/samba/lock
 install -d -m 0755 %{buildroot}/var/lib/samba/private
+install -d -m 0755 %{buildroot}/var/lib/samba/private/certs
 install -d -m 0755 %{buildroot}/var/lib/samba/scripts
 install -d -m 0755 %{buildroot}/var/lib/samba/sysvol
 install -d -m 0755 %{buildroot}/var/lib/samba/usershares
@@ -2004,7 +2006,9 @@ fi
 %ghost %dir /run/samba
 %ghost %dir /run/winbindd
 %dir /var/lib/samba
+%dir /var/lib/samba/certs
 %attr(700,root,root) %dir /var/lib/samba/private
+%attr(700,root,root) %dir /var/lib/samba/private/certs
 %dir /var/lib/samba/lock
 %attr(755,root,root) %dir %{_sysconfdir}/samba
 %config(noreplace) %{_sysconfdir}/samba/smb.conf
