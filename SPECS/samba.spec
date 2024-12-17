@@ -147,7 +147,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.19.4
-%global baserelease 5
+%global baserelease 6
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -4479,6 +4479,9 @@ fi
 %endif
 
 %changelog
+* Tue Oct 22 2024 Andreas Schneider <asn@redhat.com> - 4.19.4-6
+- resolves: RHEL-63770 - Fix notifyd performance issue
+
 * Fri Aug 02 2024 Pavel Filipenský <pfilipen@redhat.com> - 4.19.4-5
 - resolves: RHEL-45842 - Fix idmap_ad with trusted domains
 

@@ -1,7 +1,7 @@
 From 3c29fc78029e1274f931e171c9e04c19ad0182c1 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:05:54 +0300
-Subject: [PATCH 01/28] gp: Support more global trust directories
+Subject: [PATCH 01/29] gp: Support more global trust directories
 
 In addition to the SUSE global trust directory, add support for RHEL and
 Debian-based distributions (including Ubuntu).
@@ -60,13 +60,13 @@ index 312c8ddf467..1b90ab46e90 100644
          # Symlink the certs to global trust dir
          dst = os.path.join(global_trust_dir, os.path.basename(src))
 -- 
-2.45.2
+2.47.0
 
 
 From 063606e8ec83a58972df47eb561ab267f8937ba4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:09:28 +0300
-Subject: [PATCH 02/28] gp: Support update-ca-trust helper
+Subject: [PATCH 02/29] gp: Support update-ca-trust helper
 
 This is used on RHEL/Fedora instead of update-ca-certificates. They
 behave similarly so it's enough to change the command name.
@@ -104,13 +104,13 @@ index 1b90ab46e90..cefdafa21b2 100644
          Popen([update]).wait()
      # Setup Certificate Auto Enrollment
 -- 
-2.45.2
+2.47.0
 
 
 From 3b548bf280ca59ef12a7af10a9131813067a850a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 11 Aug 2023 18:46:42 +0300
-Subject: [PATCH 03/28] gp: Change root cert extension suffix
+Subject: [PATCH 03/29] gp: Change root cert extension suffix
 
 On Ubuntu, certificates must end in '.crt' in order to be considered by
 the `update-ca-certificates` helper.
@@ -138,13 +138,13 @@ index cefdafa21b2..c562722906b 100644
                  w.write(cert)
              root_certs.append(dest)
 -- 
-2.45.2
+2.47.0
 
 
 From 7592ed5032836dc43f657f66607a0a4661edcdb4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:06:43 +0300
-Subject: [PATCH 04/28] gp: Test with binary content for certificate data
+Subject: [PATCH 04/29] gp: Test with binary content for certificate data
 
 This fails all GPO-related tests that call `gpupdate --rsop`.
 
@@ -216,13 +216,13 @@ index 00000000000..0aad59607c2
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.45.2
+2.47.0
 
 
 From 7f7b235bda9e85c5ea330e52e734d1113a884571 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:20:11 +0300
-Subject: [PATCH 05/28] gp: Convert CA certificates to base64
+Subject: [PATCH 05/29] gp: Convert CA certificates to base64
 
 I don't know whether this applies universally, but in our case the
 contents of `es['cACertificate'][0]` are binary, so cleanly converting
@@ -289,13 +289,13 @@ index 0aad59607c2..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.45.2
+2.47.0
 
 
 From 49cc74015a603e80048a38fe635cd1ac28938ee4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:16:23 +0300
-Subject: [PATCH 06/28] gp: Test adding new cert templates enforces changes
+Subject: [PATCH 06/29] gp: Test adding new cert templates enforces changes
 
 Ensure that cepces-submit reporting additional templates and re-applying
 will enforce the updated policy.
@@ -422,13 +422,13 @@ index 00000000000..4edc1dce730
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.45.2
+2.47.0
 
 
 From 4c0906bd79f030e591701234bc54bc749a42d686 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:37:17 +0300
-Subject: [PATCH 07/28] gp: Template changes should invalidate cache
+Subject: [PATCH 07/29] gp: Template changes should invalidate cache
 
 If certificate templates are added or removed, the autoenroll extension
 should react to this and reapply the policy. Previously this wasn't
@@ -487,13 +487,13 @@ index 4edc1dce730..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.45.2
+2.47.0
 
 
 From e61f30dc2518d5a1c239f090baea4a309307f3f8 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:26:59 +0300
-Subject: [PATCH 08/28] gp: Test disabled enrollment unapplies policy
+Subject: [PATCH 08/29] gp: Test disabled enrollment unapplies policy
 
 For this we need to stage a Registry.pol file with certificate
 autoenrollment enabled, but with checkboxes unticked.
@@ -588,13 +588,13 @@ index 00000000000..83bc9f0ac1f
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.45.2
+2.47.0
 
 
 From 7757b9b48546d71e19798d1260da97780caa99c3 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:33:59 +0300
-Subject: [PATCH 09/28] gp: Send list of keys instead of dict to remove
+Subject: [PATCH 09/29] gp: Send list of keys instead of dict to remove
 
 `cache_get_all_attribute_values` returns a dict whereas we need to pass
 a list of keys to `remove`. These will be interpolated in the gpdb search.
@@ -634,13 +634,13 @@ index 83bc9f0ac1f..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.45.2
+2.47.0
 
 
 From 4e9b2e6409c5764ec0e66cc6c90b08e70f702e7c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 9 Jan 2024 08:50:01 +0100
-Subject: [PATCH 10/28] python:gp: Print a nice message if cepces-submit can't
+Subject: [PATCH 10/29] python:gp: Print a nice message if cepces-submit can't
  be found
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15552
@@ -691,13 +691,13 @@ index 64c35782ae8..08d1a7348cd 100644
  
  def getca(ca, url, trust_dir):
 -- 
-2.45.2
+2.47.0
 
 
 From fb3aefff51c02cf8ba3f8dfeb7d3f971e8d4902a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Mon, 8 Jan 2024 18:05:08 +0200
-Subject: [PATCH 11/28] gpo: Test certificate policy without NDES
+Subject: [PATCH 11/29] gpo: Test certificate policy without NDES
 
 As of 8231eaf856b, the NDES feature is no longer required on Windows, as
 cert auto-enroll can use the certificate from the LDAP request.
@@ -895,13 +895,13 @@ index 00000000000..f1e590bc7d8
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.45.2
+2.47.0
 
 
 From 1a9af36177c7491687c75df151474bb10285f00e Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 18 Jan 2024 20:23:24 +0200
-Subject: [PATCH 12/28] gpo: Decode base64 root cert before importing
+Subject: [PATCH 12/29] gpo: Decode base64 root cert before importing
 
 The reasoning behind this is described in the previous commit message,
 but essentially this should either be wrapped in certificate blocks and
@@ -948,13 +948,13 @@ index f1e590bc7d8..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.45.2
+2.47.0
 
 
 From f5fc88f9ae255f4dc135580f0fa4a02f5addc390 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 19 Jan 2024 11:36:19 +0200
-Subject: [PATCH 13/28] gpo: Do not get templates list on first run
+Subject: [PATCH 13/29] gpo: Do not get templates list on first run
 
 This is a visual fix and has no impact on functionality apart from
 cleaner log messages.
@@ -997,13 +997,13 @@ index cd5e54f1110..559c903e1a2 100644
          if changed(new_data, old_data) or self.cache_get_apply_state() == GPOSTATE.ENFORCE:
              self.unapply(guid, attribute, old_val)
 -- 
-2.45.2
+2.47.0
 
 
 From e8a6219181f2af87813b53fd09684650c1aa6f90 Mon Sep 17 00:00:00 2001
 From: David Mulder <dmulder@samba.org>
 Date: Fri, 5 Jan 2024 08:47:07 -0700
-Subject: [PATCH 14/28] gp: Skip site GP list if no site is found
+Subject: [PATCH 14/29] gp: Skip site GP list if no site is found
 
 [MS-GPOL] 3.2.5.1.4 Site Search says if the site
 search returns ERROR_NO_SITENAME, the GP site
@@ -1065,13 +1065,13 @@ index 617ef79350c..babd8f90748 100644
      # (L)ocal
      gpo_list.insert(0, gpo.GROUP_POLICY_OBJECT("Local Policy",
 -- 
-2.45.2
+2.47.0
 
 
 From d0d1a890d6f2466691fa4ee663232ee0bd1c3776 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:14:30 +0100
-Subject: [PATCH 15/28] python:gp: Avoid path check for cepces-submit
+Subject: [PATCH 15/29] python:gp: Avoid path check for cepces-submit
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1111,13 +1111,13 @@ index 559c903e1a2..7325d5132cf 100644
                    '%s --server=%s --auth=%s' % (cepces_submit,
                    ca['hostname'], auth)],
 -- 
-2.45.2
+2.47.0
 
 
 From 7f6c9a4945635c6eb8ada2255bd0febbf0f4e540 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:07:47 +0100
-Subject: [PATCH 16/28] python:gp: Improve logging for certificate enrollment
+Subject: [PATCH 16/29] python:gp: Improve logging for certificate enrollment
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1171,13 +1171,13 @@ index 7325d5132cf..a25a9678587 100644
      getcert = which('getcert')
      cepces_submit = find_cepces_submit()
 -- 
-2.45.2
+2.47.0
 
 
 From 5321d5b5bd24d7659743576f2e12a7dc0a93a828 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:04:36 +0100
-Subject: [PATCH 17/28] python:gp: Do not print an error, if CA already exists
+Subject: [PATCH 17/29] python:gp: Do not print an error, if CA already exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1217,13 +1217,13 @@ index a25a9678587..0b23cd688db 100644
          for template in supported_templates:
              attrs = fetch_template_attrs(ldb, template)
 -- 
-2.45.2
+2.47.0
 
 
 From 6a7a8a4090b8cdb8e71f4ad590260ceeda253ce2 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:02 +0100
-Subject: [PATCH 18/28] python:gp: Do not print an error if template already
+Subject: [PATCH 18/29] python:gp: Do not print an error if template already
  exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1264,13 +1264,13 @@ index 0b23cd688db..db681cb6f69 100644
              data['templates'].append(nickname)
          if update is not None:
 -- 
-2.45.2
+2.47.0
 
 
 From 43dc3d5d833bc1db885eb45402decd3225a7c946 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:24 +0100
-Subject: [PATCH 19/28] python:gp: Log an error if update fails
+Subject: [PATCH 19/29] python:gp: Log an error if update fails
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1301,13 +1301,13 @@ index db681cb6f69..c8ad2039dc6 100644
          log.warn('certmonger and cepces must be installed for ' +
                   'certificate auto enrollment to work')
 -- 
-2.45.2
+2.47.0
 
 
 From d8276d6a098d10f405b8f24c4dfb82af4496607c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:46:24 +0100
-Subject: [PATCH 20/28] python:gp: Improve working of log messages to avoid
+Subject: [PATCH 20/29] python:gp: Improve working of log messages to avoid
  confusion
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1354,13 +1354,13 @@ index c8ad2039dc6..2b7f7d22c2b 100644
              log.warn('Installing the server certificate only.')
              der_certificate = base64.b64decode(ca['cACertificate'])
 -- 
-2.45.2
+2.47.0
 
 
 From 585357bf0d8889747a2769c2451ee34766087d95 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 29 Jan 2024 17:46:30 +0100
-Subject: [PATCH 21/28] python:gp: Fix logging with gp
+Subject: [PATCH 21/29] python:gp: Fix logging with gp
 
 This allows enable INFO level logging with: `samba-gpupdate -d3`
 
@@ -1396,13 +1396,13 @@ index a74a8707d50..c3de32825db 100644
      logger.setLevel(logging.CRITICAL)
      if log_level == 1:
 -- 
-2.45.2
+2.47.0
 
 
 From 14ceb0b5f2f954bbabdaf78b8185fc515e3c8294 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 13 Mar 2024 13:55:41 +0100
-Subject: [PATCH 22/28] docs-xml: Add parameter all_groupmem to idmap_ad
+Subject: [PATCH 22/29] docs-xml: Add parameter all_groupmem to idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1438,13 +1438,13 @@ index b364bbfa231..de6d36afe95 100644
  		<listitem><para>This parameter is a list of OUs from
  		which objects will not be mapped via the ad idmap
 -- 
-2.45.2
+2.47.0
 
 
 From ac4184c8c3220263cb6f1a46a012533ed1c4e047 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 12 Mar 2024 13:20:24 +0100
-Subject: [PATCH 23/28] s3:winbindd: Improve performance of lookup_groupmem()
+Subject: [PATCH 23/29] s3:winbindd: Improve performance of lookup_groupmem()
  in idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1521,13 +1521,13 @@ index d7a665abbc6..e625aa6473f 100644
  	if (!NT_STATUS_IS_OK(status)) {
  		DEBUG(10, ("%s: add_primary_group_members failed: %s\n",
 -- 
-2.45.2
+2.47.0
 
 
 From d0e2002efcc37055b35c351a6b936e6ab89fad32 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 25 Mar 2024 22:38:18 +0100
-Subject: [PATCH 24/28] selftest: Add "winbind expand groups = 1" to
+Subject: [PATCH 24/29] selftest: Add "winbind expand groups = 1" to
  setup_ad_member_idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1555,13 +1555,13 @@ index 44ac4a5901a..606c65f8ab1 100755
  
  	my $ret = $self->provision(
 -- 
-2.45.2
+2.47.0
 
 
 From 9625b6aed981aa4e70fe11d9d1acdb54db7591a3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 14 Mar 2024 15:24:21 +0100
-Subject: [PATCH 25/28] tests: Add a test for "all_groups=no" to
+Subject: [PATCH 25/29] tests: Add a test for "all_groups=no" to
  test_idmap_ad.sh
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1628,13 +1628,13 @@ index 7ae112ada71..1d4bd395ba9 100755
  changetype: delete
  EOF
 -- 
-2.45.2
+2.47.0
 
 
 From e5890e63c35a4a5af29ae16e6dd734c4a3a304cc Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:51:53 +0200
-Subject: [PATCH 26/28] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
+Subject: [PATCH 26/29] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
  IP
 
 Remove the requirement to provide an IP address. We should look up the
@@ -1693,13 +1693,13 @@ index 50f4a6de3c6..ddf97c11973 100644
  
  	/*
 -- 
-2.45.2
+2.47.0
 
 
 From 96a1ecd8db249fa03db60259cf76fdef9c1bd749 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:53:51 +0200
-Subject: [PATCH 27/28] s3:libads: Do not fail if we don't get an IP passed
+Subject: [PATCH 27/29] s3:libads: Do not fail if we don't get an IP passed
  down
 
 The IP should be optional and we should look it up if not provided.
@@ -1727,13 +1727,13 @@ index ddf97c11973..f74d8eb567c 100644
  	}
  
 -- 
-2.45.2
+2.47.0
 
 
 From 4934642b7a7d92c6d81ba25ef6e4b66e3805f708 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:54:24 +0200
-Subject: [PATCH 28/28] s3:winbind: Fix idmap_ad creating an invalid local
+Subject: [PATCH 28/29] s3:winbind: Fix idmap_ad creating an invalid local
  krb5.conf
 
 In case of a trusted domain, we are providing the realm of the primary
@@ -1783,5 +1783,523 @@ index 5c9fe07db95..b8002825161 100644
  	if (!ok) {
  		DBG_DEBUG("Could not create private krb5.conf\n");
 -- 
-2.45.2
+2.47.0
+
+
+From cccc902c64c93db317bf4707d0af5e56b2887286 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Mon, 22 Jul 2024 12:26:55 +0200
+Subject: [PATCH 29/29] s3:notifyd: Use a watcher per db record
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This fixes a O(n²) performance regression in notifyd. The problem was
+that we had a watcher per notify instance. This changes the code to have
+a watcher per notify db entry.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=14430
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+
+Autobuild-User(master): Andreas Schneider <asn@cryptomilk.org>
+Autobuild-Date(master): Tue Oct  1 14:22:43 UTC 2024 on atb-devel-224
+
+(cherry picked from commit af011b987a4ad0d3753d83cc0b8d97ad64ba874a)
+---
+ source3/smbd/notifyd/notifyd.c         | 214 ++++++++++++++++++-------
+ source3/smbd/notifyd/notifyd_db.c      |   5 +-
+ source3/smbd/notifyd/notifyd_entry.c   |  51 ++++--
+ source3/smbd/notifyd/notifyd_private.h |  46 ++++--
+ 4 files changed, 228 insertions(+), 88 deletions(-)
+
+diff --git a/source3/smbd/notifyd/notifyd.c b/source3/smbd/notifyd/notifyd.c
+index ca303bd4d51..b368b8390fa 100644
+--- a/source3/smbd/notifyd/notifyd.c
++++ b/source3/smbd/notifyd/notifyd.c
+@@ -337,6 +337,7 @@ static bool notifyd_apply_rec_change(
+ 	struct messaging_context *msg_ctx)
+ {
+ 	struct db_record *rec = NULL;
++	struct notifyd_watcher watcher = {};
+ 	struct notifyd_instance *instances = NULL;
+ 	size_t num_instances;
+ 	size_t i;
+@@ -344,6 +345,7 @@ static bool notifyd_apply_rec_change(
+ 	TDB_DATA value;
+ 	NTSTATUS status;
+ 	bool ok = false;
++	bool new_watcher = false;
+ 
+ 	if (pathlen == 0) {
+ 		DBG_WARNING("pathlen==0\n");
+@@ -374,8 +376,12 @@ static bool notifyd_apply_rec_change(
+ 	value = dbwrap_record_get_value(rec);
+ 
+ 	if (value.dsize != 0) {
+-		if (!notifyd_parse_entry(value.dptr, value.dsize, NULL,
+-					 &num_instances)) {
++		ok = notifyd_parse_entry(value.dptr,
++					 value.dsize,
++					 &watcher,
++					 NULL,
++					 &num_instances);
++		if (!ok) {
+ 			goto fail;
+ 		}
+ 	}
+@@ -390,8 +396,22 @@ static bool notifyd_apply_rec_change(
+ 		goto fail;
+ 	}
+ 
+-	if (value.dsize != 0) {
+-		memcpy(instances, value.dptr, value.dsize);
++	if (num_instances > 0) {
++		struct notifyd_instance *tmp = NULL;
++		size_t num_tmp = 0;
++
++		ok = notifyd_parse_entry(value.dptr,
++					 value.dsize,
++					 NULL,
++					 &tmp,
++					 &num_tmp);
++		if (!ok) {
++			goto fail;
++		}
++
++		memcpy(instances,
++		       tmp,
++		       sizeof(struct notifyd_instance) * num_tmp);
+ 	}
+ 
+ 	for (i=0; i<num_instances; i++) {
+@@ -414,41 +434,106 @@ static bool notifyd_apply_rec_change(
+ 		*instance = (struct notifyd_instance) {
+ 			.client = *client,
+ 			.instance = *chg,
+-			.internal_filter = chg->filter,
+-			.internal_subdir_filter = chg->subdir_filter
+ 		};
+ 
+ 		num_instances += 1;
+ 	}
+ 
+-	if ((instance->instance.filter != 0) ||
+-	    (instance->instance.subdir_filter != 0)) {
+-		int ret;
++	/*
++	 * Calculate an intersection of the instances filters for the watcher.
++	 */
++	if (instance->instance.filter > 0) {
++		uint32_t filter = instance->instance.filter;
++
++		if ((watcher.filter & filter) != filter) {
++			watcher.filter |= filter;
++
++			new_watcher = true;
++		}
++	}
++
++	/*
++	 * Calculate an intersection of the instances subdir_filters for the
++	 * watcher.
++	 */
++	if (instance->instance.subdir_filter > 0) {
++		uint32_t subdir_filter = instance->instance.subdir_filter;
+ 
+-		TALLOC_FREE(instance->sys_watch);
++		if ((watcher.subdir_filter & subdir_filter) != subdir_filter) {
++			watcher.subdir_filter |= subdir_filter;
+ 
+-		ret = sys_notify_watch(entries, sys_notify_ctx, path,
+-				       &instance->internal_filter,
+-				       &instance->internal_subdir_filter,
+-				       notifyd_sys_callback, msg_ctx,
+-				       &instance->sys_watch);
+-		if (ret != 0) {
+-			DBG_WARNING("sys_notify_watch for [%s] returned %s\n",
+-				    path, strerror(errno));
++			new_watcher = true;
+ 		}
+ 	}
+ 
+ 	if ((instance->instance.filter == 0) &&
+ 	    (instance->instance.subdir_filter == 0)) {
++		uint32_t tmp_filter = 0;
++		uint32_t tmp_subdir_filter = 0;
++
+ 		/* This is a delete request */
+-		TALLOC_FREE(instance->sys_watch);
+ 		*instance = instances[num_instances-1];
+ 		num_instances -= 1;
++
++		for (i = 0; i < num_instances; i++) {
++			struct notifyd_instance *tmp = &instances[i];
++
++			tmp_filter |= tmp->instance.filter;
++			tmp_subdir_filter |= tmp->instance.subdir_filter;
++		}
++
++		/*
++		 * If the filter has changed, register a new watcher with the
++		 * changed filter.
++		 */
++		if (watcher.filter != tmp_filter ||
++		    watcher.subdir_filter != tmp_subdir_filter)
++		{
++			watcher.filter = tmp_filter;
++			watcher.subdir_filter = tmp_subdir_filter;
++
++			new_watcher = true;
++		}
++	}
++
++	if (new_watcher) {
++		/*
++		 * In case we removed all notify instances, we want to remove
++		 * the watcher. We won't register a new one, if no filters are
++		 * set anymore.
++		 */
++
++		TALLOC_FREE(watcher.sys_watch);
++
++		watcher.sys_filter = watcher.filter;
++		watcher.sys_subdir_filter = watcher.subdir_filter;
++
++		/*
++		 * Only register a watcher if we have filter.
++		 */
++		if (watcher.filter != 0 || watcher.subdir_filter != 0) {
++			int ret = sys_notify_watch(entries,
++						   sys_notify_ctx,
++						   path,
++						   &watcher.sys_filter,
++						   &watcher.sys_subdir_filter,
++						   notifyd_sys_callback,
++						   msg_ctx,
++						   &watcher.sys_watch);
++			if (ret != 0) {
++				DBG_WARNING("sys_notify_watch for [%s] "
++					    "returned %s\n",
++					    path,
++					    strerror(errno));
++			}
++		}
+ 	}
+ 
+ 	DBG_DEBUG("%s has %zu instances\n", path, num_instances);
+ 
+ 	if (num_instances == 0) {
++		TALLOC_FREE(watcher.sys_watch);
++
+ 		status = dbwrap_record_delete(rec);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DBG_WARNING("dbwrap_record_delete returned %s\n",
+@@ -456,13 +541,21 @@ static bool notifyd_apply_rec_change(
+ 			goto fail;
+ 		}
+ 	} else {
+-		value = make_tdb_data(
+-			(uint8_t *)instances,
+-			sizeof(struct notifyd_instance) * num_instances);
++		struct TDB_DATA iov[2] = {
++			{
++				.dptr = (uint8_t *)&watcher,
++				.dsize = sizeof(struct notifyd_watcher),
++			},
++			{
++				.dptr = (uint8_t *)instances,
++				.dsize = sizeof(struct notifyd_instance) *
++					 num_instances,
++			},
++		};
+ 
+-		status = dbwrap_record_store(rec, value, 0);
++		status = dbwrap_record_storev(rec, iov, ARRAY_SIZE(iov), 0);
+ 		if (!NT_STATUS_IS_OK(status)) {
+-			DBG_WARNING("dbwrap_record_store returned %s\n",
++			DBG_WARNING("dbwrap_record_storev returned %s\n",
+ 				    nt_errstr(status));
+ 			goto fail;
+ 		}
+@@ -706,12 +799,18 @@ static void notifyd_trigger_parser(TDB_DATA key, TDB_DATA data,
+ 					.when = tstate->msg->when };
+ 	struct iovec iov[2];
+ 	size_t path_len = key.dsize;
++	struct notifyd_watcher watcher = {};
+ 	struct notifyd_instance *instances = NULL;
+ 	size_t num_instances = 0;
+ 	size_t i;
++	bool ok;
+ 
+-	if (!notifyd_parse_entry(data.dptr, data.dsize, &instances,
+-				 &num_instances)) {
++	ok = notifyd_parse_entry(data.dptr,
++				 data.dsize,
++				 &watcher,
++				 &instances,
++				 &num_instances);
++	if (!ok) {
+ 		DBG_DEBUG("Could not parse notifyd_entry\n");
+ 		return;
+ 	}
+@@ -734,9 +833,11 @@ static void notifyd_trigger_parser(TDB_DATA key, TDB_DATA data,
+ 
+ 		if (tstate->covered_by_sys_notify) {
+ 			if (tstate->recursive) {
+-				i_filter = instance->internal_subdir_filter;
++				i_filter = watcher.sys_subdir_filter &
++					   instance->instance.subdir_filter;
+ 			} else {
+-				i_filter = instance->internal_filter;
++				i_filter = watcher.sys_filter &
++					   instance->instance.filter;
+ 			}
+ 		} else {
+ 			if (tstate->recursive) {
+@@ -1142,46 +1243,39 @@ static int notifyd_add_proxy_syswatches(struct db_record *rec,
+ 	struct db_context *db = dbwrap_record_get_db(rec);
+ 	TDB_DATA key = dbwrap_record_get_key(rec);
+ 	TDB_DATA value = dbwrap_record_get_value(rec);
+-	struct notifyd_instance *instances = NULL;
+-	size_t num_instances = 0;
+-	size_t i;
++	struct notifyd_watcher watcher = {};
+ 	char path[key.dsize+1];
+ 	bool ok;
++	int ret;
+ 
+ 	memcpy(path, key.dptr, key.dsize);
+ 	path[key.dsize] = '\0';
+ 
+-	ok = notifyd_parse_entry(value.dptr, value.dsize, &instances,
+-				 &num_instances);
++	/* This is a remote database, we just need the watcher. */
++	ok = notifyd_parse_entry(value.dptr, value.dsize, &watcher, NULL, NULL);
+ 	if (!ok) {
+ 		DBG_WARNING("Could not parse notifyd entry for %s\n", path);
+ 		return 0;
+ 	}
+ 
+-	for (i=0; i<num_instances; i++) {
+-		struct notifyd_instance *instance = &instances[i];
+-		uint32_t filter = instance->instance.filter;
+-		uint32_t subdir_filter = instance->instance.subdir_filter;
+-		int ret;
++	watcher.sys_watch = NULL;
++	watcher.sys_filter = watcher.filter;
++	watcher.sys_subdir_filter = watcher.subdir_filter;
+ 
+-		/*
+-		 * This is a remote database. Pointers that we were
+-		 * given don't make sense locally. Initialize to NULL
+-		 * in case sys_notify_watch fails.
+-		 */
+-		instances[i].sys_watch = NULL;
+-
+-		ret = state->sys_notify_watch(
+-			db, state->sys_notify_ctx, path,
+-			&filter, &subdir_filter,
+-			notifyd_sys_callback, state->msg_ctx,
+-			&instance->sys_watch);
+-		if (ret != 0) {
+-			DBG_WARNING("inotify_watch returned %s\n",
+-				    strerror(errno));
+-		}
++	ret = state->sys_notify_watch(db,
++				      state->sys_notify_ctx,
++				      path,
++				      &watcher.filter,
++				      &watcher.subdir_filter,
++				      notifyd_sys_callback,
++				      state->msg_ctx,
++				      &watcher.sys_watch);
++	if (ret != 0) {
++		DBG_WARNING("inotify_watch returned %s\n", strerror(errno));
+ 	}
+ 
++	memcpy(value.dptr, &watcher, sizeof(struct notifyd_watcher));
++
+ 	return 0;
+ }
+ 
+@@ -1189,21 +1283,17 @@ static int notifyd_db_del_syswatches(struct db_record *rec, void *private_data)
+ {
+ 	TDB_DATA key = dbwrap_record_get_key(rec);
+ 	TDB_DATA value = dbwrap_record_get_value(rec);
+-	struct notifyd_instance *instances = NULL;
+-	size_t num_instances = 0;
+-	size_t i;
++	struct notifyd_watcher watcher = {};
+ 	bool ok;
+ 
+-	ok = notifyd_parse_entry(value.dptr, value.dsize, &instances,
+-				 &num_instances);
++	ok = notifyd_parse_entry(value.dptr, value.dsize, &watcher, NULL, NULL);
+ 	if (!ok) {
+ 		DBG_WARNING("Could not parse notifyd entry for %.*s\n",
+ 			    (int)key.dsize, (char *)key.dptr);
+ 		return 0;
+ 	}
+-	for (i=0; i<num_instances; i++) {
+-		TALLOC_FREE(instances[i].sys_watch);
+-	}
++	TALLOC_FREE(watcher.sys_watch);
++
+ 	return 0;
+ }
+ 
+diff --git a/source3/smbd/notifyd/notifyd_db.c b/source3/smbd/notifyd/notifyd_db.c
+index 18228619e9a..7dc3cd58081 100644
+--- a/source3/smbd/notifyd/notifyd_db.c
++++ b/source3/smbd/notifyd/notifyd_db.c
+@@ -40,7 +40,10 @@ static bool notifyd_parse_db_parser(TDB_DATA key, TDB_DATA value,
+ 	memcpy(path, key.dptr, key.dsize);
+ 	path[key.dsize] = 0;
+ 
+-	ok = notifyd_parse_entry(value.dptr, value.dsize, &instances,
++	ok = notifyd_parse_entry(value.dptr,
++				 value.dsize,
++				 NULL,
++				 &instances,
+ 				 &num_instances);
+ 	if (!ok) {
+ 		DBG_DEBUG("Could not parse entry for path %s\n", path);
+diff --git a/source3/smbd/notifyd/notifyd_entry.c b/source3/smbd/notifyd/notifyd_entry.c
+index 539010de03a..f3b0e908136 100644
+--- a/source3/smbd/notifyd/notifyd_entry.c
++++ b/source3/smbd/notifyd/notifyd_entry.c
+@@ -21,22 +21,51 @@
+  * Parse an entry in the notifyd_context->entries database
+  */
+ 
+-bool notifyd_parse_entry(
+-	uint8_t *buf,
+-	size_t buflen,
+-	struct notifyd_instance **instances,
+-	size_t *num_instances)
++/**
++ * @brief Parse a notifyd database entry.
++ *
++ * The memory we pass down needs to be aligned. If it isn't aligned we can run
++ * into obscure errors as we just point into the data buffer.
++ *
++ * @param data The data to parse
++ * @param data_len The length of the data to parse
++ * @param watcher A pointer to store the watcher data or NULL.
++ * @param instances A pointer to store the array of notify instances or NULL.
++ * @param pnum_instances The number of elements in the array. If you just want
++ * the number of elements pass NULL for the watcher and instances pointers.
++ *
++ * @return true on success, false if an error occurred.
++ */
++bool notifyd_parse_entry(uint8_t *data,
++			 size_t data_len,
++			 struct notifyd_watcher *watcher,
++			 struct notifyd_instance **instances,
++			 size_t *pnum_instances)
+ {
+-	if ((buflen % sizeof(struct notifyd_instance)) != 0) {
+-		DBG_WARNING("invalid buffer size: %zu\n", buflen);
++	size_t ilen;
++
++	if (data_len < sizeof(struct notifyd_watcher)) {
+ 		return false;
+ 	}
+ 
+-	if (instances != NULL) {
+-		*instances = (struct notifyd_instance *)buf;
++	if (watcher != NULL) {
++		*watcher = *((struct notifyd_watcher *)(uintptr_t)data);
+ 	}
+-	if (num_instances != NULL) {
+-		*num_instances = buflen / sizeof(struct notifyd_instance);
++
++	ilen = data_len - sizeof(struct notifyd_watcher);
++	if ((ilen % sizeof(struct notifyd_instance)) != 0) {
++		return false;
++	}
++
++	if (pnum_instances != NULL) {
++		*pnum_instances = ilen / sizeof(struct notifyd_instance);
+ 	}
++	if (instances != NULL) {
++		/* The (uintptr_t) cast removes a warning from -Wcast-align. */
++		*instances =
++			(struct notifyd_instance *)(uintptr_t)
++				(data + sizeof(struct notifyd_watcher));
++	}
++
+ 	return true;
+ }
+diff --git a/source3/smbd/notifyd/notifyd_private.h b/source3/smbd/notifyd/notifyd_private.h
+index 36c08f47c54..db8e6e1c005 100644
+--- a/source3/smbd/notifyd/notifyd_private.h
++++ b/source3/smbd/notifyd/notifyd_private.h
+@@ -20,30 +20,48 @@
+ #include "lib/util/server_id.h"
+ #include "notifyd.h"
+ 
++
+ /*
+- * notifyd's representation of a notify instance
++ * Representation of a watcher for a path
++ *
++ * This will be stored in the db.
+  */
+-struct notifyd_instance {
+-	struct server_id client;
+-	struct notify_instance instance;
+-
+-	void *sys_watch; /* inotify/fam/etc handle */
++struct notifyd_watcher {
++	/*
++	 * This is an intersections of the filter the watcher is listening for.
++	 */
++	uint32_t filter;
++	uint32_t subdir_filter;
+ 
+ 	/*
+-	 * Filters after sys_watch took responsibility of some bits
++	 * Those are inout variables passed to the sys_watcher. The sys_watcher
++	 * will remove the bits it can't handle.
+ 	 */
+-	uint32_t internal_filter;
+-	uint32_t internal_subdir_filter;
++	uint32_t sys_filter;
++	uint32_t sys_subdir_filter;
++
++	/* The handle for inotify/fam etc. */
++	void *sys_watch;
++};
++
++/*
++ * Representation of a notifyd instance
++ *
++ * This will be stored in the db.
++ */
++struct notifyd_instance {
++	struct server_id client;
++	struct notify_instance instance;
+ };
+ 
+ /*
+  * Parse an entry in the notifyd_context->entries database
+  */
+ 
+-bool notifyd_parse_entry(
+-	uint8_t *buf,
+-	size_t buflen,
+-	struct notifyd_instance **instances,
+-	size_t *num_instances);
++bool notifyd_parse_entry(uint8_t *data,
++			 size_t data_len,
++			 struct notifyd_watcher *watcher,
++			 struct notifyd_instance **instances,
++			 size_t *num_instances);
+ 
+ #endif
+-- 
+2.47.0
 
