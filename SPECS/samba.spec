@@ -147,7 +147,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.19.4
-%global baserelease 6
+%global baserelease 7
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -4479,6 +4479,9 @@ fi
 %endif
 
 %changelog
+* Thu Mar 20 2025 Diaa Sami <disami@redhat.com> - 4.19.4-7
+- resolves: RHEL-84117 - fd_handle_destructor() can panic within an smbd_smb2_close()
+
 * Tue Oct 22 2024 Andreas Schneider <asn@redhat.com> - 4.19.4-6
 - resolves: RHEL-63770 - Fix notifyd performance issue
 
