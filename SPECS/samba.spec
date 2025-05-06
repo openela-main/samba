@@ -205,7 +205,7 @@
 
 Name:           samba
 Version:        %{samba_version}
-Release:        %{samba_release}%{?dist}
+Release:        %{samba_release}%{?dist}.1
 
 %if 0%{?fedora}
 Epoch:          2
@@ -4610,6 +4610,15 @@ fi
 %endif
 
 %changelog
+* Fri Apr 11 2025 Pavel Filipenský <pfilipen@redhat.com> - 4.20.2-2.1
+- resolves: RHEL-85347 - Fix winbind memory leak
+
+* Wed Oct 02 2024 Andreas Schneider <asn@redhat.com> - 4.20.2-2
+- resolves: RHEL-59912 - Fix performance issue in notifyd
+
+* Wed Oct 02 2024 Andreas Schneider <asn@redhat.com> - 4.20.2-2
+* resolves: RHEL-59913 - Package cert directories used by samba-gpupdate
+
 * Thu Aug 01 2024 Pavel Filipenský <pfilipen@redhat.com> - 4.20.2-2
 - resolves: RHEL-47757 - Allow to run samba-bgqd as a standalone systemd service
 
