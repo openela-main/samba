@@ -1,0 +1,2582 @@
+From 9032322cc713e82a316b271bb2fa0a867c69b021 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Mon, 22 Jul 2024 12:26:55 +0200
+Subject: [PATCH 1/6] s3:notifyd: Use a watcher per db record
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This fixes a O(n²) performance regression in notifyd. The problem was
+that we had a watcher per notify instance. This changes the code to have
+a watcher per notify db entry.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=14430
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+(cherry picked from commit af011b987a4ad0d3753d83cc0b8d97ad64ba874a)
+---
+ source3/smbd/notifyd/notifyd.c         | 214 ++++++++++++++++++-------
+ source3/smbd/notifyd/notifyd_db.c      |   5 +-
+ source3/smbd/notifyd/notifyd_entry.c   |  51 ++++--
+ source3/smbd/notifyd/notifyd_private.h |  46 ++++--
+ 4 files changed, 228 insertions(+), 88 deletions(-)
+
+diff --git a/source3/smbd/notifyd/notifyd.c b/source3/smbd/notifyd/notifyd.c
+index 64dd26a7e11..0b07ab3e435 100644
+--- a/source3/smbd/notifyd/notifyd.c
++++ b/source3/smbd/notifyd/notifyd.c
+@@ -337,6 +337,7 @@ static bool notifyd_apply_rec_change(
+ 	struct messaging_context *msg_ctx)
+ {
+ 	struct db_record *rec = NULL;
++	struct notifyd_watcher watcher = {};
+ 	struct notifyd_instance *instances = NULL;
+ 	size_t num_instances;
+ 	size_t i;
+@@ -344,6 +345,7 @@ static bool notifyd_apply_rec_change(
+ 	TDB_DATA value;
+ 	NTSTATUS status;
+ 	bool ok = false;
++	bool new_watcher = false;
+ 
+ 	if (pathlen == 0) {
+ 		DBG_WARNING("pathlen==0\n");
+@@ -374,8 +376,12 @@ static bool notifyd_apply_rec_change(
+ 	value = dbwrap_record_get_value(rec);
+ 
+ 	if (value.dsize != 0) {
+-		if (!notifyd_parse_entry(value.dptr, value.dsize, NULL,
+-					 &num_instances)) {
++		ok = notifyd_parse_entry(value.dptr,
++					 value.dsize,
++					 &watcher,
++					 NULL,
++					 &num_instances);
++		if (!ok) {
+ 			goto fail;
+ 		}
+ 	}
+@@ -390,8 +396,22 @@ static bool notifyd_apply_rec_change(
+ 		goto fail;
+ 	}
+ 
+-	if (value.dsize != 0) {
+-		memcpy(instances, value.dptr, value.dsize);
++	if (num_instances > 0) {
++		struct notifyd_instance *tmp = NULL;
++		size_t num_tmp = 0;
++
++		ok = notifyd_parse_entry(value.dptr,
++					 value.dsize,
++					 NULL,
++					 &tmp,
++					 &num_tmp);
++		if (!ok) {
++			goto fail;
++		}
++
++		memcpy(instances,
++		       tmp,
++		       sizeof(struct notifyd_instance) * num_tmp);
+ 	}
+ 
+ 	for (i=0; i<num_instances; i++) {
+@@ -414,41 +434,106 @@ static bool notifyd_apply_rec_change(
+ 		*instance = (struct notifyd_instance) {
+ 			.client = *client,
+ 			.instance = *chg,
+-			.internal_filter = chg->filter,
+-			.internal_subdir_filter = chg->subdir_filter
+ 		};
+ 
+ 		num_instances += 1;
+ 	}
+ 
+-	if ((instance->instance.filter != 0) ||
+-	    (instance->instance.subdir_filter != 0)) {
+-		int ret;
++	/*
++	 * Calculate an intersection of the instances filters for the watcher.
++	 */
++	if (instance->instance.filter > 0) {
++		uint32_t filter = instance->instance.filter;
++
++		if ((watcher.filter & filter) != filter) {
++			watcher.filter |= filter;
++
++			new_watcher = true;
++		}
++	}
++
++	/*
++	 * Calculate an intersection of the instances subdir_filters for the
++	 * watcher.
++	 */
++	if (instance->instance.subdir_filter > 0) {
++		uint32_t subdir_filter = instance->instance.subdir_filter;
+ 
+-		TALLOC_FREE(instance->sys_watch);
++		if ((watcher.subdir_filter & subdir_filter) != subdir_filter) {
++			watcher.subdir_filter |= subdir_filter;
+ 
+-		ret = sys_notify_watch(entries, sys_notify_ctx, path,
+-				       &instance->internal_filter,
+-				       &instance->internal_subdir_filter,
+-				       notifyd_sys_callback, msg_ctx,
+-				       &instance->sys_watch);
+-		if (ret != 0) {
+-			DBG_WARNING("sys_notify_watch for [%s] returned %s\n",
+-				    path, strerror(errno));
++			new_watcher = true;
+ 		}
+ 	}
+ 
+ 	if ((instance->instance.filter == 0) &&
+ 	    (instance->instance.subdir_filter == 0)) {
++		uint32_t tmp_filter = 0;
++		uint32_t tmp_subdir_filter = 0;
++
+ 		/* This is a delete request */
+-		TALLOC_FREE(instance->sys_watch);
+ 		*instance = instances[num_instances-1];
+ 		num_instances -= 1;
++
++		for (i = 0; i < num_instances; i++) {
++			struct notifyd_instance *tmp = &instances[i];
++
++			tmp_filter |= tmp->instance.filter;
++			tmp_subdir_filter |= tmp->instance.subdir_filter;
++		}
++
++		/*
++		 * If the filter has changed, register a new watcher with the
++		 * changed filter.
++		 */
++		if (watcher.filter != tmp_filter ||
++		    watcher.subdir_filter != tmp_subdir_filter)
++		{
++			watcher.filter = tmp_filter;
++			watcher.subdir_filter = tmp_subdir_filter;
++
++			new_watcher = true;
++		}
++	}
++
++	if (new_watcher) {
++		/*
++		 * In case we removed all notify instances, we want to remove
++		 * the watcher. We won't register a new one, if no filters are
++		 * set anymore.
++		 */
++
++		TALLOC_FREE(watcher.sys_watch);
++
++		watcher.sys_filter = watcher.filter;
++		watcher.sys_subdir_filter = watcher.subdir_filter;
++
++		/*
++		 * Only register a watcher if we have filter.
++		 */
++		if (watcher.filter != 0 || watcher.subdir_filter != 0) {
++			int ret = sys_notify_watch(entries,
++						   sys_notify_ctx,
++						   path,
++						   &watcher.sys_filter,
++						   &watcher.sys_subdir_filter,
++						   notifyd_sys_callback,
++						   msg_ctx,
++						   &watcher.sys_watch);
++			if (ret != 0) {
++				DBG_WARNING("sys_notify_watch for [%s] "
++					    "returned %s\n",
++					    path,
++					    strerror(errno));
++			}
++		}
+ 	}
+ 
+ 	DBG_DEBUG("%s has %zu instances\n", path, num_instances);
+ 
+ 	if (num_instances == 0) {
++		TALLOC_FREE(watcher.sys_watch);
++
+ 		status = dbwrap_record_delete(rec);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DBG_WARNING("dbwrap_record_delete returned %s\n",
+@@ -456,13 +541,21 @@ static bool notifyd_apply_rec_change(
+ 			goto fail;
+ 		}
+ 	} else {
+-		value = make_tdb_data(
+-			(uint8_t *)instances,
+-			sizeof(struct notifyd_instance) * num_instances);
++		struct TDB_DATA iov[2] = {
++			{
++				.dptr = (uint8_t *)&watcher,
++				.dsize = sizeof(struct notifyd_watcher),
++			},
++			{
++				.dptr = (uint8_t *)instances,
++				.dsize = sizeof(struct notifyd_instance) *
++					 num_instances,
++			},
++		};
+ 
+-		status = dbwrap_record_store(rec, value, 0);
++		status = dbwrap_record_storev(rec, iov, ARRAY_SIZE(iov), 0);
+ 		if (!NT_STATUS_IS_OK(status)) {
+-			DBG_WARNING("dbwrap_record_store returned %s\n",
++			DBG_WARNING("dbwrap_record_storev returned %s\n",
+ 				    nt_errstr(status));
+ 			goto fail;
+ 		}
+@@ -706,12 +799,18 @@ static void notifyd_trigger_parser(TDB_DATA key, TDB_DATA data,
+ 					.when = tstate->msg->when };
+ 	struct iovec iov[2];
+ 	size_t path_len = key.dsize;
++	struct notifyd_watcher watcher = {};
+ 	struct notifyd_instance *instances = NULL;
+ 	size_t num_instances = 0;
+ 	size_t i;
++	bool ok;
+ 
+-	if (!notifyd_parse_entry(data.dptr, data.dsize, &instances,
+-				 &num_instances)) {
++	ok = notifyd_parse_entry(data.dptr,
++				 data.dsize,
++				 &watcher,
++				 &instances,
++				 &num_instances);
++	if (!ok) {
+ 		DBG_DEBUG("Could not parse notifyd_entry\n");
+ 		return;
+ 	}
+@@ -734,9 +833,11 @@ static void notifyd_trigger_parser(TDB_DATA key, TDB_DATA data,
+ 
+ 		if (tstate->covered_by_sys_notify) {
+ 			if (tstate->recursive) {
+-				i_filter = instance->internal_subdir_filter;
++				i_filter = watcher.sys_subdir_filter &
++					   instance->instance.subdir_filter;
+ 			} else {
+-				i_filter = instance->internal_filter;
++				i_filter = watcher.sys_filter &
++					   instance->instance.filter;
+ 			}
+ 		} else {
+ 			if (tstate->recursive) {
+@@ -1146,46 +1247,39 @@ static int notifyd_add_proxy_syswatches(struct db_record *rec,
+ 	struct db_context *db = dbwrap_record_get_db(rec);
+ 	TDB_DATA key = dbwrap_record_get_key(rec);
+ 	TDB_DATA value = dbwrap_record_get_value(rec);
+-	struct notifyd_instance *instances = NULL;
+-	size_t num_instances = 0;
+-	size_t i;
++	struct notifyd_watcher watcher = {};
+ 	char path[key.dsize+1];
+ 	bool ok;
++	int ret;
+ 
+ 	memcpy(path, key.dptr, key.dsize);
+ 	path[key.dsize] = '\0';
+ 
+-	ok = notifyd_parse_entry(value.dptr, value.dsize, &instances,
+-				 &num_instances);
++	/* This is a remote database, we just need the watcher. */
++	ok = notifyd_parse_entry(value.dptr, value.dsize, &watcher, NULL, NULL);
+ 	if (!ok) {
+ 		DBG_WARNING("Could not parse notifyd entry for %s\n", path);
+ 		return 0;
+ 	}
+ 
+-	for (i=0; i<num_instances; i++) {
+-		struct notifyd_instance *instance = &instances[i];
+-		uint32_t filter = instance->instance.filter;
+-		uint32_t subdir_filter = instance->instance.subdir_filter;
+-		int ret;
++	watcher.sys_watch = NULL;
++	watcher.sys_filter = watcher.filter;
++	watcher.sys_subdir_filter = watcher.subdir_filter;
+ 
+-		/*
+-		 * This is a remote database. Pointers that we were
+-		 * given don't make sense locally. Initialize to NULL
+-		 * in case sys_notify_watch fails.
+-		 */
+-		instances[i].sys_watch = NULL;
+-
+-		ret = state->sys_notify_watch(
+-			db, state->sys_notify_ctx, path,
+-			&filter, &subdir_filter,
+-			notifyd_sys_callback, state->msg_ctx,
+-			&instance->sys_watch);
+-		if (ret != 0) {
+-			DBG_WARNING("inotify_watch returned %s\n",
+-				    strerror(errno));
+-		}
++	ret = state->sys_notify_watch(db,
++				      state->sys_notify_ctx,
++				      path,
++				      &watcher.filter,
++				      &watcher.subdir_filter,
++				      notifyd_sys_callback,
++				      state->msg_ctx,
++				      &watcher.sys_watch);
++	if (ret != 0) {
++		DBG_WARNING("inotify_watch returned %s\n", strerror(errno));
+ 	}
+ 
++	memcpy(value.dptr, &watcher, sizeof(struct notifyd_watcher));
++
+ 	return 0;
+ }
+ 
+@@ -1193,21 +1287,17 @@ static int notifyd_db_del_syswatches(struct db_record *rec, void *private_data)
+ {
+ 	TDB_DATA key = dbwrap_record_get_key(rec);
+ 	TDB_DATA value = dbwrap_record_get_value(rec);
+-	struct notifyd_instance *instances = NULL;
+-	size_t num_instances = 0;
+-	size_t i;
++	struct notifyd_watcher watcher = {};
+ 	bool ok;
+ 
+-	ok = notifyd_parse_entry(value.dptr, value.dsize, &instances,
+-				 &num_instances);
++	ok = notifyd_parse_entry(value.dptr, value.dsize, &watcher, NULL, NULL);
+ 	if (!ok) {
+ 		DBG_WARNING("Could not parse notifyd entry for %.*s\n",
+ 			    (int)key.dsize, (char *)key.dptr);
+ 		return 0;
+ 	}
+-	for (i=0; i<num_instances; i++) {
+-		TALLOC_FREE(instances[i].sys_watch);
+-	}
++	TALLOC_FREE(watcher.sys_watch);
++
+ 	return 0;
+ }
+ 
+diff --git a/source3/smbd/notifyd/notifyd_db.c b/source3/smbd/notifyd/notifyd_db.c
+index 18228619e9a..7dc3cd58081 100644
+--- a/source3/smbd/notifyd/notifyd_db.c
++++ b/source3/smbd/notifyd/notifyd_db.c
+@@ -40,7 +40,10 @@ static bool notifyd_parse_db_parser(TDB_DATA key, TDB_DATA value,
+ 	memcpy(path, key.dptr, key.dsize);
+ 	path[key.dsize] = 0;
+ 
+-	ok = notifyd_parse_entry(value.dptr, value.dsize, &instances,
++	ok = notifyd_parse_entry(value.dptr,
++				 value.dsize,
++				 NULL,
++				 &instances,
+ 				 &num_instances);
+ 	if (!ok) {
+ 		DBG_DEBUG("Could not parse entry for path %s\n", path);
+diff --git a/source3/smbd/notifyd/notifyd_entry.c b/source3/smbd/notifyd/notifyd_entry.c
+index 539010de03a..f3b0e908136 100644
+--- a/source3/smbd/notifyd/notifyd_entry.c
++++ b/source3/smbd/notifyd/notifyd_entry.c
+@@ -21,22 +21,51 @@
+  * Parse an entry in the notifyd_context->entries database
+  */
+ 
+-bool notifyd_parse_entry(
+-	uint8_t *buf,
+-	size_t buflen,
+-	struct notifyd_instance **instances,
+-	size_t *num_instances)
++/**
++ * @brief Parse a notifyd database entry.
++ *
++ * The memory we pass down needs to be aligned. If it isn't aligned we can run
++ * into obscure errors as we just point into the data buffer.
++ *
++ * @param data The data to parse
++ * @param data_len The length of the data to parse
++ * @param watcher A pointer to store the watcher data or NULL.
++ * @param instances A pointer to store the array of notify instances or NULL.
++ * @param pnum_instances The number of elements in the array. If you just want
++ * the number of elements pass NULL for the watcher and instances pointers.
++ *
++ * @return true on success, false if an error occurred.
++ */
++bool notifyd_parse_entry(uint8_t *data,
++			 size_t data_len,
++			 struct notifyd_watcher *watcher,
++			 struct notifyd_instance **instances,
++			 size_t *pnum_instances)
+ {
+-	if ((buflen % sizeof(struct notifyd_instance)) != 0) {
+-		DBG_WARNING("invalid buffer size: %zu\n", buflen);
++	size_t ilen;
++
++	if (data_len < sizeof(struct notifyd_watcher)) {
+ 		return false;
+ 	}
+ 
+-	if (instances != NULL) {
+-		*instances = (struct notifyd_instance *)buf;
++	if (watcher != NULL) {
++		*watcher = *((struct notifyd_watcher *)(uintptr_t)data);
+ 	}
+-	if (num_instances != NULL) {
+-		*num_instances = buflen / sizeof(struct notifyd_instance);
++
++	ilen = data_len - sizeof(struct notifyd_watcher);
++	if ((ilen % sizeof(struct notifyd_instance)) != 0) {
++		return false;
++	}
++
++	if (pnum_instances != NULL) {
++		*pnum_instances = ilen / sizeof(struct notifyd_instance);
+ 	}
++	if (instances != NULL) {
++		/* The (uintptr_t) cast removes a warning from -Wcast-align. */
++		*instances =
++			(struct notifyd_instance *)(uintptr_t)
++				(data + sizeof(struct notifyd_watcher));
++	}
++
+ 	return true;
+ }
+diff --git a/source3/smbd/notifyd/notifyd_private.h b/source3/smbd/notifyd/notifyd_private.h
+index 36c08f47c54..db8e6e1c005 100644
+--- a/source3/smbd/notifyd/notifyd_private.h
++++ b/source3/smbd/notifyd/notifyd_private.h
+@@ -20,30 +20,48 @@
+ #include "lib/util/server_id.h"
+ #include "notifyd.h"
+ 
++
+ /*
+- * notifyd's representation of a notify instance
++ * Representation of a watcher for a path
++ *
++ * This will be stored in the db.
+  */
+-struct notifyd_instance {
+-	struct server_id client;
+-	struct notify_instance instance;
+-
+-	void *sys_watch; /* inotify/fam/etc handle */
++struct notifyd_watcher {
++	/*
++	 * This is an intersections of the filter the watcher is listening for.
++	 */
++	uint32_t filter;
++	uint32_t subdir_filter;
+ 
+ 	/*
+-	 * Filters after sys_watch took responsibility of some bits
++	 * Those are inout variables passed to the sys_watcher. The sys_watcher
++	 * will remove the bits it can't handle.
+ 	 */
+-	uint32_t internal_filter;
+-	uint32_t internal_subdir_filter;
++	uint32_t sys_filter;
++	uint32_t sys_subdir_filter;
++
++	/* The handle for inotify/fam etc. */
++	void *sys_watch;
++};
++
++/*
++ * Representation of a notifyd instance
++ *
++ * This will be stored in the db.
++ */
++struct notifyd_instance {
++	struct server_id client;
++	struct notify_instance instance;
+ };
+ 
+ /*
+  * Parse an entry in the notifyd_context->entries database
+  */
+ 
+-bool notifyd_parse_entry(
+-	uint8_t *buf,
+-	size_t buflen,
+-	struct notifyd_instance **instances,
+-	size_t *num_instances);
++bool notifyd_parse_entry(uint8_t *data,
++			 size_t data_len,
++			 struct notifyd_watcher *watcher,
++			 struct notifyd_instance **instances,
++			 size_t *num_instances);
+ 
+ #endif
+-- 
+2.48.1
+
+
+From da6309049eb21ec5cd6bdf7942203960adbc37c0 Mon Sep 17 00:00:00 2001
+From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
+Date: Thu, 5 Dec 2024 16:35:51 +1300
+Subject: [PATCH 2/6] util: add a crypt wrapper, derived from
+ dsdb:password_hash
+
+This is going to be used by the dsdb password_hash module, and exposed
+to Python via pyglue.
+
+We're doing this because Python 3.13 has dropped crypt from the Python
+standard library.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15756
+
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 93bc860e8f344a96d0496edbc5d463f2c5411fcd)
+---
+ lib/util/util_crypt.c  | 90 ++++++++++++++++++++++++++++++++++++++++++
+ lib/util/util_crypt.h  |  5 +++
+ lib/util/wscript_build |  6 +++
+ 3 files changed, 101 insertions(+)
+ create mode 100644 lib/util/util_crypt.c
+ create mode 100644 lib/util/util_crypt.h
+
+diff --git a/lib/util/util_crypt.c b/lib/util/util_crypt.c
+new file mode 100644
+index 00000000000..0f7b2d0fd31
+--- /dev/null
++++ b/lib/util/util_crypt.c
+@@ -0,0 +1,90 @@
++#include <replace.h>
++#include "data_blob.h"
++#include <talloc.h>
++#include <crypt.h>
++#include "util_crypt.h"
++
++
++static int crypt_as_best_we_can(const char *phrase,
++				const char *setting,
++				const char **hashp)
++{
++	int ret = 0;
++	const char *hash = NULL;
++
++#if defined(HAVE_CRYPT_R) || defined(HAVE_CRYPT_RN)
++	struct crypt_data crypt_data = {
++		.initialized = 0        /* working storage used by crypt */
++	};
++#endif
++
++	/*
++	 * crypt_r() and crypt() may return a null pointer upon error
++	 * depending on how libcrypt was configured, so we prefer
++	 * crypt_rn() from libcrypt / libxcrypt which always returns
++	 * NULL on error.
++	 *
++	 * POSIX specifies returning a null pointer and setting
++	 * errno.
++	 *
++	 * RHEL 7 (which does not use libcrypt / libxcrypt) returns a
++	 * non-NULL pointer from crypt_r() on success but (always?)
++	 * sets errno during internal processing in the NSS crypto
++	 * subsystem.
++	 *
++	 * By preferring crypt_rn we avoid the 'return non-NULL but
++	 * set-errno' that we otherwise cannot tell apart from the
++	 * RHEL 7 behaviour.
++	 */
++	errno = 0;
++
++#ifdef HAVE_CRYPT_RN
++	hash = crypt_rn(phrase, setting,
++			&crypt_data,
++			sizeof(crypt_data));
++#elif HAVE_CRYPT_R
++	hash = crypt_r(phrase, setting, &crypt_data);
++#else
++	/*
++	 * No crypt_r falling back to crypt, which is NOT thread safe
++	 * Thread safety MT-Unsafe race:crypt
++	 */
++	hash = crypt(phrase, setting);
++#endif
++	/*
++	* On error, crypt() and crypt_r() may return a null pointer,
++	* or a pointer to an invalid hash beginning with a '*'.
++	*/
++	ret = errno;
++	errno = 0;
++	if (hash == NULL || hash[0] == '*') {
++		if (ret == 0) {
++			/* this is annoying */
++			ret = ENOTRECOVERABLE;
++		}
++	}
++
++	*hashp = hash;
++	return ret;
++}
++
++
++int talloc_crypt_blob(TALLOC_CTX *mem_ctx,
++		      const char *phrase,
++		      const char *setting,
++		      DATA_BLOB *blob)
++{
++	const char *hash = NULL;
++	int ret = crypt_as_best_we_can(phrase, setting, &hash);
++	if (ret != 0) {
++		blob->data = NULL;
++		blob->length = 0;
++		return ret;
++	}
++	blob->length = strlen(hash);
++	blob->data = talloc_memdup(mem_ctx, hash, blob->length);
++	if (blob->data == NULL) {
++		return ENOMEM;
++	}
++	return 0;
++}
+diff --git a/lib/util/util_crypt.h b/lib/util/util_crypt.h
+new file mode 100644
+index 00000000000..8c289e489e8
+--- /dev/null
++++ b/lib/util/util_crypt.h
+@@ -0,0 +1,5 @@
++
++int talloc_crypt_blob(TALLOC_CTX *mem_ctx,
++		      const char *phrase,
++		      const char *cmd,
++		      DATA_BLOB *blob);
+diff --git a/lib/util/wscript_build b/lib/util/wscript_build
+index b4fcfeaba07..7de9c0b7b17 100644
+--- a/lib/util/wscript_build
++++ b/lib/util/wscript_build
+@@ -253,6 +253,12 @@ else:
+                       private_library=True,
+                       local_include=False)
+ 
++    bld.SAMBA_LIBRARY('util_crypt',
++                      source='util_crypt.c',
++                      deps='talloc crypt',
++                      private_library=True,
++                      local_include=False)
++
+ 
+     bld.SAMBA_SUBSYSTEM('UNIX_PRIVS',
+                         source='unix_privs.c',
+-- 
+2.48.1
+
+
+From 334093563640f232bb337675417f1e8a410987de Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 20 Jan 2025 16:00:51 +0100
+Subject: [PATCH 3/6] s3: Add new keytab specifiers
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15759
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+(cherry picked from commit 15e191736d3eaba83b2fb4b901e1df2214526b64)
+---
+ selftest/target/Samba3.pm                  |   3 +-
+ source3/libads/kerberos_keytab.c           | 631 +++++++++++++--------
+ source3/script/tests/test_update_keytab.sh | 449 +++++++++++----
+ 3 files changed, 730 insertions(+), 353 deletions(-)
+
+diff --git a/selftest/target/Samba3.pm b/selftest/target/Samba3.pm
+index 17343e63e52..cc4498ff36e 100755
+--- a/selftest/target/Samba3.pm
++++ b/selftest/target/Samba3.pm
+@@ -807,7 +807,8 @@ sub provision_ad_member
+ 	\"$prefix_abs/keytab2:spn_prefixes=imap,smtp:additional_dns_hostnames:netbios_aliases:machine_password:sync_etypes\", \\
+ 	\"$prefix_abs/keytab2k:spn_prefixes=imap,smtp:additional_dns_hostnames:sync_kvno:machine_password:sync_etypes\", \\
+ 	\"$prefix_abs/keytab3:spns=wurst/brot\@$dcvars->{REALM}:machine_password:sync_etypes\", \\
+-	\"$prefix_abs/keytab3k:spns=wurst/brot\@$dcvars->{REALM},wurst1/brot\@$dcvars->{REALM},wurst2/brot\@$dcvars->{REALM}:sync_kvno:machine_password:sync_etypes\"
++	\"$prefix_abs/keytab3k:spns=wurst/brot\@$dcvars->{REALM},wurst1/brot\@$dcvars->{REALM},wurst2/brot\@$dcvars->{REALM}:sync_kvno:machine_password:sync_etypes\", \\
++	\"$prefix_abs/keytab4k:account_name:sync_account_name:spn_prefixes=imap,smtp:additional_dns_hostnames:netbios_aliases:spns=wurst/brot\@$dcvars->{REALM},wurst1/brot\@$dcvars->{REALM},wurst2/brot\@$dcvars->{REALM}:sync_kvno:machine_password:sync_etypes\"
+ 	";
+ 	}
+ 
+diff --git a/source3/libads/kerberos_keytab.c b/source3/libads/kerberos_keytab.c
+index dbf8af44c1f..619a7bda0d4 100644
+--- a/source3/libads/kerberos_keytab.c
++++ b/source3/libads/kerberos_keytab.c
+@@ -30,6 +30,7 @@
+ #include "ads.h"
+ #include "secrets.h"
+ #include "librpc/gen_ndr/ndr_secrets.h"
++#include "lib/util/string_wrappers.h"
+ 
+ #ifdef HAVE_KRB5
+ 
+@@ -41,44 +42,59 @@
+ #endif
+ 
+ enum spn_spec_type {
+-	SPN_SPEC_DEFAULT,
+-	SPN_SPEC_SYNC,
++	SPN_SPEC_ACCOUNT_NAME,
++	SPN_SPEC_SYNC_ACCOUNT_NAME,
++	SPN_SPEC_HOST,
++	SPN_SPEC_SYNC_UPN,
++	SPN_SPEC_SYNC_SPNS,
+ 	SPN_SPEC_FULL,
+-	SPN_SPEC_PREFIX
++	SPN_SPEC_PREFIX,
++	SPN_SPEC_MAX
+ };
+ 
+-/* pw2kt_conf contains 1 parsed line from "sync machine password to keytab" */
+-struct pw2kt_conf {
+-	enum spn_spec_type spn_spec;
++/* Specifier */
++struct pw2kt_specifier {
++	bool is_set;
++	char **spn_spec_vals; /* Array of full SPNs or prefixes */
++};
++
++/* Descriptor contains 1 parsed line from "sync machine password to keytab" */
++struct pw2kt_keytab_desc {
+ 	char *keytab;
+ 	bool sync_etypes;
+ 	bool sync_kvno;
+ 	bool additional_dns_hostnames;
+ 	bool netbios_aliases;
+ 	bool machine_password;
+-	char **spn_spec_array;
+-	size_t num_spn_spec;
++	struct pw2kt_specifier spec_array[SPN_SPEC_MAX];
+ };
+ 
+-/* State used by pw2kt */
+-struct pw2kt_state {
++/* Global state - stores initial data */
++struct pw2kt_global_state {
+ 	/* Array of parsed lines from "sync machine password to keytab" */
+-	struct pw2kt_conf *keytabs;
+-	size_t num_keytabs;
++	struct pw2kt_keytab_desc *keytabs;
++	/* Accumulated configuration from all keytabs */
+ 	bool sync_etypes;
+ 	bool sync_kvno;
+ 	bool sync_spns;
++	bool sync_upn;
++	bool sync_sam_account;
+ 	/* These are from DC */
+ 	krb5_kvno ad_kvno;
+ 	uint32_t ad_etypes;
++	char *ad_upn;
++	char *ad_sam_account;
+ 	char **ad_spn_array;
+ 	size_t ad_num_spns;
+ 	/* This is from secrets.db */
+ 	struct secrets_domain_info1 *info;
+ };
+ 
+-/* State used by pw2kt_process_keytab */
+-struct pw2kt_process_state {
++/*
++ * Manages krb5lib data created during processing of 'global state'.
++ * One instance per keytab.
++ */
++struct pw2kt_keytab_state {
+ 	krb5_keytab keytab;
+ 	krb5_context context;
+ 	krb5_keytab_entry *array1;
+@@ -88,151 +104,206 @@ struct pw2kt_process_state {
+ 	krb5_enctype preferred_etype;
+ };
+ 
+-static ADS_STATUS pw2kt_scan_add_spn(TALLOC_CTX *ctx,
+-				     const char *spn,
+-				     struct pw2kt_conf *conf)
++static ADS_STATUS pw2kt_add_val(TALLOC_CTX *ctx,
++				struct pw2kt_specifier *spec,
++				const char *spn_val)
+ {
+-	conf->spn_spec_array = talloc_realloc(ctx,
+-					      conf->spn_spec_array,
+-					      char *,
+-					      conf->num_spn_spec + 1);
+-	if (conf->spn_spec_array == NULL) {
++	size_t len = talloc_array_length(spec->spn_spec_vals);
++	spec->spn_spec_vals = talloc_realloc(ctx,
++					     spec->spn_spec_vals,
++					     char *,
++					     len + 1);
++	if (spec->spn_spec_vals == NULL) {
+ 		return ADS_ERROR_NT(NT_STATUS_NO_MEMORY);
+ 	}
+-	conf->spn_spec_array[conf->num_spn_spec] = talloc_strdup(
+-		conf->spn_spec_array, spn);
+-	if (conf->spn_spec_array[conf->num_spn_spec] == NULL) {
++	spec->spn_spec_vals[len] = talloc_strdup(spec->spn_spec_vals, spn_val);
++	if (spec->spn_spec_vals[len] == NULL) {
+ 		return ADS_ERROR_NT(NT_STATUS_NO_MEMORY);
+ 	}
+-	conf->num_spn_spec++;
+ 
+ 	return ADS_SUCCESS;
+ }
+ 
++static ADS_STATUS pw2kt_scan_spec(TALLOC_CTX *ctx,
++				  struct pw2kt_global_state *gstate,
++				  struct pw2kt_keytab_desc *desc,
++				  const char *option)
++{
++	enum spn_spec_type spec_type;
++	struct pw2kt_specifier *spec;
++	char *vals = NULL;
++	char *tmp = NULL;
++	ADS_STATUS status;
++
++	/* First check for options sync_kvno, sync_etypes, ... */
++	if (strequal(option, "sync_kvno")) {
++		desc->sync_kvno = gstate->sync_kvno = true;
++		return ADS_SUCCESS;
++	} else if (strequal(option, "sync_etypes")) {
++		desc->sync_etypes = gstate->sync_etypes = true;
++		return ADS_SUCCESS;
++	} else if (strequal(option, "additional_dns_hostnames")) {
++		desc->additional_dns_hostnames = true;
++		return ADS_SUCCESS;
++	} else if (strequal(option, "netbios_aliases")) {
++		desc->netbios_aliases = true;
++		return ADS_SUCCESS;
++	} else if (strequal(option, "machine_password")) {
++		desc->machine_password = true;
++		return ADS_SUCCESS;
++	}
++
++	vals = strchr_m(option, '=');
++	if (vals != NULL) {
++		*vals = 0;
++		vals++;
++	}
++
++	if (strequal(option, "account_name")) {
++		spec_type = SPN_SPEC_ACCOUNT_NAME;
++	} else if (strequal(option, "sync_account_name")) {
++		spec_type = SPN_SPEC_SYNC_ACCOUNT_NAME;
++		gstate->sync_sam_account = true;
++	} else if (strequal(option, "host")) {
++		spec_type = SPN_SPEC_HOST;
++	} else if (strequal(option, "sync_upn")) {
++		spec_type = SPN_SPEC_SYNC_UPN;
++		gstate->sync_upn = true;
++	} else if (strequal(option, "sync_spns")) {
++		spec_type = SPN_SPEC_SYNC_SPNS;
++		gstate->sync_spns = true;
++	} else if (strequal(option, "spns")) {
++		spec_type = SPN_SPEC_FULL;
++	} else if (strequal(option, "spn_prefixes")) {
++		spec_type = SPN_SPEC_PREFIX;
++	} else {
++		DBG_ERR("Invalid option: '%s'\n", option);
++		return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
++	}
++
++	desc->spec_array[spec_type].is_set = true;
++	if (spec_type != SPN_SPEC_PREFIX && spec_type != SPN_SPEC_FULL) {
++		return ADS_SUCCESS;
++	}
++	if (vals == NULL) {
++		DBG_ERR("SPN specifier: %s is missing '='\n", option);
++		return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
++	}
++	spec = &desc->spec_array[spec_type];
++
++	/* Entries are separated via ',' */
++	while ((tmp = strchr_m(vals, ',')) != NULL) {
++		*tmp = 0;
++		tmp++;
++		status = pw2kt_add_val(ctx, spec, vals);
++		if (!ADS_ERR_OK(status)) {
++			return status;
++		}
++		vals = tmp;
++		if (*vals == 0) {
++			DBG_ERR("Invalid syntax (trailing ','): %s\n", option);
++			return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
++		}
++	}
++	/* Process the last entry */
++	return pw2kt_add_val(ctx, spec, vals);
++}
++
+ /*
+  * Parse the smb.conf and find out if it is needed to read from DC:
+- *  - servicePrincipalNames
++ *  - servicePrincipalName
+  *  - msDs-KeyVersionNumber
++ *  - userPrincipalName
++ *  - sAMAccountName
++ *
++ *  Example of a line:
++ *  /etc/krb5/krb5.keytab:account_name:snps=s1@REALM.COM,spn2@REALM.ORG:host:sync_kvno:machine_password
+  */
+-static ADS_STATUS pw2kt_scan_line(const char *line, struct pw2kt_state *state)
++static ADS_STATUS pw2kt_scan_line(const char *line,
++				  struct pw2kt_global_state *gstate)
+ {
+-	char *keytabname = NULL;
+-	char *spn_spec = NULL;
+-	char *spn_val = NULL;
+-	char *option = NULL;
+-	struct pw2kt_conf *conf = NULL;
++	char *tmp = NULL;
++	char *olist = NULL;
++	struct pw2kt_keytab_desc *desc = NULL;
+ 	ADS_STATUS status;
++	size_t num_keytabs = talloc_array_length(gstate->keytabs);
+ 
+-	state->keytabs = talloc_realloc(state,
+-					state->keytabs,
+-					struct pw2kt_conf,
+-					state->num_keytabs + 1);
+-	if (state->keytabs == NULL) {
++	gstate->keytabs = talloc_realloc(gstate,
++					 gstate->keytabs,
++					 struct pw2kt_keytab_desc,
++					 num_keytabs + 1);
++	if (gstate->keytabs == NULL) {
+ 		return ADS_ERROR_NT(NT_STATUS_NO_MEMORY);
+ 	}
+-	conf = &state->keytabs[state->num_keytabs];
+-	state->num_keytabs++;
++	desc = &gstate->keytabs[num_keytabs];
++	ZERO_STRUCT(*desc);
+ 
+-	keytabname = talloc_strdup(state->keytabs, line);
+-	if (keytabname == NULL) {
++	desc->keytab = talloc_strdup(gstate->keytabs, line);
++	if (desc->keytab == NULL) {
+ 		return ADS_ERROR_NT(NT_STATUS_NO_MEMORY);
+ 	}
+ 
+-	ZERO_STRUCT(*conf);
+-	conf->keytab = keytabname;
+-	spn_spec = strchr_m(keytabname, ':');
+-	if (spn_spec == NULL) {
+-		DBG_ERR("Invalid format! ':' expected in '%s'\n", keytabname);
++	olist = strchr_m(desc->keytab, ':');
++	if (olist == NULL) {
++		DBG_ERR("Invalid format! ':' expected in '%s'\n", line);
+ 		return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
+ 	}
+-	*spn_spec++ = 0;
+-
+-	/* reverse match with strrchr_m() */
+-	while ((option = strrchr_m(spn_spec, ':')) != NULL) {
+-		*option++ = 0;
+-		if (strequal(option, "sync_kvno")) {
+-			conf->sync_kvno = state->sync_kvno = true;
+-		} else if (strequal(option, "sync_etypes")) {
+-			conf->sync_etypes = state->sync_etypes = true;
+-		} else if (strequal(option, "additional_dns_hostnames")) {
+-			conf->additional_dns_hostnames = true;
+-		} else if (strequal(option, "netbios_aliases")) {
+-			conf->netbios_aliases = true;
+-		} else if (strequal(option, "machine_password")) {
+-			conf->machine_password = true;
+-		} else {
+-			DBG_WARNING("Unknown option '%s'!\n", option);
+-			return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
+-		}
+-	}
++	*olist = 0;
++	olist++;
+ 
+-	spn_val = strchr_m(spn_spec, '=');
+-	if (spn_val != NULL) {
+-		*spn_val++ = 0;
+-	}
++	/* Always add 'host' principal */
++	desc->spec_array[SPN_SPEC_HOST].is_set = true;
+ 
+-	if (strcmp(spn_spec, "account_name") == 0) {
+-		conf->spn_spec = SPN_SPEC_DEFAULT;
+-	} else if (strcmp(spn_spec, "sync_spns") == 0) {
+-		conf->spn_spec = SPN_SPEC_SYNC;
+-		state->sync_spns = true;
+-	} else if (strcmp(spn_spec, "spns") == 0 ||
+-		   strcmp(spn_spec, "spn_prefixes") == 0)
+-	{
+-		char *spn = NULL, *tmp = NULL;
+-
+-		conf->spn_spec = strcmp(spn_spec, "spns") == 0
+-					 ? SPN_SPEC_FULL
+-					 : SPN_SPEC_PREFIX;
+-		conf->num_spn_spec = 0;
+-		spn = spn_val;
+-		while ((tmp = strchr_m(spn, ',')) != NULL) {
+-			*tmp++ = 0;
+-			status = pw2kt_scan_add_spn(state->keytabs, spn, conf);
+-			if (!ADS_ERR_OK(status)) {
+-				return status;
+-			}
+-			spn = tmp;
++	/* Entries are separated via ':' */
++	while ((tmp = strchr_m(olist, ':')) != NULL) {
++		*tmp = 0;
++		tmp++;
++		status = pw2kt_scan_spec(gstate->keytabs, gstate, desc, olist);
++		if (!ADS_ERR_OK(status)) {
++			return status;
++		}
++		olist = tmp;
++		if (*olist == 0) {
++			DBG_ERR("Invalid syntax (trailing ':'): %s\n", line);
++			return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
+ 		}
+-		/* Do not forget the last entry */
+-		return pw2kt_scan_add_spn(state->keytabs, spn, conf);
+-	} else {
+-		DBG_WARNING("Invalid SPN specifier: %s\n", spn_spec);
+-		return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
+ 	}
+-
+-	return ADS_SUCCESS;
++	/* Process the last entry */
++	return pw2kt_scan_spec(gstate->keytabs, gstate, desc, olist);
+ }
+ 
+ /*
+- * Fill struct pw2kt_state with defaults if "sync machine password to keytab"
+- * is missing in smb.conf
++ * Fill struct pw2kt_global_state with defaults if
++ * "sync machine password to keytab" is missing in smb.conf
++ * Creates 1 keytab with 3 SPN specifiers (sync_spns, account_name, host).
+  */
+-static ADS_STATUS pw2kt_default_cfg(const char *name, struct pw2kt_state *state)
++static ADS_STATUS pw2kt_default_cfg(const char *name,
++				    struct pw2kt_global_state *state)
+ {
+ 	char *keytabname = NULL;
+-	struct pw2kt_conf *conf = NULL;
++	struct pw2kt_keytab_desc *desc = NULL;
+ 
+ 	state->keytabs = talloc_zero_array(state->keytabs,
+-					   struct pw2kt_conf,
++					   struct pw2kt_keytab_desc,
+ 					   1);
+ 	if (state->keytabs == NULL) {
+ 		return ADS_ERROR_NT(NT_STATUS_NO_MEMORY);
+ 	}
+-	conf = &state->keytabs[0];
+-	state->num_keytabs = 1;
++	desc = &state->keytabs[0];
+ 
+ 	keytabname = talloc_strdup(state->keytabs, name);
+ 	if (keytabname == NULL) {
+ 		return ADS_ERROR_NT(NT_STATUS_NO_MEMORY);
+ 	}
+-
+-	conf->spn_spec = SPN_SPEC_SYNC;
+-	conf->keytab = keytabname;
+-	conf->machine_password = true;
+-	conf->sync_kvno = state->sync_kvno = true;
++	desc->keytab = keytabname;
++	desc->machine_password = true;
++	desc->sync_kvno = state->sync_kvno = true;
+ 	state->sync_spns = true;
+ 
++	desc->spec_array[SPN_SPEC_SYNC_SPNS].is_set = true;
++	desc->spec_array[SPN_SPEC_ACCOUNT_NAME].is_set = true;
++	desc->spec_array[SPN_SPEC_HOST].is_set = true;
++
+ 	return ADS_SUCCESS;
+ }
+ 
+@@ -240,7 +311,7 @@ static ADS_STATUS pw2kt_default_cfg(const char *name, struct pw2kt_state *state)
+  * For the given principal add to the array entries created from all pw->keys[]
+  */
+ static krb5_error_code pw2kt_process_add_pw(
+-	struct pw2kt_process_state *state2,
++	struct pw2kt_keytab_state *state2,
+ 	krb5_principal princ,
+ 	krb5_kvno vno,
+ 	struct secrets_domain_info1_password *pw)
+@@ -287,11 +358,10 @@ static krb5_error_code pw2kt_process_add_pw(
+  * For the given principal add to the array entries based on password,
+  * old_password, older_password and next_change->password.
+  */
+-static krb5_error_code pw2kt_process_add_info(
+-	struct pw2kt_process_state *state2,
+-	krb5_kvno kvno,
+-	const char *princs,
+-	struct secrets_domain_info1 *info)
++static krb5_error_code pw2kt_process_add_info(struct pw2kt_keytab_state *state2,
++					      krb5_kvno kvno,
++					      const char *princs,
++					      struct secrets_domain_info1 *info)
+ {
+ 	krb5_error_code ret;
+ 	krb5_principal princ = NULL;
+@@ -336,7 +406,7 @@ static krb5_error_code pw2kt_process_add_info(
+ 	return ret;
+ }
+ 
+-static int pw2kt_process_state_destructor(struct pw2kt_process_state *state2)
++static int pw2kt_keytab_state_destructor(struct pw2kt_keytab_state *state2)
+ {
+ 	int i;
+ 	size_t len2 = talloc_array_length(state2->array2);
+@@ -356,7 +426,7 @@ static int pw2kt_process_state_destructor(struct pw2kt_process_state *state2)
+ }
+ 
+ /* Read the whole keytab to krb5_keytab_entry array */
+-static krb5_error_code pw2kt_process_kt2ar(struct pw2kt_process_state *state2)
++static krb5_error_code pw2kt_process_kt2ar(struct pw2kt_keytab_state *state2)
+ {
+ 	krb5_error_code ret = 0, ret2 = 0;
+ 	krb5_kt_cursor cursor;
+@@ -402,18 +472,173 @@ static krb5_error_code pw2kt_process_kt2ar(struct pw2kt_process_state *state2)
+ 	return ret != 0 ? ret : ret2;
+ }
+ 
+-static ADS_STATUS pw2kt_process_keytab(struct pw2kt_state *state,
+-				       struct pw2kt_conf *keytabptr)
++#define ADD_INFO(P)                                                    \
++	ret = pw2kt_process_add_info(state2, kvno, (P), gstate->info); \
++	if (ret != 0) {                                                \
++		return ADS_ERROR_KRB5(ret);                            \
++	}
++
++static ADS_STATUS pw2kt_add_prefix(struct pw2kt_global_state *gstate,
++				   struct pw2kt_keytab_state *state2,
++				   struct pw2kt_keytab_desc *keytabptr,
++				   const char *prefix)
+ {
+ 	krb5_error_code ret = 0;
+-	krb5_kvno kvno = -1;
+-	size_t i, j, len1 = 0, len2 = 0;
++	krb5_kvno kvno = keytabptr->sync_kvno ? gstate->ad_kvno : -1;
+ 	char *princ_s = NULL;
+ 	const char **netbios_alias = NULL;
+ 	const char **addl_hostnames = NULL;
++
++	/* Add prefix/dnshostname@REALM */
++	princ_s = talloc_asprintf(talloc_tos(),
++				  "%s/%s@%s",
++				  prefix,
++				  lp_dns_hostname(),
++				  lp_realm());
++	if (princ_s == NULL) {
++		return ADS_ERROR_KRB5(ENOMEM);
++	}
++	ADD_INFO(princ_s);
++
++	/* Add prefix/NETBIOSNAME@REALM */
++	princ_s = talloc_asprintf(talloc_tos(),
++				  "%s/%s@%s",
++				  prefix,
++				  lp_netbios_name(),
++				  lp_realm());
++	if (princ_s == NULL) {
++		return ADS_ERROR_KRB5(ENOMEM);
++	}
++	ADD_INFO(princ_s);
++
++	if (keytabptr->netbios_aliases) {
++		for (netbios_alias = lp_netbios_aliases();
++		     netbios_alias != NULL && *netbios_alias != NULL;
++		     netbios_alias++)
++		{
++			fstring netbios_lower;
++
++			fstrcpy(netbios_lower, *netbios_alias);
++			if (!strlower_m(netbios_lower)) {
++				return ADS_ERROR_NT(
++					NT_STATUS_INVALID_PARAMETER);
++			}
++
++			/* Add prefix/NETBIOSALIAS@REALM */
++			princ_s = talloc_asprintf(talloc_tos(),
++						  "%s/%s@%s",
++						  prefix,
++						  *netbios_alias,
++						  lp_realm());
++			if (princ_s == NULL) {
++				return ADS_ERROR_KRB5(ENOMEM);
++			}
++			ADD_INFO(princ_s);
++
++			/* Add prefix/netbiosalias.dnsdomain@REALM */
++			princ_s = talloc_asprintf(talloc_tos(),
++						  "%s/%s.%s@%s",
++						  prefix,
++						  netbios_lower,
++						  lp_dnsdomain(),
++						  lp_realm());
++			if (princ_s == NULL) {
++				return ADS_ERROR_KRB5(ENOMEM);
++			}
++			ADD_INFO(princ_s);
++		}
++	}
++
++	if (keytabptr->additional_dns_hostnames) {
++		for (addl_hostnames = lp_additional_dns_hostnames();
++		     addl_hostnames != NULL && *addl_hostnames != NULL;
++		     addl_hostnames++)
++		{
++			/* Add prefix/additionalhostname@REALM */
++			princ_s = talloc_asprintf(talloc_tos(),
++						  "%s/%s@%s",
++						  prefix,
++						  *addl_hostnames,
++						  lp_realm());
++			if (princ_s == NULL) {
++				return ADS_ERROR_KRB5(ENOMEM);
++			}
++			ADD_INFO(princ_s);
++		}
++	}
++	return ADS_SUCCESS;
++}
++
++static ADS_STATUS pw2kt_process_specifier(struct pw2kt_global_state *gstate,
++					  struct pw2kt_keytab_state *state2,
++					  struct pw2kt_keytab_desc *keytabptr,
++					  enum spn_spec_type spec_type)
++{
++	krb5_error_code ret = 0;
++	ADS_STATUS status;
++	krb5_kvno kvno = keytabptr->sync_kvno ? gstate->ad_kvno : -1;
++	struct pw2kt_specifier *spec = &keytabptr->spec_array[spec_type];
++	size_t i, num_spn_spec_vals;
++
++	if (!spec->is_set) {
++		return ADS_SUCCESS;
++	}
++	switch (spec_type) {
++	case SPN_SPEC_ACCOUNT_NAME:
++		ADD_INFO(gstate->info->account_name);
++		break;
++	case SPN_SPEC_SYNC_ACCOUNT_NAME:
++		ADD_INFO(gstate->ad_sam_account);
++		break;
++	case SPN_SPEC_HOST:
++		status = pw2kt_add_prefix(gstate, state2, keytabptr, "host");
++		if (!ADS_ERR_OK(status)) {
++			return status;
++		}
++		break;
++	case SPN_SPEC_SYNC_UPN:
++		if (gstate->ad_upn != NULL) {
++			ADD_INFO(gstate->ad_upn);
++		}
++		break;
++	case SPN_SPEC_SYNC_SPNS:
++		for (i = 0; i < gstate->ad_num_spns; i++) {
++			ADD_INFO(gstate->ad_spn_array[i]);
++		}
++		break;
++	case SPN_SPEC_FULL:
++		num_spn_spec_vals = talloc_array_length(spec->spn_spec_vals);
++		for (i = 0; i < num_spn_spec_vals; i++) {
++			ADD_INFO(spec->spn_spec_vals[i]);
++		}
++		break;
++	case SPN_SPEC_PREFIX:
++		num_spn_spec_vals = talloc_array_length(spec->spn_spec_vals);
++		for (i = 0; i < num_spn_spec_vals; i++) {
++			status = pw2kt_add_prefix(gstate,
++						  state2,
++						  keytabptr,
++						  spec->spn_spec_vals[i]);
++			if (!ADS_ERR_OK(status)) {
++				return status;
++			}
++		}
++		break;
++	default:
++		return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
++	}
++	return ADS_SUCCESS;
++}
++
++static ADS_STATUS pw2kt_process_keytab(struct pw2kt_global_state *state,
++				       struct pw2kt_keytab_desc *keytabptr)
++{
++	krb5_error_code ret = 0;
++	size_t i, j, k, len1 = 0, len2 = 0;
+ 	size_t *index_array1 = NULL;
+ 	size_t *index_array2 = NULL;
+-	struct pw2kt_process_state *state2 = NULL;
++	struct pw2kt_keytab_state *state2 = NULL;
++	ADS_STATUS status;
+ 
+ 	if (!keytabptr->machine_password) {
+ 		DBG_ERR("No 'machine_password' option for '%s'. Skip it.\n",
+@@ -421,11 +646,11 @@ static ADS_STATUS pw2kt_process_keytab(struct pw2kt_state *state,
+ 		return ADS_SUCCESS;
+ 	}
+ 
+-	state2 = talloc_zero(state, struct pw2kt_process_state);
++	state2 = talloc_zero(state, struct pw2kt_keytab_state);
+ 	if (state2 == NULL) {
+ 		return ADS_ERROR_NT(NT_STATUS_NO_MEMORY);
+ 	}
+-	talloc_set_destructor(state2, pw2kt_process_state_destructor);
++	talloc_set_destructor(state2, pw2kt_keytab_state_destructor);
+ 
+ 	ret = smb_krb5_init_context_common(&state2->context);
+ 	if (ret != 0) {
+@@ -479,100 +704,11 @@ static ADS_STATUS pw2kt_process_keytab(struct pw2kt_state *state,
+ 		}
+ 	}
+ 
+-	if (keytabptr->sync_kvno) {
+-		kvno = state->ad_kvno;
+-	}
+-
+-#define ADD_INFO(P)                                                   \
+-	ret = pw2kt_process_add_info(state2, kvno, (P), state->info); \
+-	if (ret != 0) {                                               \
+-		return ADS_ERROR_KRB5(ret);                           \
+-	}
+-
+-	/* Add ACCOUNTNAME$ entries */
+-	switch (keytabptr->spn_spec) {
+-	case SPN_SPEC_DEFAULT:
+-		ADD_INFO(state->info->account_name);
+-		break;
+-	case SPN_SPEC_SYNC:
+-		for (i = 0; i < state->ad_num_spns; i++) {
+-			ADD_INFO(state->ad_spn_array[i]);
+-		}
+-		break;
+-	case SPN_SPEC_FULL:
+-		for (i = 0; i < keytabptr->num_spn_spec; i++) {
+-			ADD_INFO(keytabptr->spn_spec_array[i]);
+-		}
+-		break;
+-	case SPN_SPEC_PREFIX:
+-		for (i = 0; i < keytabptr->num_spn_spec; i++) {
+-			princ_s = talloc_asprintf(talloc_tos(),
+-						  "%s/%s@%s",
+-						  keytabptr->spn_spec_array[i],
+-						  lp_netbios_name(),
+-						  lp_realm());
+-			if (princ_s == NULL) {
+-				return ADS_ERROR_KRB5(ENOMEM);
+-			}
+-			ADD_INFO(princ_s);
+-
+-			if (!keytabptr->netbios_aliases) {
+-				goto additional_dns_hostnames;
+-			}
+-			for (netbios_alias = lp_netbios_aliases();
+-			     netbios_alias != NULL && *netbios_alias != NULL;
+-			     netbios_alias++)
+-			{
+-				/* Add PREFIX/netbiosname@REALM */
+-				princ_s = talloc_asprintf(
+-					talloc_tos(),
+-					"%s/%s@%s",
+-					keytabptr->spn_spec_array[i],
+-					*netbios_alias,
+-					lp_realm());
+-				if (princ_s == NULL) {
+-					return ADS_ERROR_KRB5(ENOMEM);
+-				}
+-				ADD_INFO(princ_s);
+-
+-				/* Add PREFIX/netbiosname.domainname@REALM */
+-				princ_s = talloc_asprintf(
+-					talloc_tos(),
+-					"%s/%s.%s@%s",
+-					keytabptr->spn_spec_array[i],
+-					*netbios_alias,
+-					lp_dnsdomain(),
+-					lp_realm());
+-				if (princ_s == NULL) {
+-					return ADS_ERROR_KRB5(ENOMEM);
+-				}
+-				ADD_INFO(princ_s);
+-			}
+-
+-additional_dns_hostnames:
+-			if (!keytabptr->additional_dns_hostnames) {
+-				continue;
+-			}
+-			for (addl_hostnames = lp_additional_dns_hostnames();
+-			     addl_hostnames != NULL && *addl_hostnames != NULL;
+-			     addl_hostnames++)
+-			{
+-				/* Add PREFIX/netbiosname@REALM */
+-				princ_s = talloc_asprintf(
+-					talloc_tos(),
+-					"%s/%s@%s",
+-					keytabptr->spn_spec_array[i],
+-					*addl_hostnames,
+-					lp_realm());
+-				if (princ_s == NULL) {
+-					return ADS_ERROR_KRB5(ENOMEM);
+-				}
+-				ADD_INFO(princ_s);
+-			}
++	for (k = 0; k < SPN_SPEC_MAX; k++) {
++		status = pw2kt_process_specifier(state, state2, keytabptr, k);
++		if (!ADS_ERR_OK(status)) {
++			return status;
+ 		}
+-		break;
+-	default:
+-		return ADS_ERROR_NT(NT_STATUS_INVALID_PARAMETER);
+ 	}
+ 
+ 	ret = smb_krb5_kt_open(state2->context,
+@@ -718,7 +854,7 @@ sync_kvno:
+ 	return ADS_ERROR_KRB5(ret);
+ }
+ 
+-static ADS_STATUS pw2kt_get_dc_info(struct pw2kt_state *state)
++static ADS_STATUS pw2kt_get_dc_info(struct pw2kt_global_state *state)
+ {
+ 	ADS_STATUS status;
+ 	LDAPMessage *res = NULL;
+@@ -762,7 +898,7 @@ static ADS_STATUS pw2kt_get_dc_info(struct pw2kt_state *state)
+ 				     "msDS-SupportedEncryptionTypes",
+ 				     &state->ad_etypes);
+ 		if (!ok) {
+-			DBG_WARNING("Failed to determine encryption types.\n");
++			DBG_ERR("Failed to determine encryption types.\n");
+ 			ads_msgfree(ads, res);
+ 			TALLOC_FREE(tmp_ctx);
+ 			return ADS_ERROR_NT(NT_STATUS_INTERNAL_ERROR);
+@@ -773,7 +909,7 @@ static ADS_STATUS pw2kt_get_dc_info(struct pw2kt_state *state)
+ 		uint32_t kvno = -1;
+ 		ok = ads_pull_uint32(ads, res, "msDS-KeyVersionNumber", &kvno);
+ 		if (!ok) {
+-			DBG_WARNING("Failed to determine the system's kvno.\n");
++			DBG_ERR("Failed to determine the system's kvno.\n");
+ 			ads_msgfree(ads, res);
+ 			TALLOC_FREE(tmp_ctx);
+ 			return ADS_ERROR_NT(NT_STATUS_INTERNAL_ERROR);
+@@ -787,8 +923,34 @@ static ADS_STATUS pw2kt_get_dc_info(struct pw2kt_state *state)
+ 						       res,
+ 						       "servicePrincipalName",
+ 						       &state->ad_num_spns);
+-		if (state->ad_spn_array == NULL) {
+-			DBG_WARNING("Failed to determine SPNs.\n");
++		if (state->ad_spn_array == NULL || state->ad_num_spns == 0) {
++			DBG_ERR("Failed to determine servicePrincipalName.\n");
++			ads_msgfree(ads, res);
++			TALLOC_FREE(tmp_ctx);
++			return ADS_ERROR_NT(NT_STATUS_INTERNAL_ERROR);
++		}
++	}
++
++	if (state->sync_upn) {
++		state->ad_upn = ads_pull_string(ads,
++						state,
++						res,
++						"userPrincipalName");
++		if (state->ad_upn == NULL) {
++			DBG_ERR("Failed to determine userPrincipalName.\n");
++			ads_msgfree(ads, res);
++			TALLOC_FREE(tmp_ctx);
++			return ADS_ERROR_NT(NT_STATUS_INTERNAL_ERROR);
++		}
++	}
++
++	if (state->sync_sam_account) {
++		state->ad_sam_account = ads_pull_string(ads,
++							state,
++							res,
++							"sAMAccountName");
++		if (state->ad_sam_account == NULL) {
++			DBG_ERR("Failed to determine sAMAccountName.\n");
+ 			ads_msgfree(ads, res);
+ 			TALLOC_FREE(tmp_ctx);
+ 			return ADS_ERROR_NT(NT_STATUS_INTERNAL_ERROR);
+@@ -864,13 +1026,14 @@ NTSTATUS sync_pw2keytabs(void)
+ 	TALLOC_CTX *frame = talloc_stackframe();
+ 	const struct loadparm_substitution *lp_sub =
+ 		loadparm_s3_global_substitution();
+-	struct pw2kt_state *state = NULL;
++	struct pw2kt_global_state *state = NULL;
+ 	const char **line = NULL;
+ 	const char **lp_ptr = NULL;
+ 	const char *pwsync_script = NULL;
+ 	NTSTATUS status_nt;
+ 	ADS_STATUS status_ads;
+ 	int i;
++	size_t num_keytabs;
+ 
+ 	DBG_DEBUG("Syncing machine password from secrets to keytabs.\n");
+ 
+@@ -879,7 +1042,7 @@ NTSTATUS sync_pw2keytabs(void)
+ 		return NT_STATUS_OK; /* nothing todo */
+ 	}
+ 
+-	state = talloc_zero(frame, struct pw2kt_state);
++	state = talloc_zero(frame, struct pw2kt_global_state);
+ 	if (state == NULL) {
+ 		TALLOC_FREE(frame);
+ 		return NT_STATUS_NO_MEMORY;
+@@ -921,7 +1084,9 @@ NTSTATUS sync_pw2keytabs(void)
+ 	}
+ 
+ params_ready:
+-	if (state->sync_etypes || state->sync_kvno || state->sync_spns) {
++	if (state->sync_etypes || state->sync_kvno || state->sync_spns ||
++	    state->sync_upn || state->sync_sam_account)
++	{
+ 		status_ads = pw2kt_get_dc_info(state);
+ 		if (!ADS_ERR_OK(status_ads)) {
+ 			DBG_WARNING("cannot read from DC\n");
+@@ -929,9 +1094,10 @@ params_ready:
+ 			return NT_STATUS_INTERNAL_ERROR;
+ 		}
+ 	} else {
+-		DBG_DEBUG("No 'sync_etypes', 'sync_kvno' and 'sync_spns' in "
+-			  "parameter 'sync machine password to keytab' => "
+-			  "no need to talk to DC.\n");
++		DBG_DEBUG("No 'sync_etypes', 'sync_kvno', 'sync_spns', "
++			  "'sync_upn' and 'sync_sam_account' in parameter "
++			  "'sync machine password to keytab' => no need to "
++			  "talk to DC.\n");
+ 	}
+ 
+ 	if (!secrets_init()) {
+@@ -951,7 +1117,8 @@ params_ready:
+ 		return status_nt;
+ 	}
+ 
+-	for (i = 0; i < state->num_keytabs; i++) {
++	num_keytabs = talloc_array_length(state->keytabs);
++	for (i = 0; i < num_keytabs; i++) {
+ 		status_ads = pw2kt_process_keytab(state, &state->keytabs[i]);
+ 		if (!ADS_ERR_OK(status_ads)) {
+ 			TALLOC_FREE(frame);
+diff --git a/source3/script/tests/test_update_keytab.sh b/source3/script/tests/test_update_keytab.sh
+index 2c38b53ccca..82c64984787 100755
+--- a/source3/script/tests/test_update_keytab.sh
++++ b/source3/script/tests/test_update_keytab.sh
+@@ -20,208 +20,416 @@ samba_net="$BINDIR/net $CONFIGURATION"
+ samba_rpcclient="$BINDIR/rpcclient $CONFIGURATION"
+ smbclient="${BINDIR}/smbclient"
+ 
+-keytabs_sync_kvno="keytab0k keytab1k keytab2k keytab3k"
++keytabs_sync_kvno="keytab0k keytab1k keytab2k keytab3k keytab4k"
+ keytabs_nosync_kvno="keytab0 keytab1 keytab2 keytab3"
+ keytabs_all="$keytabs_sync_kvno $keytabs_nosync_kvno"
+ 
+-# default, no specifiers
++# Generate the next ~300 lines for keytab templates using these steps:
++# make testenv SELFTEST_TESTENV="ad_member_idmap_nss:local"
++# source3/script/tests/test_update_keytab.sh ADDOMAIN --configfile=st/ad_member_idmap_nss/lib/server.conf
++# and finally source it from the vim editor
++# :r! for k in keytab0 keytab0k keytab1 keytab1k keytab2 keytab2k keytab3 keytab3k keytab4k ; do (echo $k=\"\\; bin/net --configfile=st/ad_member_idmap_nss/lib/server.conf ads keytab list /path/st/ad_member_idmap_nss/$k |sort -k3 |grep -v Vno|sed 's/\$/\\$/'; echo '";'; echo ); done
++
+ keytab0="\
+- -1  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes128-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+  -1  arcfour-hmac-md5                            ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes128-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+  -2  arcfour-hmac-md5                            ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes128-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+  -3  arcfour-hmac-md5                            ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes128-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes128-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes128-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++ -1  arcfour-hmac-md5                            host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -2  arcfour-hmac-md5                            host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -3  arcfour-hmac-md5                            host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes128-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes128-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes128-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  arcfour-hmac-md5                            host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  arcfour-hmac-md5                            host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  arcfour-hmac-md5                            host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes128-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes128-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes128-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+-# sync_kvno=yes
+ keytab0k="\
+-  5  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+-# sync_spns=yes
+ keytab1="\
+- -1  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     HOST/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     HOST/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     HOST/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     HOST/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     HOST/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     HOST/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     HOST/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     HOST/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     HOST/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+-# sync_spns=yes:sync_kvno=yes
+ keytab1k="\
+-  5  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     HOST/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     HOST/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     HOST/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     HOST/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     HOST/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     HOST/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     HOST/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     HOST/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     HOST/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     RestrictedKrbHost/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+-# spn_prefixes=imap,smtp
+ keytab2="\
++ -1  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     imap/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     imap/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     imap/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     imap/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     imap/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     imap/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     imap/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     imap/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     imap/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     imap/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     imap/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     imap/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     imap/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     imap/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     imap/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     imap/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     imap/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     imap/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     imap/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     imap/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     imap/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     imap/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     imap/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     imap/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     imap/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     imap/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     imap/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     smtp/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     smtp/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     smtp/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     smtp/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     smtp/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     smtp/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     smtp/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     smtp/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     smtp/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+-# spn_prefixes=imap,smtp:sync_kvno=yes
+ keytab2k="\
+-  5  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+-# spns=wurst/brot\@$dcvars->{REALM}
+ keytab3="\
++ -1  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++ -1  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -2  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++ -3  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+-# spns=wurst/brot\@$dcvars->{REALM},wurst1/brot\@$dcvars->{REALM},wurst2/brot\@$dcvars->{REALM}:sync_kvno=yes
+ keytab3k="\
+-  5  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     wurst2/brot@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     wurst2/brot@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
+-  3  aes256-cts-hmac-sha1-96                     wurst2/brot@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     wurst2/brot@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
++";
++
++keytab4k="\
++  4  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     host/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     host/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     host/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     imap/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     imap/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     imap/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/host1.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/host2.other.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/NETBIOS1@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/netbios1.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/NETBIOS2@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/netbios2.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/NETBIOS3@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     smtp/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     smtp/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     smtp/netbios3.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     wurst2/brot@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     wurst2/brot@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     wurst2/brot@ADDOM.SAMBA.EXAMPLE.COM
++  4  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
++  5  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
++  6  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+ # find the biggest vno and store it into global variable vno
+@@ -289,9 +497,9 @@ SED2="s/^ \+-\?[0-9]\+ \+//"
+ 
+ compare_keytabs_sync_kvno()
+ {
+-	sed "$SED1" < "$1" | sort -k1rn -k3 | sed "$SED2" > "${1}.sync_kvno"
+-	sed "$SED1" < "$2" | sort -k1rn -k3 | sed "$SED2" > "${2}.sync_kvno"
+-	diff --ignore-case "${1}.sync_kvno"  "${2}.sync_kvno"
++	sed "$SED1" < "$1" | sed "$SED2" | sort > "${1}.sync_kvno"
++	sed "$SED1" < "$2" | sed "$SED2" | sort > "${2}.sync_kvno"
++	diff "${1}.sync_kvno"  "${2}.sync_kvno"
+ 	return $?
+ }
+ 
+@@ -299,7 +507,7 @@ compare_keytabs_nosync_kvno()
+ {
+ 	sed "$SED1" < "$1"  | sort -k1rn -k3 > "${1}.nosync_kvno"
+ 	sed "$SED1" < "$2"  | sort -k1rn -k3 > "${2}.nosync_kvno"
+-	diff --ignore-case "${1}.nosync_kvno"  "${2}.nosync_kvno"
++	diff "${1}.nosync_kvno"  "${2}.nosync_kvno"
+ 	return $?
+ }
+ 
+@@ -391,6 +599,7 @@ printf '%s' "$keytab2" > "$TMPDIR/keytab2_template"
+ printf '%s' "$keytab2k" > "$TMPDIR/keytab2k_template"
+ printf '%s' "$keytab3" > "$TMPDIR/keytab3_template"
+ printf '%s' "$keytab3k" > "$TMPDIR/keytab3k_template"
++printf '%s' "$keytab4k" > "$TMPDIR/keytab4k_template"
+ 
+ # Other approach could e.g. compare first six entries from the template.
+ # The 6 entries correspond to password and old_password, each has 3 enc. types.
+-- 
+2.48.1
+
+
+From f1e0fce49fbd1890da053d05c8511010cb7f2911 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Tue, 14 Jan 2025 11:29:54 +0100
+Subject: [PATCH 4/6] docs-xml:smbdotconf: Document new options for 'sync
+ machinepassword to keytab'
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15759
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Thu Feb 13 18:45:21 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 7a662e097be5e0d3f7779fa544486968b8f57063)
+---
+ docs-xml/manpages/net.8.xml                   | 24 +++++------
+ .../security/syncmachinepasswordtokeytab.xml  | 42 ++++++++++++-------
+ 2 files changed, 38 insertions(+), 28 deletions(-)
+
+diff --git a/docs-xml/manpages/net.8.xml b/docs-xml/manpages/net.8.xml
+index f388644172f..8091368a48e 100644
+--- a/docs-xml/manpages/net.8.xml
++++ b/docs-xml/manpages/net.8.xml
+@@ -1549,29 +1549,25 @@ to show in the result.
+ 
+ <para>
+ Since Samba 4.21.0, keytab file is created as specified in <smbconfoption
+-name="sync machine password to keytab"/>. The keytab is created only for
++name="sync machine password to keytab"/> . The keytab can be created only when
++machine password is available in secrets.tdb, i.e. only for
+ <smbconfoption name="kerberos method">secrets only</smbconfoption> and
+ <smbconfoption name="kerberos method">secrets and keytab</smbconfoption>. With
+ the smb.conf default values for <smbconfoption name="kerberos method"> secrets
+ only</smbconfoption> and <smbconfoption name="sync machine password to keytab"/>
+ (default is empty) the keytab is not generated at all.  Keytab with a default
+-name and SPNs synced from AD is created for <smbconfoption name="kerberos
+-method">secrets and keytab</smbconfoption> if <smbconfoption name="sync machine
+-password to keytab"/> is missing.
++name containing: SPNs synced from AD, account name COMPUTER$ and principal
++host/dns_hostname is created for <smbconfoption name="kerberos method">secrets
++and keytab</smbconfoption> if <smbconfoption name="sync machine password to
++keytab"/> is missing.
+ </para>
+ <para>
+-Till Samba 4.20.0, two more entries were created by default: the machinename of
+-the client (ending with '$') and the UPN (host/domain@REALM).  If these two
+-entries are still needed, each must be specified in an own keytab file.
+-Example below will generate three keytab files that contain SPNs synced from
+-AD, host UPN and machine$ SPN:
++Till Samba 4.20, these entries were created by default: the account name
++COMPUTER$, 'host' principal and SPNs synced from AD. Example below generates
++such keytab ('host' is added implicitly):
+ </para>
+ <programlisting>
+-<smbconfoption name="sync machine password to keytab">
+-/etc/krb5.keytab0:sync_spns:machine_password,
+-/etc/krb5.keytab1:spns=host/smb.com@SMB.COM:machine_password,
+-/etc/krb5.keytab2:account_name:machine_password
+-</smbconfoption>
++<smbconfoption name="sync machine password to keytab">/etc/krb5.keytab:account_name:sync_spns:sync_kvno:machine_password</smbconfoption>
+ </programlisting>
+ <para>
+ No changes are made to the computer AD account.
+diff --git a/docs-xml/smbdotconf/security/syncmachinepasswordtokeytab.xml b/docs-xml/smbdotconf/security/syncmachinepasswordtokeytab.xml
+index f7dc30023d4..02eaf3162c0 100644
+--- a/docs-xml/smbdotconf/security/syncmachinepasswordtokeytab.xml
++++ b/docs-xml/smbdotconf/security/syncmachinepasswordtokeytab.xml
+@@ -24,36 +24,49 @@ synchronization.
+ 
+ Each string has this form:
+ <programlisting>
+-absolute_path_to_keytab:spn_spec[:sync_etypes][:sync_kvno][:netbios_aliases][:additional_dns_hostnames][:machine_password]
++absolute_path_to_keytab:spn_spec[:spn_spec]*[:sync_etypes][:sync_kvno][:netbios_aliases][:additional_dns_hostnames][:machine_password]
+ </programlisting>
+ 
+-where spn_spec can have exactly one of these four forms:
++spn_spec can be specified multiple times (separated using ':') and each spn_spec can have exactly one of these forms:
+ <programlisting>
+ account_name
++sync_account_name
++sync_upn
+ sync_spns
+ spn_prefixes=value1[,value2[...]]
+ spns=value1[,value2[...]]
+ </programlisting>
+-No other combinations are allowed.
+ </para>
+ 
+ <para>
+-Specifiers:
++Every keytab contains the 'host' principal and principals according the specification below:
+ <programlisting>
+-account_name - creates entry using principal 'computer$@REALM'.
+-sync_spns    - uses principals received from AD DC.
+-spn_prefixes - creates principals from the prefixes and adds netbios_aliases or additional_dns_hostnames if specified.
+-spns         - creates only the principals defined in the list.
++account_name      - COMPUTER$@REALM
++sync_account_name - uses attribute "sAMAccountName" from AD
++host              - always present, no need to specify it explicitly
++                    the 'host' principal is created for the same variants (netbios name, dns hostname, netbiosalias, additional_dns_hostname) as in spn_prefixes
++sync_upn          - uses attribute "userPrincipalName" (if exists in AD)
++sync_spns         - uses attribute "servicePrincipalName" (if exists in AD)
++spn_prefixes      - creates these two principals from each prefix. e.g.:
++                      prefix/<smbconfoption name="netbios name"/>@REALM
++                      prefix/<smbconfoption name="dns hostname"/>@REALM
++                    with :netbios_aliases for each netbiosalias in <smbconfoption name="netbios aliases"/>
++                      prefix/netbiosalias@REALM
++                      prefix/netbiosalias.dnsdomain@REALM
++                    with :additional_dns_hostnames for each additionaldnshostname in <smbconfoption name="additional dns hostnames"/>
++                      prefix/additionaldnshostname@REALM
++spns              - creates only the principals defined in the list
+ </programlisting>
++'account_name' and 'sync_account_name' are the same, just the source differs (secrets.tdb vs. AD).
+ </para>
+ 
+ <para>
+ Options:
+ <programlisting>
+-sync_etypes              - parameter "msDS-SupportedEncryptionTypes" is read from DC and is used to find the highest common enc type for AD and KRB5 lib.
+-sync_kvno                - the key version number ("msDS-KeyVersionNumber") is synchronized from DC, otherwise is set to -1.
+-netbios_aliases          - evaluated only for SPN_SPEC_PREFIX. If present, PREFIX/netbiosname@REALM and PREFIX/netbiosname.domainname@REALM are added for each alias. See <smbconfoption name="netbios aliases"/>
+-additional_dns_hostnames - evaluated only for SPN_SPEC_PREFIX. If present, PREFIX/dnshostname@REALM is  added for each dns name. See <smbconfoption name="additional dns hostnames"/>
++sync_etypes              - attribute "msDS-SupportedEncryptionTypes" is read from AD and is used to find the highest common enc type for AD and KRB5 lib.
++sync_kvno                - attribute "msDS-KeyVersionNumber" from AD is used to set KVNO. If this option is missing, KVNO is set to -1.
++netbios_aliases          - evaluated only for spn_prefixes (see details above) and for the 'host' principal.
++additional_dns_hostnames - evaluated only for spn_prefixes (see details above) and for the 'host' principal.
+ machine_password         - mandatory, if missing the entry is ignored. For future use.
+ </programlisting>
+ </para>
+@@ -68,7 +81,8 @@ Example:
+ "/path/to/keytab4:spn_prefixes=imap,smtp:machine_password",
+ "/path/to/keytab5:spn_prefixes=imap,smtp:netbios_aliases:additional_dns_hostnames:sync_kvno:machine_password",
+ "/path/to/keytab6:spns=wurst/brot@REALM:machine_password",
+-"/path/to/keytab7:spns=wurst/brot@REALM,wurst2/brot@REALM:sync_kvno:machine_password"
++"/path/to/keytab7:spns=wurst/brot@REALM,wurst2/brot@REALM:sync_kvno:machine_password",
++"/path/to/keytab8:account_name:sync_account_name:host:sync_upn:sync_spns:spn_prefixes=cifs,http:spns=wurst/brot@REALM:sync_kvno:machine_password"
+ </programlisting>
+ If sync_etypes or sync_kvno or sync_spns is present then winbind connects to DC. For "offline domain join" it might be useful not to use these options.
+ </para>
+@@ -80,7 +94,7 @@ If no value is present and <smbconfoption name="kerberos method"/> is different
+ <itemizedlist>
+         <listitem>
+                 <para><userinput>winbind</userinput> uses value
+-                      <programlisting>/path/to/keytab:sync_spns:sync_kvno:machine_password</programlisting>
++                      <programlisting>/path/to/keytab:host:account_name:sync_spns:sync_kvno:machine_password</programlisting>
+                       where the path to the keytab is obtained either from the krb5 library or from
+                       <smbconfoption name="dedicated keytab file"/>.
+                 </para>
+-- 
+2.48.1
+
+
+From 4dc163e87824aac33107767881d4a47033c5d9dd Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Fri, 14 Feb 2025 17:28:54 +0100
+Subject: [PATCH 5/6] s3:libads: Remove specifier for 'host' principal from
+ 'sync machine password to keytab'
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Use specifier 'spn_prefixes=host' instead of 'host'
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15759
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+(cherry picked from commit ccc3b2b2fba7b5d223c79bffc0f655490aed19cf)
+---
+ selftest/target/Samba3.pm                  |  6 +--
+ source3/libads/kerberos_keytab.c           | 21 +++-------
+ source3/script/tests/test_update_keytab.sh | 48 ----------------------
+ 3 files changed, 9 insertions(+), 66 deletions(-)
+
+diff --git a/selftest/target/Samba3.pm b/selftest/target/Samba3.pm
+index cc4498ff36e..6650690fbb7 100755
+--- a/selftest/target/Samba3.pm
++++ b/selftest/target/Samba3.pm
+@@ -804,11 +804,11 @@ sub provision_ad_member
+ 	\"$prefix_abs/keytab0k:account_name:sync_kvno:machine_password:sync_etypes\", \\
+ 	\"$prefix_abs/keytab1:sync_spns:machine_password:sync_etypes\", \\
+ 	\"$prefix_abs/keytab1k:sync_spns:sync_kvno:machine_password:sync_etypes\", \\
+-	\"$prefix_abs/keytab2:spn_prefixes=imap,smtp:additional_dns_hostnames:netbios_aliases:machine_password:sync_etypes\", \\
+-	\"$prefix_abs/keytab2k:spn_prefixes=imap,smtp:additional_dns_hostnames:sync_kvno:machine_password:sync_etypes\", \\
++	\"$prefix_abs/keytab2:spn_prefixes=host,imap,smtp:additional_dns_hostnames:netbios_aliases:machine_password:sync_etypes\", \\
++	\"$prefix_abs/keytab2k:spn_prefixes=host,imap,smtp:additional_dns_hostnames:sync_kvno:machine_password:sync_etypes\", \\
+ 	\"$prefix_abs/keytab3:spns=wurst/brot\@$dcvars->{REALM}:machine_password:sync_etypes\", \\
+ 	\"$prefix_abs/keytab3k:spns=wurst/brot\@$dcvars->{REALM},wurst1/brot\@$dcvars->{REALM},wurst2/brot\@$dcvars->{REALM}:sync_kvno:machine_password:sync_etypes\", \\
+-	\"$prefix_abs/keytab4k:account_name:sync_account_name:spn_prefixes=imap,smtp:additional_dns_hostnames:netbios_aliases:spns=wurst/brot\@$dcvars->{REALM},wurst1/brot\@$dcvars->{REALM},wurst2/brot\@$dcvars->{REALM}:sync_kvno:machine_password:sync_etypes\"
++	\"$prefix_abs/keytab4k:account_name:sync_account_name:spn_prefixes=host,imap,smtp:additional_dns_hostnames:netbios_aliases:spns=wurst/brot\@$dcvars->{REALM},wurst1/brot\@$dcvars->{REALM},wurst2/brot\@$dcvars->{REALM}:sync_kvno:machine_password:sync_etypes\"
+ 	";
+ 	}
+ 
+diff --git a/source3/libads/kerberos_keytab.c b/source3/libads/kerberos_keytab.c
+index 619a7bda0d4..5913db299ad 100644
+--- a/source3/libads/kerberos_keytab.c
++++ b/source3/libads/kerberos_keytab.c
+@@ -44,7 +44,6 @@
+ enum spn_spec_type {
+ 	SPN_SPEC_ACCOUNT_NAME,
+ 	SPN_SPEC_SYNC_ACCOUNT_NAME,
+-	SPN_SPEC_HOST,
+ 	SPN_SPEC_SYNC_UPN,
+ 	SPN_SPEC_SYNC_SPNS,
+ 	SPN_SPEC_FULL,
+@@ -164,8 +163,6 @@ static ADS_STATUS pw2kt_scan_spec(TALLOC_CTX *ctx,
+ 	} else if (strequal(option, "sync_account_name")) {
+ 		spec_type = SPN_SPEC_SYNC_ACCOUNT_NAME;
+ 		gstate->sync_sam_account = true;
+-	} else if (strequal(option, "host")) {
+-		spec_type = SPN_SPEC_HOST;
+ 	} else if (strequal(option, "sync_upn")) {
+ 		spec_type = SPN_SPEC_SYNC_UPN;
+ 		gstate->sync_upn = true;
+@@ -251,9 +248,6 @@ static ADS_STATUS pw2kt_scan_line(const char *line,
+ 	*olist = 0;
+ 	olist++;
+ 
+-	/* Always add 'host' principal */
+-	desc->spec_array[SPN_SPEC_HOST].is_set = true;
+-
+ 	/* Entries are separated via ':' */
+ 	while ((tmp = strchr_m(olist, ':')) != NULL) {
+ 		*tmp = 0;
+@@ -275,7 +269,8 @@ static ADS_STATUS pw2kt_scan_line(const char *line,
+ /*
+  * Fill struct pw2kt_global_state with defaults if
+  * "sync machine password to keytab" is missing in smb.conf
+- * Creates 1 keytab with 3 SPN specifiers (sync_spns, account_name, host).
++ * Creates 1 keytab with these SPN specifiers:
++ *   sync_spns:account_name:spn_prefixes=host:sync_kvno:machine_password
+  */
+ static ADS_STATUS pw2kt_default_cfg(const char *name,
+ 				    struct pw2kt_global_state *state)
+@@ -302,9 +297,11 @@ static ADS_STATUS pw2kt_default_cfg(const char *name,
+ 
+ 	desc->spec_array[SPN_SPEC_SYNC_SPNS].is_set = true;
+ 	desc->spec_array[SPN_SPEC_ACCOUNT_NAME].is_set = true;
+-	desc->spec_array[SPN_SPEC_HOST].is_set = true;
++	desc->spec_array[SPN_SPEC_PREFIX].is_set = true;
+ 
+-	return ADS_SUCCESS;
++	return pw2kt_add_val(state->keytabs,
++			     &desc->spec_array[SPN_SPEC_PREFIX],
++			     "host");
+ }
+ 
+ /*
+@@ -590,12 +587,6 @@ static ADS_STATUS pw2kt_process_specifier(struct pw2kt_global_state *gstate,
+ 	case SPN_SPEC_SYNC_ACCOUNT_NAME:
+ 		ADD_INFO(gstate->ad_sam_account);
+ 		break;
+-	case SPN_SPEC_HOST:
+-		status = pw2kt_add_prefix(gstate, state2, keytabptr, "host");
+-		if (!ADS_ERR_OK(status)) {
+-			return status;
+-		}
+-		break;
+ 	case SPN_SPEC_SYNC_UPN:
+ 		if (gstate->ad_upn != NULL) {
+ 			ADD_INFO(gstate->ad_upn);
+diff --git a/source3/script/tests/test_update_keytab.sh b/source3/script/tests/test_update_keytab.sh
+index 82c64984787..21edf8b8882 100755
+--- a/source3/script/tests/test_update_keytab.sh
++++ b/source3/script/tests/test_update_keytab.sh
+@@ -40,48 +40,18 @@ keytab0="\
+  -2  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes128-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+- -1  arcfour-hmac-md5                            host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -2  arcfour-hmac-md5                            host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -3  arcfour-hmac-md5                            host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes128-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes128-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes128-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -1  arcfour-hmac-md5                            host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  arcfour-hmac-md5                            host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  arcfour-hmac-md5                            host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes128-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes128-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes128-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+ keytab0k="\
+   4  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+   6  aes256-cts-hmac-sha1-96                     ADMEMIDMAPNSS\$@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  6  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  6  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+ keytab1="\
+- -1  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+@@ -118,15 +88,9 @@ keytab1="\
+ ";
+ 
+ keytab1k="\
+-  4  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  6  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+   6  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  6  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   6  aes256-cts-hmac-sha1-96                     HOST/ADMEMIDMAPNSS.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+@@ -295,24 +259,12 @@ keytab2k="\
+ ";
+ 
+ keytab3="\
+- -1  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+- -1  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -2  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+- -3  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+  -1  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
+  -2  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
+  -3  aes256-cts-hmac-sha1-96                     wurst/brot@ADDOM.SAMBA.EXAMPLE.COM
+ ";
+ 
+ keytab3k="\
+-  4  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  6  aes256-cts-hmac-sha1-96                     host/ADMEMIDMAPNSS@ADDOM.SAMBA.EXAMPLE.COM
+-  4  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  5  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+-  6  aes256-cts-hmac-sha1-96                     host/admemidmapnss.addom.samba.example.com@ADDOM.SAMBA.EXAMPLE.COM
+   4  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
+   5  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
+   6  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
+-- 
+2.48.1
+
+
+From 8bb9f6f5d9f5db755dfd950260288dfd746cfbb6 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Fri, 14 Feb 2025 17:27:26 +0100
+Subject: [PATCH 6/6] docs: Update documentation for 'sync machine password to
+ keytab'
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Use specifier 'spn_prefixes=host' instead of 'host'
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15759
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Sat Feb 15 19:21:56 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 7cae7aad1ca6dcd5e0a3a102f36af74fa49a2c2b)
+---
+ docs-xml/manpages/net.8.xml                           |  4 ++--
+ .../security/syncmachinepasswordtokeytab.xml          | 11 +++++------
+ 2 files changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/docs-xml/manpages/net.8.xml b/docs-xml/manpages/net.8.xml
+index 8091368a48e..a5f004d6e12 100644
+--- a/docs-xml/manpages/net.8.xml
++++ b/docs-xml/manpages/net.8.xml
+@@ -1564,10 +1564,10 @@ keytab"/> is missing.
+ <para>
+ Till Samba 4.20, these entries were created by default: the account name
+ COMPUTER$, 'host' principal and SPNs synced from AD. Example below generates
+-such keytab ('host' is added implicitly):
++such keytab:
+ </para>
+ <programlisting>
+-<smbconfoption name="sync machine password to keytab">/etc/krb5.keytab:account_name:sync_spns:sync_kvno:machine_password</smbconfoption>
++<smbconfoption name="sync machine password to keytab">/etc/krb5.keytab:spn_prefixes=host:account_name:sync_spns:sync_kvno:machine_password</smbconfoption>
+ </programlisting>
+ <para>
+ No changes are made to the computer AD account.
+diff --git a/docs-xml/smbdotconf/security/syncmachinepasswordtokeytab.xml b/docs-xml/smbdotconf/security/syncmachinepasswordtokeytab.xml
+index 02eaf3162c0..ec3fffc1119 100644
+--- a/docs-xml/smbdotconf/security/syncmachinepasswordtokeytab.xml
++++ b/docs-xml/smbdotconf/security/syncmachinepasswordtokeytab.xml
+@@ -39,12 +39,10 @@ spns=value1[,value2[...]]
+ </para>
+ 
+ <para>
+-Every keytab contains the 'host' principal and principals according the specification below:
++Every keytab contains principals according the specification below:
+ <programlisting>
+ account_name      - COMPUTER$@REALM
+ sync_account_name - uses attribute "sAMAccountName" from AD
+-host              - always present, no need to specify it explicitly
+-                    the 'host' principal is created for the same variants (netbios name, dns hostname, netbiosalias, additional_dns_hostname) as in spn_prefixes
+ sync_upn          - uses attribute "userPrincipalName" (if exists in AD)
+ sync_spns         - uses attribute "servicePrincipalName" (if exists in AD)
+ spn_prefixes      - creates these two principals from each prefix. e.g.:
+@@ -55,6 +53,7 @@ spn_prefixes      - creates these two principals from each prefix. e.g.:
+                       prefix/netbiosalias.dnsdomain@REALM
+                     with :additional_dns_hostnames for each additionaldnshostname in <smbconfoption name="additional dns hostnames"/>
+                       prefix/additionaldnshostname@REALM
++                  - 'host' principal should be created using specifier spn_prefixes
+ spns              - creates only the principals defined in the list
+ </programlisting>
+ 'account_name' and 'sync_account_name' are the same, just the source differs (secrets.tdb vs. AD).
+@@ -65,8 +64,8 @@ Options:
+ <programlisting>
+ sync_etypes              - attribute "msDS-SupportedEncryptionTypes" is read from AD and is used to find the highest common enc type for AD and KRB5 lib.
+ sync_kvno                - attribute "msDS-KeyVersionNumber" from AD is used to set KVNO. If this option is missing, KVNO is set to -1.
+-netbios_aliases          - evaluated only for spn_prefixes (see details above) and for the 'host' principal.
+-additional_dns_hostnames - evaluated only for spn_prefixes (see details above) and for the 'host' principal.
++netbios_aliases          - evaluated only for spn_prefixes (see details above).
++additional_dns_hostnames - evaluated only for spn_prefixes (see details above).
+ machine_password         - mandatory, if missing the entry is ignored. For future use.
+ </programlisting>
+ </para>
+@@ -82,7 +81,7 @@ Example:
+ "/path/to/keytab5:spn_prefixes=imap,smtp:netbios_aliases:additional_dns_hostnames:sync_kvno:machine_password",
+ "/path/to/keytab6:spns=wurst/brot@REALM:machine_password",
+ "/path/to/keytab7:spns=wurst/brot@REALM,wurst2/brot@REALM:sync_kvno:machine_password",
+-"/path/to/keytab8:account_name:sync_account_name:host:sync_upn:sync_spns:spn_prefixes=cifs,http:spns=wurst/brot@REALM:sync_kvno:machine_password"
++"/path/to/keytab8:sync_account_name:sync_upn:sync_spns:spn_prefixes=host,cifs,http:spns=wurst/brot@REALM:sync_kvno:machine_password"
+ </programlisting>
+ If sync_etypes or sync_kvno or sync_spns is present then winbind connects to DC. For "offline domain join" it might be useful not to use these options.
+ </para>
+-- 
+2.48.1
+
