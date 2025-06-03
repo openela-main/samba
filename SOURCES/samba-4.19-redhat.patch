@@ -1,7 +1,7 @@
 From 3c29fc78029e1274f931e171c9e04c19ad0182c1 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:05:54 +0300
-Subject: [PATCH 01/31] gp: Support more global trust directories
+Subject: [PATCH 01/33] gp: Support more global trust directories
 
 In addition to the SUSE global trust directory, add support for RHEL and
 Debian-based distributions (including Ubuntu).
@@ -60,13 +60,13 @@ index 312c8ddf467..1b90ab46e90 100644
          # Symlink the certs to global trust dir
          dst = os.path.join(global_trust_dir, os.path.basename(src))
 -- 
-2.48.1
+2.49.0
 
 
 From 063606e8ec83a58972df47eb561ab267f8937ba4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:09:28 +0300
-Subject: [PATCH 02/31] gp: Support update-ca-trust helper
+Subject: [PATCH 02/33] gp: Support update-ca-trust helper
 
 This is used on RHEL/Fedora instead of update-ca-certificates. They
 behave similarly so it's enough to change the command name.
@@ -104,13 +104,13 @@ index 1b90ab46e90..cefdafa21b2 100644
          Popen([update]).wait()
      # Setup Certificate Auto Enrollment
 -- 
-2.48.1
+2.49.0
 
 
 From 3b548bf280ca59ef12a7af10a9131813067a850a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 11 Aug 2023 18:46:42 +0300
-Subject: [PATCH 03/31] gp: Change root cert extension suffix
+Subject: [PATCH 03/33] gp: Change root cert extension suffix
 
 On Ubuntu, certificates must end in '.crt' in order to be considered by
 the `update-ca-certificates` helper.
@@ -138,13 +138,13 @@ index cefdafa21b2..c562722906b 100644
                  w.write(cert)
              root_certs.append(dest)
 -- 
-2.48.1
+2.49.0
 
 
 From 7592ed5032836dc43f657f66607a0a4661edcdb4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:06:43 +0300
-Subject: [PATCH 04/31] gp: Test with binary content for certificate data
+Subject: [PATCH 04/33] gp: Test with binary content for certificate data
 
 This fails all GPO-related tests that call `gpupdate --rsop`.
 
@@ -216,13 +216,13 @@ index 00000000000..0aad59607c2
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.48.1
+2.49.0
 
 
 From 7f7b235bda9e85c5ea330e52e734d1113a884571 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:20:11 +0300
-Subject: [PATCH 05/31] gp: Convert CA certificates to base64
+Subject: [PATCH 05/33] gp: Convert CA certificates to base64
 
 I don't know whether this applies universally, but in our case the
 contents of `es['cACertificate'][0]` are binary, so cleanly converting
@@ -289,13 +289,13 @@ index 0aad59607c2..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.48.1
+2.49.0
 
 
 From 49cc74015a603e80048a38fe635cd1ac28938ee4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:16:23 +0300
-Subject: [PATCH 06/31] gp: Test adding new cert templates enforces changes
+Subject: [PATCH 06/33] gp: Test adding new cert templates enforces changes
 
 Ensure that cepces-submit reporting additional templates and re-applying
 will enforce the updated policy.
@@ -422,13 +422,13 @@ index 00000000000..4edc1dce730
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.48.1
+2.49.0
 
 
 From 4c0906bd79f030e591701234bc54bc749a42d686 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:37:17 +0300
-Subject: [PATCH 07/31] gp: Template changes should invalidate cache
+Subject: [PATCH 07/33] gp: Template changes should invalidate cache
 
 If certificate templates are added or removed, the autoenroll extension
 should react to this and reapply the policy. Previously this wasn't
@@ -487,13 +487,13 @@ index 4edc1dce730..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.48.1
+2.49.0
 
 
 From e61f30dc2518d5a1c239f090baea4a309307f3f8 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:26:59 +0300
-Subject: [PATCH 08/31] gp: Test disabled enrollment unapplies policy
+Subject: [PATCH 08/33] gp: Test disabled enrollment unapplies policy
 
 For this we need to stage a Registry.pol file with certificate
 autoenrollment enabled, but with checkboxes unticked.
@@ -588,13 +588,13 @@ index 00000000000..83bc9f0ac1f
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.48.1
+2.49.0
 
 
 From 7757b9b48546d71e19798d1260da97780caa99c3 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:33:59 +0300
-Subject: [PATCH 09/31] gp: Send list of keys instead of dict to remove
+Subject: [PATCH 09/33] gp: Send list of keys instead of dict to remove
 
 `cache_get_all_attribute_values` returns a dict whereas we need to pass
 a list of keys to `remove`. These will be interpolated in the gpdb search.
@@ -634,13 +634,13 @@ index 83bc9f0ac1f..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.48.1
+2.49.0
 
 
 From 4e9b2e6409c5764ec0e66cc6c90b08e70f702e7c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 9 Jan 2024 08:50:01 +0100
-Subject: [PATCH 10/31] python:gp: Print a nice message if cepces-submit can't
+Subject: [PATCH 10/33] python:gp: Print a nice message if cepces-submit can't
  be found
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15552
@@ -691,13 +691,13 @@ index 64c35782ae8..08d1a7348cd 100644
  
  def getca(ca, url, trust_dir):
 -- 
-2.48.1
+2.49.0
 
 
 From fb3aefff51c02cf8ba3f8dfeb7d3f971e8d4902a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Mon, 8 Jan 2024 18:05:08 +0200
-Subject: [PATCH 11/31] gpo: Test certificate policy without NDES
+Subject: [PATCH 11/33] gpo: Test certificate policy without NDES
 
 As of 8231eaf856b, the NDES feature is no longer required on Windows, as
 cert auto-enroll can use the certificate from the LDAP request.
@@ -895,13 +895,13 @@ index 00000000000..f1e590bc7d8
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.48.1
+2.49.0
 
 
 From 1a9af36177c7491687c75df151474bb10285f00e Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 18 Jan 2024 20:23:24 +0200
-Subject: [PATCH 12/31] gpo: Decode base64 root cert before importing
+Subject: [PATCH 12/33] gpo: Decode base64 root cert before importing
 
 The reasoning behind this is described in the previous commit message,
 but essentially this should either be wrapped in certificate blocks and
@@ -948,13 +948,13 @@ index f1e590bc7d8..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.48.1
+2.49.0
 
 
 From f5fc88f9ae255f4dc135580f0fa4a02f5addc390 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 19 Jan 2024 11:36:19 +0200
-Subject: [PATCH 13/31] gpo: Do not get templates list on first run
+Subject: [PATCH 13/33] gpo: Do not get templates list on first run
 
 This is a visual fix and has no impact on functionality apart from
 cleaner log messages.
@@ -997,13 +997,13 @@ index cd5e54f1110..559c903e1a2 100644
          if changed(new_data, old_data) or self.cache_get_apply_state() == GPOSTATE.ENFORCE:
              self.unapply(guid, attribute, old_val)
 -- 
-2.48.1
+2.49.0
 
 
 From e8a6219181f2af87813b53fd09684650c1aa6f90 Mon Sep 17 00:00:00 2001
 From: David Mulder <dmulder@samba.org>
 Date: Fri, 5 Jan 2024 08:47:07 -0700
-Subject: [PATCH 14/31] gp: Skip site GP list if no site is found
+Subject: [PATCH 14/33] gp: Skip site GP list if no site is found
 
 [MS-GPOL] 3.2.5.1.4 Site Search says if the site
 search returns ERROR_NO_SITENAME, the GP site
@@ -1065,13 +1065,13 @@ index 617ef79350c..babd8f90748 100644
      # (L)ocal
      gpo_list.insert(0, gpo.GROUP_POLICY_OBJECT("Local Policy",
 -- 
-2.48.1
+2.49.0
 
 
 From d0d1a890d6f2466691fa4ee663232ee0bd1c3776 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:14:30 +0100
-Subject: [PATCH 15/31] python:gp: Avoid path check for cepces-submit
+Subject: [PATCH 15/33] python:gp: Avoid path check for cepces-submit
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1111,13 +1111,13 @@ index 559c903e1a2..7325d5132cf 100644
                    '%s --server=%s --auth=%s' % (cepces_submit,
                    ca['hostname'], auth)],
 -- 
-2.48.1
+2.49.0
 
 
 From 7f6c9a4945635c6eb8ada2255bd0febbf0f4e540 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:07:47 +0100
-Subject: [PATCH 16/31] python:gp: Improve logging for certificate enrollment
+Subject: [PATCH 16/33] python:gp: Improve logging for certificate enrollment
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1171,13 +1171,13 @@ index 7325d5132cf..a25a9678587 100644
      getcert = which('getcert')
      cepces_submit = find_cepces_submit()
 -- 
-2.48.1
+2.49.0
 
 
 From 5321d5b5bd24d7659743576f2e12a7dc0a93a828 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:04:36 +0100
-Subject: [PATCH 17/31] python:gp: Do not print an error, if CA already exists
+Subject: [PATCH 17/33] python:gp: Do not print an error, if CA already exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1217,13 +1217,13 @@ index a25a9678587..0b23cd688db 100644
          for template in supported_templates:
              attrs = fetch_template_attrs(ldb, template)
 -- 
-2.48.1
+2.49.0
 
 
 From 6a7a8a4090b8cdb8e71f4ad590260ceeda253ce2 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:02 +0100
-Subject: [PATCH 18/31] python:gp: Do not print an error if template already
+Subject: [PATCH 18/33] python:gp: Do not print an error if template already
  exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1264,13 +1264,13 @@ index 0b23cd688db..db681cb6f69 100644
              data['templates'].append(nickname)
          if update is not None:
 -- 
-2.48.1
+2.49.0
 
 
 From 43dc3d5d833bc1db885eb45402decd3225a7c946 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:24 +0100
-Subject: [PATCH 19/31] python:gp: Log an error if update fails
+Subject: [PATCH 19/33] python:gp: Log an error if update fails
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1301,13 +1301,13 @@ index db681cb6f69..c8ad2039dc6 100644
          log.warn('certmonger and cepces must be installed for ' +
                   'certificate auto enrollment to work')
 -- 
-2.48.1
+2.49.0
 
 
 From d8276d6a098d10f405b8f24c4dfb82af4496607c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:46:24 +0100
-Subject: [PATCH 20/31] python:gp: Improve working of log messages to avoid
+Subject: [PATCH 20/33] python:gp: Improve working of log messages to avoid
  confusion
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1354,13 +1354,13 @@ index c8ad2039dc6..2b7f7d22c2b 100644
              log.warn('Installing the server certificate only.')
              der_certificate = base64.b64decode(ca['cACertificate'])
 -- 
-2.48.1
+2.49.0
 
 
 From 585357bf0d8889747a2769c2451ee34766087d95 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 29 Jan 2024 17:46:30 +0100
-Subject: [PATCH 21/31] python:gp: Fix logging with gp
+Subject: [PATCH 21/33] python:gp: Fix logging with gp
 
 This allows enable INFO level logging with: `samba-gpupdate -d3`
 
@@ -1396,13 +1396,13 @@ index a74a8707d50..c3de32825db 100644
      logger.setLevel(logging.CRITICAL)
      if log_level == 1:
 -- 
-2.48.1
+2.49.0
 
 
 From 14ceb0b5f2f954bbabdaf78b8185fc515e3c8294 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 13 Mar 2024 13:55:41 +0100
-Subject: [PATCH 22/31] docs-xml: Add parameter all_groupmem to idmap_ad
+Subject: [PATCH 22/33] docs-xml: Add parameter all_groupmem to idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1438,13 +1438,13 @@ index b364bbfa231..de6d36afe95 100644
  		<listitem><para>This parameter is a list of OUs from
  		which objects will not be mapped via the ad idmap
 -- 
-2.48.1
+2.49.0
 
 
 From ac4184c8c3220263cb6f1a46a012533ed1c4e047 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 12 Mar 2024 13:20:24 +0100
-Subject: [PATCH 23/31] s3:winbindd: Improve performance of lookup_groupmem()
+Subject: [PATCH 23/33] s3:winbindd: Improve performance of lookup_groupmem()
  in idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1521,13 +1521,13 @@ index d7a665abbc6..e625aa6473f 100644
  	if (!NT_STATUS_IS_OK(status)) {
  		DEBUG(10, ("%s: add_primary_group_members failed: %s\n",
 -- 
-2.48.1
+2.49.0
 
 
 From d0e2002efcc37055b35c351a6b936e6ab89fad32 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 25 Mar 2024 22:38:18 +0100
-Subject: [PATCH 24/31] selftest: Add "winbind expand groups = 1" to
+Subject: [PATCH 24/33] selftest: Add "winbind expand groups = 1" to
  setup_ad_member_idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1555,13 +1555,13 @@ index 44ac4a5901a..606c65f8ab1 100755
  
  	my $ret = $self->provision(
 -- 
-2.48.1
+2.49.0
 
 
 From 9625b6aed981aa4e70fe11d9d1acdb54db7591a3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 14 Mar 2024 15:24:21 +0100
-Subject: [PATCH 25/31] tests: Add a test for "all_groups=no" to
+Subject: [PATCH 25/33] tests: Add a test for "all_groups=no" to
  test_idmap_ad.sh
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1628,13 +1628,13 @@ index 7ae112ada71..1d4bd395ba9 100755
  changetype: delete
  EOF
 -- 
-2.48.1
+2.49.0
 
 
 From e5890e63c35a4a5af29ae16e6dd734c4a3a304cc Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:51:53 +0200
-Subject: [PATCH 26/31] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
+Subject: [PATCH 26/33] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
  IP
 
 Remove the requirement to provide an IP address. We should look up the
@@ -1693,13 +1693,13 @@ index 50f4a6de3c6..ddf97c11973 100644
  
  	/*
 -- 
-2.48.1
+2.49.0
 
 
 From 96a1ecd8db249fa03db60259cf76fdef9c1bd749 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:53:51 +0200
-Subject: [PATCH 27/31] s3:libads: Do not fail if we don't get an IP passed
+Subject: [PATCH 27/33] s3:libads: Do not fail if we don't get an IP passed
  down
 
 The IP should be optional and we should look it up if not provided.
@@ -1727,13 +1727,13 @@ index ddf97c11973..f74d8eb567c 100644
  	}
  
 -- 
-2.48.1
+2.49.0
 
 
 From 4934642b7a7d92c6d81ba25ef6e4b66e3805f708 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:54:24 +0200
-Subject: [PATCH 28/31] s3:winbind: Fix idmap_ad creating an invalid local
+Subject: [PATCH 28/33] s3:winbind: Fix idmap_ad creating an invalid local
  krb5.conf
 
 In case of a trusted domain, we are providing the realm of the primary
@@ -1783,13 +1783,13 @@ index 5c9fe07db95..b8002825161 100644
  	if (!ok) {
  		DBG_DEBUG("Could not create private krb5.conf\n");
 -- 
-2.48.1
+2.49.0
 
 
 From cccc902c64c93db317bf4707d0af5e56b2887286 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jul 2024 12:26:55 +0200
-Subject: [PATCH 29/31] s3:notifyd: Use a watcher per db record
+Subject: [PATCH 29/33] s3:notifyd: Use a watcher per db record
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2301,13 +2301,13 @@ index 36c08f47c54..db8e6e1c005 100644
  
  #endif
 -- 
-2.48.1
+2.49.0
 
 
 From b04cb93ee52aac0ce7213d0581d69e852df52d4a Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 5 Feb 2024 15:03:48 +0100
-Subject: [PATCH 30/31] smbd: simplify handling of failing fstat() after
+Subject: [PATCH 30/33] smbd: simplify handling of failing fstat() after
  unlinking file
 
 close_remove_share_mode() already called vfs_stat_fsp(), so we can skip the
@@ -2365,13 +2365,13 @@ index 3581c4b9173..93c12e00eb0 100644
  	}
  
 -- 
-2.48.1
+2.49.0
 
 
 From 29f0c0fb2f1cb0cfc4c615d31e82048b46a2cb0d Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Tue, 20 Feb 2024 09:26:29 +0000
-Subject: [PATCH 31/31] s3/smbd: If we fail to close file_handle ensure we
+Subject: [PATCH 31/33] s3/smbd: If we fail to close file_handle ensure we
  should reset the fd
 
 if fsp_flags.fstat_before_close == true then close_file_smb will call
@@ -2446,5 +2446,314 @@ index 93c12e00eb0..74be444fef5 100644
  
  /****************************************************************************
 -- 
-2.48.1
+2.49.0
+
+
+From ed138c4d679e8291de18162e1cac65cc9da33b4d Mon Sep 17 00:00:00 2001
+From: Jeremy Allison <jra@samba.org>
+Date: Wed, 15 Jan 2025 10:21:19 -0800
+Subject: [PATCH 32/33] auth: Add missing talloc_free() in error code path.
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15782
+
+Signed-off-by: Jeremy Allison <jra@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+
+Autobuild-User(master): Günther Deschner <gd@samba.org>
+Autobuild-Date(master): Thu Jan 16 14:32:39 UTC 2025 on atb-devel-224
+
+(cherry picked from commit c514ce8dcadcbbf0d86f3038d2be0f9253a76b75)
+---
+ auth/kerberos/kerberos_pac.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/auth/kerberos/kerberos_pac.c b/auth/kerberos/kerberos_pac.c
+index b914075d85c..196654b36bd 100644
+--- a/auth/kerberos/kerberos_pac.c
++++ b/auth/kerberos/kerberos_pac.c
+@@ -351,6 +351,7 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		if (ret) {
+ 			DEBUG(5, ("PAC Decode: Failed to verify the service "
+ 				  "signature: %s\n", error_message(ret)));
++			talloc_free(tmp_ctx);
+ 			return NT_STATUS_ACCESS_DENIED;
+ 		}
+ 
+-- 
+2.49.0
+
+
+From f8a7d7a3e8c3be3c7742c874239766b34c25ef3e Mon Sep 17 00:00:00 2001
+From: Jeremy Allison <jra@samba.org>
+Date: Thu, 16 Jan 2025 16:12:31 -0800
+Subject: [PATCH 33/33] auth: Cleanup exit code paths in kerberos_decode_pac().
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+One more memory leak missed and now fixed. tmp_ctx
+must be freed once the pac data is talloc_move'd.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15782
+
+Signed-off-by: Jeremy Allison <jra@samba.org>
+Reviewed-by: Jennifer Sutton <jennifersutton@catalyst.net.nz>
+Reviewed-by: Christian Ambach <ambi@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+
+Autobuild-User(master): Günther Deschner <gd@samba.org>
+Autobuild-Date(master): Fri Jan 17 12:01:47 UTC 2025 on atb-devel-224
+
+(cherry picked from commit f9eb0b248da0689c82656f3e482161c45749afb6)
+---
+ auth/kerberos/kerberos_pac.c | 88 ++++++++++++++++++------------------
+ 1 file changed, 43 insertions(+), 45 deletions(-)
+
+diff --git a/auth/kerberos/kerberos_pac.c b/auth/kerberos/kerberos_pac.c
+index 196654b36bd..abb096bde1b 100644
+--- a/auth/kerberos/kerberos_pac.c
++++ b/auth/kerberos/kerberos_pac.c
+@@ -128,7 +128,7 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 			     time_t tgs_authtime,
+ 			     struct PAC_DATA **pac_data_out)
+ {
+-	NTSTATUS status;
++	NTSTATUS status = NT_STATUS_NO_MEMORY;
+ 	enum ndr_err_code ndr_err;
+ 	krb5_error_code ret;
+ 	DATA_BLOB modified_pac_blob;
+@@ -164,8 +164,8 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 	kdc_sig_wipe = talloc(tmp_ctx, struct PAC_SIGNATURE_DATA);
+ 	srv_sig_wipe = talloc(tmp_ctx, struct PAC_SIGNATURE_DATA);
+ 	if (!pac_data_raw || !pac_data || !kdc_sig_wipe || !srv_sig_wipe) {
+-		talloc_free(tmp_ctx);
+-		return NT_STATUS_NO_MEMORY;
++		status = NT_STATUS_NO_MEMORY;
++		goto out;
+ 	}
+ 
+ 	ndr_err = ndr_pull_struct_blob(&pac_data_blob, pac_data, pac_data,
+@@ -174,15 +174,14 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		status = ndr_map_error2ntstatus(ndr_err);
+ 		DEBUG(0,("can't parse the PAC: %s\n",
+ 			nt_errstr(status)));
+-		talloc_free(tmp_ctx);
+-		return status;
++		goto out;
+ 	}
+ 
+ 	if (pac_data->num_buffers < 4) {
+ 		/* we need logon_ingo, service_key and kdc_key */
+ 		DEBUG(0,("less than 4 PAC buffers\n"));
+-		talloc_free(tmp_ctx);
+-		return NT_STATUS_INVALID_PARAMETER;
++		status = NT_STATUS_INVALID_PARAMETER;
++		goto out;
+ 	}
+ 
+ 	ndr_err = ndr_pull_struct_blob(
+@@ -192,15 +191,14 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		status = ndr_map_error2ntstatus(ndr_err);
+ 		DEBUG(0,("can't parse the PAC: %s\n",
+ 			nt_errstr(status)));
+-		talloc_free(tmp_ctx);
+-		return status;
++		goto out;
+ 	}
+ 
+ 	if (pac_data_raw->num_buffers < 4) {
+ 		/* we need logon_ingo, service_key and kdc_key */
+ 		DEBUG(0,("less than 4 PAC buffers\n"));
+-		talloc_free(tmp_ctx);
+-		return NT_STATUS_INVALID_PARAMETER;
++		status = NT_STATUS_INVALID_PARAMETER;
++		goto out;
+ 	}
+ 
+ 	if (pac_data->num_buffers != pac_data_raw->num_buffers) {
+@@ -208,8 +206,8 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		DEBUG(0, ("misparse! PAC_DATA has %d buffers while "
+ 			  "PAC_DATA_RAW has %d\n", pac_data->num_buffers,
+ 			  pac_data_raw->num_buffers));
+-		talloc_free(tmp_ctx);
+-		return NT_STATUS_INVALID_PARAMETER;
++		status = NT_STATUS_INVALID_PARAMETER;
++		goto out;
+ 	}
+ 
+ 	for (i=0; i < pac_data->num_buffers; i++) {
+@@ -220,8 +218,8 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 			DEBUG(0, ("misparse! PAC_DATA buffer %d has type "
+ 				  "%d while PAC_DATA_RAW has %d\n", i,
+ 				  data_buf->type, raw_buf->type));
+-			talloc_free(tmp_ctx);
+-			return NT_STATUS_INVALID_PARAMETER;
++			status = NT_STATUS_INVALID_PARAMETER;
++			goto out;
+ 		}
+ 		switch (data_buf->type) {
+ 		case PAC_TYPE_LOGON_INFO:
+@@ -254,26 +252,26 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 
+ 	if (!logon_info) {
+ 		DEBUG(0,("PAC no logon_info\n"));
+-		talloc_free(tmp_ctx);
+-		return NT_STATUS_INVALID_PARAMETER;
++		status = NT_STATUS_INVALID_PARAMETER;
++		goto out;
+ 	}
+ 
+ 	if (!logon_name) {
+ 		DEBUG(0,("PAC no logon_name\n"));
+-		talloc_free(tmp_ctx);
+-		return NT_STATUS_INVALID_PARAMETER;
++		status = NT_STATUS_INVALID_PARAMETER;
++		goto out;
+ 	}
+ 
+ 	if (!srv_sig_ptr || !srv_sig_blob) {
+ 		DEBUG(0,("PAC no srv_key\n"));
+-		talloc_free(tmp_ctx);
+-		return NT_STATUS_INVALID_PARAMETER;
++		status = NT_STATUS_INVALID_PARAMETER;
++		goto out;
+ 	}
+ 
+ 	if (!kdc_sig_ptr || !kdc_sig_blob) {
+ 		DEBUG(0,("PAC no kdc_key\n"));
+-		talloc_free(tmp_ctx);
+-		return NT_STATUS_INVALID_PARAMETER;
++		status = NT_STATUS_INVALID_PARAMETER;
++		goto out;
+ 	}
+ 
+ 	/* Find and zero out the signatures,
+@@ -288,8 +286,7 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		status = ndr_map_error2ntstatus(ndr_err);
+ 		DEBUG(0,("can't parse the KDC signature: %s\n",
+ 			nt_errstr(status)));
+-		talloc_free(tmp_ctx);
+-		return status;
++		goto out;
+ 	}
+ 
+ 	ndr_err = ndr_pull_struct_blob(
+@@ -299,8 +296,7 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		status = ndr_map_error2ntstatus(ndr_err);
+ 		DEBUG(0,("can't parse the SRV signature: %s\n",
+ 			nt_errstr(status)));
+-		talloc_free(tmp_ctx);
+-		return status;
++		goto out;
+ 	}
+ 
+ 	/* Now zero the decoded structure */
+@@ -317,8 +313,7 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		status = ndr_map_error2ntstatus(ndr_err);
+ 		DEBUG(0,("can't repack the KDC signature: %s\n",
+ 			nt_errstr(status)));
+-		talloc_free(tmp_ctx);
+-		return status;
++		goto out;
+ 	}
+ 	ndr_err = ndr_push_struct_blob(
+ 			srv_sig_blob, pac_data_raw, srv_sig_wipe,
+@@ -327,8 +322,7 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		status = ndr_map_error2ntstatus(ndr_err);
+ 		DEBUG(0,("can't repack the SRV signature: %s\n",
+ 			nt_errstr(status)));
+-		talloc_free(tmp_ctx);
+-		return status;
++		goto out;
+ 	}
+ 
+ 	/* push out the whole structure, but now with zero'ed signatures */
+@@ -339,8 +333,7 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		status = ndr_map_error2ntstatus(ndr_err);
+ 		DEBUG(0,("can't repack the RAW PAC: %s\n",
+ 			nt_errstr(status)));
+-		talloc_free(tmp_ctx);
+-		return status;
++		goto out;
+ 	}
+ 
+ 	if (service_keyblock) {
+@@ -351,8 +344,8 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		if (ret) {
+ 			DEBUG(5, ("PAC Decode: Failed to verify the service "
+ 				  "signature: %s\n", error_message(ret)));
+-			talloc_free(tmp_ctx);
+-			return NT_STATUS_ACCESS_DENIED;
++			status = NT_STATUS_ACCESS_DENIED;
++			goto out;
+ 		}
+ 
+ 		if (krbtgt_keyblock) {
+@@ -362,8 +355,8 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 			if (ret) {
+ 				DEBUG(1, ("PAC Decode: Failed to verify the KDC signature: %s\n",
+ 					  smb_get_krb5_error_message(context, ret, tmp_ctx)));
+-				talloc_free(tmp_ctx);
+-				return NT_STATUS_ACCESS_DENIED;
++				status = NT_STATUS_ACCESS_DENIED;
++				goto out;
+ 			}
+ 		}
+ 	}
+@@ -379,8 +372,8 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 				  nt_time_string(tmp_ctx, logon_name->logon_time)));
+ 			DEBUG(2, ("PAC Decode: Ticket: %s\n",
+ 				  nt_time_string(tmp_ctx, tgs_authtime_nttime)));
+-			talloc_free(tmp_ctx);
+-			return NT_STATUS_ACCESS_DENIED;
++			status = NT_STATUS_ACCESS_DENIED;
++			goto out;
+ 		}
+ 	}
+ 
+@@ -392,8 +385,8 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 		if (ret) {
+ 			DEBUG(2, ("Could not unparse name from ticket to match with name from PAC: [%s]:%s\n",
+ 				  logon_name->account_name, error_message(ret)));
+-			talloc_free(tmp_ctx);
+-			return NT_STATUS_INVALID_PARAMETER;
++			status = NT_STATUS_INVALID_PARAMETER;
++			goto out;
+ 		}
+ 
+ 		bool_ret = strcmp(client_principal_string, logon_name->account_name) == 0;
+@@ -404,8 +397,8 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 				  logon_name->account_name,
+ 				  client_principal_string));
+ 			SAFE_FREE(client_principal_string);
+-			talloc_free(tmp_ctx);
+-			return NT_STATUS_ACCESS_DENIED;
++			status = NT_STATUS_ACCESS_DENIED;
++			goto out;
+ 		}
+ 		SAFE_FREE(client_principal_string);
+ 
+@@ -426,10 +419,15 @@ NTSTATUS kerberos_decode_pac(TALLOC_CTX *mem_ctx,
+ 	}
+ 
+ 	if (pac_data_out) {
+-		*pac_data_out = talloc_steal(mem_ctx, pac_data);
++		*pac_data_out = talloc_move(mem_ctx, &pac_data);
+ 	}
+ 
+-	return NT_STATUS_OK;
++	status = NT_STATUS_OK;
++
++    out:
++
++	TALLOC_FREE(tmp_ctx);
++	return status;
+ }
+ 
+ NTSTATUS kerberos_pac_logon_info(TALLOC_CTX *mem_ctx,
+-- 
+2.49.0
 
