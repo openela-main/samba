@@ -1,7 +1,7 @@
 From 3c29fc78029e1274f931e171c9e04c19ad0182c1 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:05:54 +0300
-Subject: [PATCH 01/33] gp: Support more global trust directories
+Subject: [PATCH 01/38] gp: Support more global trust directories
 
 In addition to the SUSE global trust directory, add support for RHEL and
 Debian-based distributions (including Ubuntu).
@@ -60,13 +60,13 @@ index 312c8ddf467..1b90ab46e90 100644
          # Symlink the certs to global trust dir
          dst = os.path.join(global_trust_dir, os.path.basename(src))
 -- 
-2.49.0
+2.50.0
 
 
 From 063606e8ec83a58972df47eb561ab267f8937ba4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:09:28 +0300
-Subject: [PATCH 02/33] gp: Support update-ca-trust helper
+Subject: [PATCH 02/38] gp: Support update-ca-trust helper
 
 This is used on RHEL/Fedora instead of update-ca-certificates. They
 behave similarly so it's enough to change the command name.
@@ -104,13 +104,13 @@ index 1b90ab46e90..cefdafa21b2 100644
          Popen([update]).wait()
      # Setup Certificate Auto Enrollment
 -- 
-2.49.0
+2.50.0
 
 
 From 3b548bf280ca59ef12a7af10a9131813067a850a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 11 Aug 2023 18:46:42 +0300
-Subject: [PATCH 03/33] gp: Change root cert extension suffix
+Subject: [PATCH 03/38] gp: Change root cert extension suffix
 
 On Ubuntu, certificates must end in '.crt' in order to be considered by
 the `update-ca-certificates` helper.
@@ -138,13 +138,13 @@ index cefdafa21b2..c562722906b 100644
                  w.write(cert)
              root_certs.append(dest)
 -- 
-2.49.0
+2.50.0
 
 
 From 7592ed5032836dc43f657f66607a0a4661edcdb4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:06:43 +0300
-Subject: [PATCH 04/33] gp: Test with binary content for certificate data
+Subject: [PATCH 04/38] gp: Test with binary content for certificate data
 
 This fails all GPO-related tests that call `gpupdate --rsop`.
 
@@ -216,13 +216,13 @@ index 00000000000..0aad59607c2
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.49.0
+2.50.0
 
 
 From 7f7b235bda9e85c5ea330e52e734d1113a884571 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:20:11 +0300
-Subject: [PATCH 05/33] gp: Convert CA certificates to base64
+Subject: [PATCH 05/38] gp: Convert CA certificates to base64
 
 I don't know whether this applies universally, but in our case the
 contents of `es['cACertificate'][0]` are binary, so cleanly converting
@@ -289,13 +289,13 @@ index 0aad59607c2..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.49.0
+2.50.0
 
 
 From 49cc74015a603e80048a38fe635cd1ac28938ee4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:16:23 +0300
-Subject: [PATCH 06/33] gp: Test adding new cert templates enforces changes
+Subject: [PATCH 06/38] gp: Test adding new cert templates enforces changes
 
 Ensure that cepces-submit reporting additional templates and re-applying
 will enforce the updated policy.
@@ -422,13 +422,13 @@ index 00000000000..4edc1dce730
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.49.0
+2.50.0
 
 
 From 4c0906bd79f030e591701234bc54bc749a42d686 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:37:17 +0300
-Subject: [PATCH 07/33] gp: Template changes should invalidate cache
+Subject: [PATCH 07/38] gp: Template changes should invalidate cache
 
 If certificate templates are added or removed, the autoenroll extension
 should react to this and reapply the policy. Previously this wasn't
@@ -487,13 +487,13 @@ index 4edc1dce730..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.49.0
+2.50.0
 
 
 From e61f30dc2518d5a1c239f090baea4a309307f3f8 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:26:59 +0300
-Subject: [PATCH 08/33] gp: Test disabled enrollment unapplies policy
+Subject: [PATCH 08/38] gp: Test disabled enrollment unapplies policy
 
 For this we need to stage a Registry.pol file with certificate
 autoenrollment enabled, but with checkboxes unticked.
@@ -588,13 +588,13 @@ index 00000000000..83bc9f0ac1f
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.49.0
+2.50.0
 
 
 From 7757b9b48546d71e19798d1260da97780caa99c3 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:33:59 +0300
-Subject: [PATCH 09/33] gp: Send list of keys instead of dict to remove
+Subject: [PATCH 09/38] gp: Send list of keys instead of dict to remove
 
 `cache_get_all_attribute_values` returns a dict whereas we need to pass
 a list of keys to `remove`. These will be interpolated in the gpdb search.
@@ -634,13 +634,13 @@ index 83bc9f0ac1f..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.49.0
+2.50.0
 
 
 From 4e9b2e6409c5764ec0e66cc6c90b08e70f702e7c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 9 Jan 2024 08:50:01 +0100
-Subject: [PATCH 10/33] python:gp: Print a nice message if cepces-submit can't
+Subject: [PATCH 10/38] python:gp: Print a nice message if cepces-submit can't
  be found
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15552
@@ -691,13 +691,13 @@ index 64c35782ae8..08d1a7348cd 100644
  
  def getca(ca, url, trust_dir):
 -- 
-2.49.0
+2.50.0
 
 
 From fb3aefff51c02cf8ba3f8dfeb7d3f971e8d4902a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Mon, 8 Jan 2024 18:05:08 +0200
-Subject: [PATCH 11/33] gpo: Test certificate policy without NDES
+Subject: [PATCH 11/38] gpo: Test certificate policy without NDES
 
 As of 8231eaf856b, the NDES feature is no longer required on Windows, as
 cert auto-enroll can use the certificate from the LDAP request.
@@ -895,13 +895,13 @@ index 00000000000..f1e590bc7d8
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.49.0
+2.50.0
 
 
 From 1a9af36177c7491687c75df151474bb10285f00e Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 18 Jan 2024 20:23:24 +0200
-Subject: [PATCH 12/33] gpo: Decode base64 root cert before importing
+Subject: [PATCH 12/38] gpo: Decode base64 root cert before importing
 
 The reasoning behind this is described in the previous commit message,
 but essentially this should either be wrapped in certificate blocks and
@@ -948,13 +948,13 @@ index f1e590bc7d8..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.49.0
+2.50.0
 
 
 From f5fc88f9ae255f4dc135580f0fa4a02f5addc390 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 19 Jan 2024 11:36:19 +0200
-Subject: [PATCH 13/33] gpo: Do not get templates list on first run
+Subject: [PATCH 13/38] gpo: Do not get templates list on first run
 
 This is a visual fix and has no impact on functionality apart from
 cleaner log messages.
@@ -997,13 +997,13 @@ index cd5e54f1110..559c903e1a2 100644
          if changed(new_data, old_data) or self.cache_get_apply_state() == GPOSTATE.ENFORCE:
              self.unapply(guid, attribute, old_val)
 -- 
-2.49.0
+2.50.0
 
 
 From e8a6219181f2af87813b53fd09684650c1aa6f90 Mon Sep 17 00:00:00 2001
 From: David Mulder <dmulder@samba.org>
 Date: Fri, 5 Jan 2024 08:47:07 -0700
-Subject: [PATCH 14/33] gp: Skip site GP list if no site is found
+Subject: [PATCH 14/38] gp: Skip site GP list if no site is found
 
 [MS-GPOL] 3.2.5.1.4 Site Search says if the site
 search returns ERROR_NO_SITENAME, the GP site
@@ -1065,13 +1065,13 @@ index 617ef79350c..babd8f90748 100644
      # (L)ocal
      gpo_list.insert(0, gpo.GROUP_POLICY_OBJECT("Local Policy",
 -- 
-2.49.0
+2.50.0
 
 
 From d0d1a890d6f2466691fa4ee663232ee0bd1c3776 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:14:30 +0100
-Subject: [PATCH 15/33] python:gp: Avoid path check for cepces-submit
+Subject: [PATCH 15/38] python:gp: Avoid path check for cepces-submit
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1111,13 +1111,13 @@ index 559c903e1a2..7325d5132cf 100644
                    '%s --server=%s --auth=%s' % (cepces_submit,
                    ca['hostname'], auth)],
 -- 
-2.49.0
+2.50.0
 
 
 From 7f6c9a4945635c6eb8ada2255bd0febbf0f4e540 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:07:47 +0100
-Subject: [PATCH 16/33] python:gp: Improve logging for certificate enrollment
+Subject: [PATCH 16/38] python:gp: Improve logging for certificate enrollment
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1171,13 +1171,13 @@ index 7325d5132cf..a25a9678587 100644
      getcert = which('getcert')
      cepces_submit = find_cepces_submit()
 -- 
-2.49.0
+2.50.0
 
 
 From 5321d5b5bd24d7659743576f2e12a7dc0a93a828 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:04:36 +0100
-Subject: [PATCH 17/33] python:gp: Do not print an error, if CA already exists
+Subject: [PATCH 17/38] python:gp: Do not print an error, if CA already exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1217,13 +1217,13 @@ index a25a9678587..0b23cd688db 100644
          for template in supported_templates:
              attrs = fetch_template_attrs(ldb, template)
 -- 
-2.49.0
+2.50.0
 
 
 From 6a7a8a4090b8cdb8e71f4ad590260ceeda253ce2 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:02 +0100
-Subject: [PATCH 18/33] python:gp: Do not print an error if template already
+Subject: [PATCH 18/38] python:gp: Do not print an error if template already
  exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1264,13 +1264,13 @@ index 0b23cd688db..db681cb6f69 100644
              data['templates'].append(nickname)
          if update is not None:
 -- 
-2.49.0
+2.50.0
 
 
 From 43dc3d5d833bc1db885eb45402decd3225a7c946 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:24 +0100
-Subject: [PATCH 19/33] python:gp: Log an error if update fails
+Subject: [PATCH 19/38] python:gp: Log an error if update fails
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1301,13 +1301,13 @@ index db681cb6f69..c8ad2039dc6 100644
          log.warn('certmonger and cepces must be installed for ' +
                   'certificate auto enrollment to work')
 -- 
-2.49.0
+2.50.0
 
 
 From d8276d6a098d10f405b8f24c4dfb82af4496607c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:46:24 +0100
-Subject: [PATCH 20/33] python:gp: Improve working of log messages to avoid
+Subject: [PATCH 20/38] python:gp: Improve working of log messages to avoid
  confusion
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1354,13 +1354,13 @@ index c8ad2039dc6..2b7f7d22c2b 100644
              log.warn('Installing the server certificate only.')
              der_certificate = base64.b64decode(ca['cACertificate'])
 -- 
-2.49.0
+2.50.0
 
 
 From 585357bf0d8889747a2769c2451ee34766087d95 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 29 Jan 2024 17:46:30 +0100
-Subject: [PATCH 21/33] python:gp: Fix logging with gp
+Subject: [PATCH 21/38] python:gp: Fix logging with gp
 
 This allows enable INFO level logging with: `samba-gpupdate -d3`
 
@@ -1396,13 +1396,13 @@ index a74a8707d50..c3de32825db 100644
      logger.setLevel(logging.CRITICAL)
      if log_level == 1:
 -- 
-2.49.0
+2.50.0
 
 
 From 14ceb0b5f2f954bbabdaf78b8185fc515e3c8294 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 13 Mar 2024 13:55:41 +0100
-Subject: [PATCH 22/33] docs-xml: Add parameter all_groupmem to idmap_ad
+Subject: [PATCH 22/38] docs-xml: Add parameter all_groupmem to idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1438,13 +1438,13 @@ index b364bbfa231..de6d36afe95 100644
  		<listitem><para>This parameter is a list of OUs from
  		which objects will not be mapped via the ad idmap
 -- 
-2.49.0
+2.50.0
 
 
 From ac4184c8c3220263cb6f1a46a012533ed1c4e047 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 12 Mar 2024 13:20:24 +0100
-Subject: [PATCH 23/33] s3:winbindd: Improve performance of lookup_groupmem()
+Subject: [PATCH 23/38] s3:winbindd: Improve performance of lookup_groupmem()
  in idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1521,13 +1521,13 @@ index d7a665abbc6..e625aa6473f 100644
  	if (!NT_STATUS_IS_OK(status)) {
  		DEBUG(10, ("%s: add_primary_group_members failed: %s\n",
 -- 
-2.49.0
+2.50.0
 
 
 From d0e2002efcc37055b35c351a6b936e6ab89fad32 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 25 Mar 2024 22:38:18 +0100
-Subject: [PATCH 24/33] selftest: Add "winbind expand groups = 1" to
+Subject: [PATCH 24/38] selftest: Add "winbind expand groups = 1" to
  setup_ad_member_idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1555,13 +1555,13 @@ index 44ac4a5901a..606c65f8ab1 100755
  
  	my $ret = $self->provision(
 -- 
-2.49.0
+2.50.0
 
 
 From 9625b6aed981aa4e70fe11d9d1acdb54db7591a3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 14 Mar 2024 15:24:21 +0100
-Subject: [PATCH 25/33] tests: Add a test for "all_groups=no" to
+Subject: [PATCH 25/38] tests: Add a test for "all_groups=no" to
  test_idmap_ad.sh
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1628,13 +1628,13 @@ index 7ae112ada71..1d4bd395ba9 100755
  changetype: delete
  EOF
 -- 
-2.49.0
+2.50.0
 
 
 From e5890e63c35a4a5af29ae16e6dd734c4a3a304cc Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:51:53 +0200
-Subject: [PATCH 26/33] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
+Subject: [PATCH 26/38] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
  IP
 
 Remove the requirement to provide an IP address. We should look up the
@@ -1693,13 +1693,13 @@ index 50f4a6de3c6..ddf97c11973 100644
  
  	/*
 -- 
-2.49.0
+2.50.0
 
 
 From 96a1ecd8db249fa03db60259cf76fdef9c1bd749 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:53:51 +0200
-Subject: [PATCH 27/33] s3:libads: Do not fail if we don't get an IP passed
+Subject: [PATCH 27/38] s3:libads: Do not fail if we don't get an IP passed
  down
 
 The IP should be optional and we should look it up if not provided.
@@ -1727,13 +1727,13 @@ index ddf97c11973..f74d8eb567c 100644
  	}
  
 -- 
-2.49.0
+2.50.0
 
 
 From 4934642b7a7d92c6d81ba25ef6e4b66e3805f708 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:54:24 +0200
-Subject: [PATCH 28/33] s3:winbind: Fix idmap_ad creating an invalid local
+Subject: [PATCH 28/38] s3:winbind: Fix idmap_ad creating an invalid local
  krb5.conf
 
 In case of a trusted domain, we are providing the realm of the primary
@@ -1783,13 +1783,13 @@ index 5c9fe07db95..b8002825161 100644
  	if (!ok) {
  		DBG_DEBUG("Could not create private krb5.conf\n");
 -- 
-2.49.0
+2.50.0
 
 
 From cccc902c64c93db317bf4707d0af5e56b2887286 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jul 2024 12:26:55 +0200
-Subject: [PATCH 29/33] s3:notifyd: Use a watcher per db record
+Subject: [PATCH 29/38] s3:notifyd: Use a watcher per db record
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2301,13 +2301,13 @@ index 36c08f47c54..db8e6e1c005 100644
  
  #endif
 -- 
-2.49.0
+2.50.0
 
 
 From b04cb93ee52aac0ce7213d0581d69e852df52d4a Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 5 Feb 2024 15:03:48 +0100
-Subject: [PATCH 30/33] smbd: simplify handling of failing fstat() after
+Subject: [PATCH 30/38] smbd: simplify handling of failing fstat() after
  unlinking file
 
 close_remove_share_mode() already called vfs_stat_fsp(), so we can skip the
@@ -2365,13 +2365,13 @@ index 3581c4b9173..93c12e00eb0 100644
  	}
  
 -- 
-2.49.0
+2.50.0
 
 
 From 29f0c0fb2f1cb0cfc4c615d31e82048b46a2cb0d Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Tue, 20 Feb 2024 09:26:29 +0000
-Subject: [PATCH 31/33] s3/smbd: If we fail to close file_handle ensure we
+Subject: [PATCH 31/38] s3/smbd: If we fail to close file_handle ensure we
  should reset the fd
 
 if fsp_flags.fstat_before_close == true then close_file_smb will call
@@ -2446,13 +2446,13 @@ index 93c12e00eb0..74be444fef5 100644
  
  /****************************************************************************
 -- 
-2.49.0
+2.50.0
 
 
 From ed138c4d679e8291de18162e1cac65cc9da33b4d Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Wed, 15 Jan 2025 10:21:19 -0800
-Subject: [PATCH 32/33] auth: Add missing talloc_free() in error code path.
+Subject: [PATCH 32/38] auth: Add missing talloc_free() in error code path.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2483,13 +2483,13 @@ index b914075d85c..196654b36bd 100644
  		}
  
 -- 
-2.49.0
+2.50.0
 
 
 From f8a7d7a3e8c3be3c7742c874239766b34c25ef3e Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Thu, 16 Jan 2025 16:12:31 -0800
-Subject: [PATCH 33/33] auth: Cleanup exit code paths in kerberos_decode_pac().
+Subject: [PATCH 33/38] auth: Cleanup exit code paths in kerberos_decode_pac().
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2755,5 +2755,633 @@ index 196654b36bd..abb096bde1b 100644
  
  NTSTATUS kerberos_pac_logon_info(TALLOC_CTX *mem_ctx,
 -- 
-2.49.0
+2.50.0
+
+
+From 9fd06d5c331f5babaf417cc7339d12854a79fe4b Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Thu, 15 Feb 2024 17:29:46 +0100
+Subject: [PATCH 34/38] s3:libsmb/dsgetdcname: use
+ NETLOGON_NT_VERSION_AVOID_NT4EMUL
+
+In 2024 we always want an active directory response...
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15620
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+(cherry picked from commit 2b66663c75cdb3bc1b6bc5b1736dd9d35b094b42)
+---
+ source3/libsmb/dsgetdcname.c | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/source3/libsmb/dsgetdcname.c b/source3/libsmb/dsgetdcname.c
+index 280ccd585b0..6fcaa26810c 100644
+--- a/source3/libsmb/dsgetdcname.c
++++ b/source3/libsmb/dsgetdcname.c
+@@ -930,6 +930,11 @@ static NTSTATUS process_dc_netbios(TALLOC_CTX *mem_ctx,
+ 		name_type = NBT_NAME_PDC;
+ 	}
+ 
++	/*
++	 * It's 2024 we always want an AD style response!
++	 */
++	nt_version |= NETLOGON_NT_VERSION_AVOID_NT4EMUL;
++
+ 	nt_version |= map_ds_flags_to_nt_version(flags);
+ 
+ 	snprintf(my_acct_name,
+-- 
+2.50.0
+
+
+From 58e28d056f2df0906ee77ccfb9b56e8a764b38b4 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Tue, 7 May 2024 14:53:24 +0000
+Subject: [PATCH 35/38] s3:libsmb: allow store_cldap_reply() to work with a
+ ipv6 response
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15642
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andrew Bartlett <abartlet@samba.org>
+
+Autobuild-User(master): Andrew Bartlett <abartlet@samba.org>
+Autobuild-Date(master): Fri May 10 01:35:18 UTC 2024 on atb-devel-224
+
+(cherry picked from commit 712ffbffc03c7dcd551c1e22815ebe7c0b9b45d2)
+---
+ source3/libsmb/dsgetdcname.c | 24 +++++++++++++++++++++++-
+ 1 file changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/source3/libsmb/dsgetdcname.c b/source3/libsmb/dsgetdcname.c
+index 6fcaa26810c..da173e7bbb0 100644
+--- a/source3/libsmb/dsgetdcname.c
++++ b/source3/libsmb/dsgetdcname.c
+@@ -196,7 +196,29 @@ static NTSTATUS store_cldap_reply(TALLOC_CTX *mem_ctx,
+ 	/* FIXME */
+ 	r->sockaddr_size = 0x10; /* the w32 winsock addr size */
+ 	r->sockaddr.sockaddr_family = 2; /* AF_INET */
+-	r->sockaddr.pdc_ip = talloc_strdup(mem_ctx, addr);
++	if (is_ipaddress_v4(addr)) {
++		r->sockaddr.pdc_ip = talloc_strdup(mem_ctx, addr);
++		if (r->sockaddr.pdc_ip == NULL) {
++			return NT_STATUS_NO_MEMORY;
++		}
++	} else {
++		/*
++		 * ndr_push_NETLOGON_SAM_LOGON_RESPONSE_EX will
++		 * fail with an ipv6 address.
++		 *
++		 * This matches windows behaviour in the CLDAP
++		 * response when NETLOGON_NT_VERSION_5EX_WITH_IP
++		 * is used.
++		 *
++		 * Windows returns the ipv4 address of the ipv6
++		 * server interface and falls back to 127.0.0.1
++		 * if there's no ipv4 address.
++		 */
++		r->sockaddr.pdc_ip = talloc_strdup(mem_ctx, "127.0.0.1");
++		if (r->sockaddr.pdc_ip == NULL) {
++			return NT_STATUS_NO_MEMORY;
++		}
++	}
+ 
+ 	ndr_err = ndr_push_struct_blob(&blob, mem_ctx, r,
+ 		       (ndr_push_flags_fn_t)ndr_push_NETLOGON_SAM_LOGON_RESPONSE_EX);
+-- 
+2.50.0
+
+
+From e4d5269b2359c670acdf0cba81248f148ae68c17 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Fri, 11 Oct 2024 13:32:22 +0000
+Subject: [PATCH 36/38] s3:libsmb: let discover_dc_netbios() return
+ DOMAIN_CONTROLLER_NOT_FOUND
+
+We may get NT_STATUS_NOT_FOUND when the name can't be resolved
+and NT_STATUS_INVALID_ADDRESS if the system doesn't have ipv4
+addresses...
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit e47ce1d10b13d8ef165c70984e6e490f4c2a64c2)
+---
+ source3/libsmb/dsgetdcname.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/source3/libsmb/dsgetdcname.c b/source3/libsmb/dsgetdcname.c
+index da173e7bbb0..8278959dd7d 100644
+--- a/source3/libsmb/dsgetdcname.c
++++ b/source3/libsmb/dsgetdcname.c
+@@ -483,7 +483,19 @@ static NTSTATUS discover_dc_netbios(TALLOC_CTX *mem_ctx,
+ 					&count,
+ 					resolve_order);
+ 	if (!NT_STATUS_IS_OK(status)) {
+-		DEBUG(10,("discover_dc_netbios: failed to find DC\n"));
++		NTSTATUS raw_status = status;
++
++		if (NT_STATUS_EQUAL(status, NT_STATUS_NOT_FOUND)) {
++			status = NT_STATUS_DOMAIN_CONTROLLER_NOT_FOUND;
++		}
++		if (NT_STATUS_EQUAL(status, NT_STATUS_INVALID_ADDRESS)) {
++			status = NT_STATUS_DOMAIN_CONTROLLER_NOT_FOUND;
++		}
++
++		DBG_DEBUG("failed to find DC for %s: %s => %s\n",
++			  domain_name,
++			  nt_errstr(raw_status),
++			  nt_errstr(status));
+ 		return status;
+ 	}
+ 
+-- 
+2.50.0
+
+
+From d90d2b0e985913247f43192cb94eec0efb3e9046 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Wed, 2 Jul 2025 21:59:48 +0200
+Subject: [PATCH 37/38] s3-winbindd: Fix internal winbind dsgetdcname calls
+ w.r.t. domain name
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+when winbind calls to dsgetdcname internally, make sure to
+prefer the DNS domain name if we have it. Makes DNS lookups much more
+likely to succeed.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+
+Autobuild-User(master): Ralph Böhme <slow@samba.org>
+Autobuild-Date(master): Mon Jul  7 10:44:37 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 2560c9b3224816ffd371a62103f65b3aca301ad5)
+---
+ source3/winbindd/wb_queryuser.c   | 17 +++++++++++++----
+ source3/winbindd/wb_sids2xids.c   | 17 +++++++++++++----
+ source3/winbindd/wb_xids2sids.c   | 12 +++++++++---
+ source3/winbindd/winbindd_dual.c  |  6 +++++-
+ source3/winbindd/winbindd_proto.h |  1 +
+ source3/winbindd/winbindd_util.c  | 19 +++++++++++++++++++
+ 6 files changed, 60 insertions(+), 12 deletions(-)
+
+diff --git a/source3/winbindd/wb_queryuser.c b/source3/winbindd/wb_queryuser.c
+index c2758f1b76a..db8e946ba71 100644
+--- a/source3/winbindd/wb_queryuser.c
++++ b/source3/winbindd/wb_queryuser.c
+@@ -289,10 +289,19 @@ static void wb_queryuser_done(struct tevent_req *subreq)
+ 
+ 	if (NT_STATUS_EQUAL(result, NT_STATUS_DOMAIN_CONTROLLER_NOT_FOUND) &&
+ 	    !state->tried_dclookup) {
+-		D_DEBUG("GetNssInfo got DOMAIN_CONTROLLER_NOT_FOUND, calling wb_dsgetdcname_send()\n");
+-		subreq = wb_dsgetdcname_send(
+-			state, state->ev, state->info->domain_name, NULL, NULL,
+-			DS_RETURN_DNS_NAME);
++		const char *domain_name = find_dns_domain_name(
++			state->info->domain_name);
++
++		D_DEBUG("GetNssInfo got DOMAIN_CONTROLLER_NOT_FOUND, calling "
++			"wb_dsgetdcname_send(%s)\n",
++			domain_name);
++
++		subreq = wb_dsgetdcname_send(state,
++					     state->ev,
++					     domain_name,
++					     NULL,
++					     NULL,
++					     DS_RETURN_DNS_NAME);
+ 		if (tevent_req_nomem(subreq, req)) {
+ 			return;
+ 		}
+diff --git a/source3/winbindd/wb_sids2xids.c b/source3/winbindd/wb_sids2xids.c
+index f0f6c23fc20..03e5e7e0258 100644
+--- a/source3/winbindd/wb_sids2xids.c
++++ b/source3/winbindd/wb_sids2xids.c
+@@ -612,13 +612,22 @@ static void wb_sids2xids_done(struct tevent_req *subreq)
+ 	    !state->tried_dclookup) {
+ 
+ 		struct lsa_DomainInfo *d;
++		const char *domain_name = NULL;
+ 
+-		D_DEBUG("Domain controller not found. Calling wb_dsgetdcname_send() to get it.\n");
+ 		d = &state->idmap_doms.domains[state->dom_index];
+ 
+-		subreq = wb_dsgetdcname_send(
+-			state, state->ev, d->name.string, NULL, NULL,
+-			DS_RETURN_DNS_NAME);
++		domain_name = find_dns_domain_name(d->name.string);
++
++		D_DEBUG("Domain controller not found. Calling "
++			"wb_dsgetdcname_send(%s) to get it.\n",
++			domain_name);
++
++		subreq = wb_dsgetdcname_send(state,
++					     state->ev,
++					     domain_name,
++					     NULL,
++					     NULL,
++					     DS_RETURN_DNS_NAME);
+ 		if (tevent_req_nomem(subreq, req)) {
+ 			return;
+ 		}
+diff --git a/source3/winbindd/wb_xids2sids.c b/source3/winbindd/wb_xids2sids.c
+index 86bd7f9deab..6fcf524d94f 100644
+--- a/source3/winbindd/wb_xids2sids.c
++++ b/source3/winbindd/wb_xids2sids.c
+@@ -143,9 +143,15 @@ static void wb_xids2sids_dom_done(struct tevent_req *subreq)
+ 	if (NT_STATUS_EQUAL(result, NT_STATUS_DOMAIN_CONTROLLER_NOT_FOUND) &&
+ 	    !state->tried_dclookup) {
+ 
+-		subreq = wb_dsgetdcname_send(
+-			state, state->ev, state->dom_map->name, NULL, NULL,
+-			DS_RETURN_DNS_NAME);
++		const char *domain_name = find_dns_domain_name(
++			state->dom_map->name);
++
++		subreq = wb_dsgetdcname_send(state,
++					     state->ev,
++					     domain_name,
++					     NULL,
++					     NULL,
++					     DS_RETURN_DNS_NAME);
+ 		if (tevent_req_nomem(subreq, req)) {
+ 			return;
+ 		}
+diff --git a/source3/winbindd/winbindd_dual.c b/source3/winbindd/winbindd_dual.c
+index 36562ab10b8..02a10e41537 100644
+--- a/source3/winbindd/winbindd_dual.c
++++ b/source3/winbindd/winbindd_dual.c
+@@ -532,6 +532,7 @@ static void wb_domain_request_trigger(struct tevent_req *req,
+ 	struct wb_domain_request_state *state = tevent_req_data(
+ 		req, struct wb_domain_request_state);
+ 	struct winbindd_domain *domain = state->domain;
++	const char *domain_name = NULL;
+ 	struct tevent_req *subreq = NULL;
+ 	size_t shortest_queue_length;
+ 
+@@ -604,8 +605,11 @@ static void wb_domain_request_trigger(struct tevent_req *req,
+ 	 * which is indicated by DS_RETURN_DNS_NAME.
+ 	 * For NT4 domains we still get the netbios name.
+ 	 */
++
++	domain_name = find_dns_domain_name(state->domain->name);
++
+ 	subreq = wb_dsgetdcname_send(state, state->ev,
+-				     state->domain->name,
++				     domain_name,
+ 				     NULL, /* domain_guid */
+ 				     NULL, /* site_name */
+ 				     DS_RETURN_DNS_NAME); /* flags */
+diff --git a/source3/winbindd/winbindd_proto.h b/source3/winbindd/winbindd_proto.h
+index 9b10f2c061a..4f7dc8a15d6 100644
+--- a/source3/winbindd/winbindd_proto.h
++++ b/source3/winbindd/winbindd_proto.h
+@@ -567,6 +567,7 @@ bool parse_sidlist(TALLOC_CTX *mem_ctx, const char *sidstr,
+ 		   struct dom_sid **sids, uint32_t *num_sids);
+ bool parse_xidlist(TALLOC_CTX *mem_ctx, const char *xidstr,
+ 		   struct unixid **pxids, uint32_t *pnum_xids);
++const char *find_dns_domain_name(const char *domain_name);
+ 
+ /* The following definitions come from winbindd/winbindd_wins.c  */
+ 
+diff --git a/source3/winbindd/winbindd_util.c b/source3/winbindd/winbindd_util.c
+index fe93528787d..eca4116d0c8 100644
+--- a/source3/winbindd/winbindd_util.c
++++ b/source3/winbindd/winbindd_util.c
+@@ -2181,3 +2181,22 @@ fail:
+ 	TALLOC_FREE(xids);
+ 	return false;
+ }
++
++/**
++ * Helper to extract the DNS Domain Name from a struct winbindd_domain
++ */
++const char *find_dns_domain_name(const char *domain_name)
++{
++	struct winbindd_domain *wbdom = NULL;
++
++	wbdom = find_domain_from_name(domain_name);
++	if (wbdom == NULL) {
++		return domain_name;
++	}
++
++	if (wbdom->active_directory && wbdom->alt_name != NULL) {
++		return wbdom->alt_name;
++	}
++
++	return wbdom->name;
++}
+-- 
+2.50.0
+
+
+From 7da6072ce95bca445368f6d0453247c8f92fcdf2 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Fri, 9 May 2025 09:38:41 +0200
+Subject: [PATCH 38/38] s3:winbindd: avoid using any netlogon call to get a dc
+ name
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+(backported from commit f86a4bf6848ade2db7229d182576db3320c3ece7)
+---
+ source3/winbindd/winbindd_cm.c       | 145 ---------------------------
+ source3/winbindd/winbindd_dual_srv.c | 105 +------------------
+ 2 files changed, 5 insertions(+), 245 deletions(-)
+
+diff --git a/source3/winbindd/winbindd_cm.c b/source3/winbindd/winbindd_cm.c
+index 2ebfb0f6dd8..195259daa43 100644
+--- a/source3/winbindd/winbindd_cm.c
++++ b/source3/winbindd/winbindd_cm.c
+@@ -475,135 +475,6 @@ static bool cm_is_ipc_credentials(struct cli_credentials *creds)
+ 	return ret;
+ }
+ 
+-static bool get_dc_name_via_netlogon(struct winbindd_domain *domain,
+-				     fstring dcname,
+-				     struct sockaddr_storage *dc_ss,
+-				     uint32_t request_flags)
+-{
+-	struct winbindd_domain *our_domain = NULL;
+-	struct rpc_pipe_client *netlogon_pipe = NULL;
+-	NTSTATUS result;
+-	WERROR werr;
+-	TALLOC_CTX *mem_ctx;
+-	unsigned int orig_timeout;
+-	const char *tmp = NULL;
+-	const char *p;
+-	struct dcerpc_binding_handle *b;
+-
+-	/* Hmmmm. We can only open one connection to the NETLOGON pipe at the
+-	 * moment.... */
+-
+-	if (IS_DC) {
+-		return False;
+-	}
+-
+-	if (domain->primary) {
+-		return False;
+-	}
+-
+-	our_domain = find_our_domain();
+-
+-	if ((mem_ctx = talloc_init("get_dc_name_via_netlogon")) == NULL) {
+-		return False;
+-	}
+-
+-	result = cm_connect_netlogon(our_domain, &netlogon_pipe);
+-	if (!NT_STATUS_IS_OK(result)) {
+-		talloc_destroy(mem_ctx);
+-		return False;
+-	}
+-
+-	b = netlogon_pipe->binding_handle;
+-
+-	/* This call can take a long time - allow the server to time out.
+-	   35 seconds should do it. */
+-
+-	orig_timeout = rpccli_set_timeout(netlogon_pipe, 35000);
+-
+-	if (our_domain->active_directory) {
+-		struct netr_DsRGetDCNameInfo *domain_info = NULL;
+-
+-		/*
+-		 * TODO request flags are not respected in the server
+-		 * (and in some cases, like REQUIRE_PDC, causes an error)
+-		 */
+-		result = dcerpc_netr_DsRGetDCName(b,
+-						  mem_ctx,
+-						  our_domain->dcname,
+-						  domain->name,
+-						  NULL,
+-						  NULL,
+-						  request_flags|DS_RETURN_DNS_NAME,
+-						  &domain_info,
+-						  &werr);
+-		if (NT_STATUS_IS_OK(result) && W_ERROR_IS_OK(werr)) {
+-			tmp = talloc_strdup(
+-				mem_ctx, domain_info->dc_unc);
+-			if (tmp == NULL) {
+-				DEBUG(0, ("talloc_strdup failed\n"));
+-				talloc_destroy(mem_ctx);
+-				return false;
+-			}
+-			if (domain->alt_name == NULL) {
+-				domain->alt_name = talloc_strdup(domain,
+-								 domain_info->domain_name);
+-				if (domain->alt_name == NULL) {
+-					DEBUG(0, ("talloc_strdup failed\n"));
+-					talloc_destroy(mem_ctx);
+-					return false;
+-				}
+-			}
+-			if (domain->forest_name == NULL) {
+-				domain->forest_name = talloc_strdup(domain,
+-								    domain_info->forest_name);
+-				if (domain->forest_name == NULL) {
+-					DEBUG(0, ("talloc_strdup failed\n"));
+-					talloc_destroy(mem_ctx);
+-					return false;
+-				}
+-			}
+-		}
+-	} else {
+-		result = dcerpc_netr_GetAnyDCName(b, mem_ctx,
+-						  our_domain->dcname,
+-						  domain->name,
+-						  &tmp,
+-						  &werr);
+-	}
+-
+-	/* And restore our original timeout. */
+-	rpccli_set_timeout(netlogon_pipe, orig_timeout);
+-
+-	if (!NT_STATUS_IS_OK(result)) {
+-		DEBUG(10,("dcerpc_netr_GetAnyDCName failed: %s\n",
+-			nt_errstr(result)));
+-		talloc_destroy(mem_ctx);
+-		return false;
+-	}
+-
+-	if (!W_ERROR_IS_OK(werr)) {
+-		DEBUG(10,("dcerpc_netr_GetAnyDCName failed: %s\n",
+-			   win_errstr(werr)));
+-		talloc_destroy(mem_ctx);
+-		return false;
+-	}
+-
+-	/* dcerpc_netr_GetAnyDCName gives us a name with \\ */
+-	p = strip_hostname(tmp);
+-
+-	fstrcpy(dcname, p);
+-
+-	talloc_destroy(mem_ctx);
+-
+-	DEBUG(10,("dcerpc_netr_GetAnyDCName returned %s\n", dcname));
+-
+-	if (!resolve_name(dcname, dc_ss, 0x20, true)) {
+-		return False;
+-	}
+-
+-	return True;
+-}
+-
+ /**
+  * Helper function to assemble trust password and account name
+  */
+@@ -1279,24 +1150,8 @@ static bool get_dcs(TALLOC_CTX *mem_ctx, struct winbindd_domain *domain,
+ 	struct  samba_sockaddr *sa_list = NULL;
+ 	size_t     salist_size = 0;
+ 	size_t     i;
+-	bool    is_our_domain;
+ 	enum security_types sec = (enum security_types)lp_security();
+ 
+-	is_our_domain = strequal(domain->name, lp_workgroup());
+-
+-	/* If not our domain, get the preferred DC, by asking our primary DC */
+-	if ( !is_our_domain
+-		&& get_dc_name_via_netlogon(domain, dcname, &ss, request_flags)
+-		&& add_one_dc_unique(mem_ctx, domain->name, dcname, &ss, dcs,
+-		       num_dcs) )
+-	{
+-		char addr[INET6_ADDRSTRLEN];
+-		print_sockaddr(addr, sizeof(addr), &ss);
+-		DEBUG(10, ("Retrieved DC %s at %s via netlogon\n",
+-			   dcname, addr));
+-		return True;
+-	}
+-
+ 	if ((sec == SEC_ADS) && (domain->alt_name != NULL)) {
+ 		char *sitename = NULL;
+ 
+diff --git a/source3/winbindd/winbindd_dual_srv.c b/source3/winbindd/winbindd_dual_srv.c
+index f0fd18a8fa6..47c68257b12 100644
+--- a/source3/winbindd/winbindd_dual_srv.c
++++ b/source3/winbindd/winbindd_dual_srv.c
+@@ -662,106 +662,11 @@ NTSTATUS _wbint_QueryUserRidList(struct pipes_struct *p,
+ 
+ NTSTATUS _wbint_DsGetDcName(struct pipes_struct *p, struct wbint_DsGetDcName *r)
+ {
+-	struct winbindd_domain *domain = wb_child_domain();
+-	struct rpc_pipe_client *netlogon_pipe;
+-	struct netr_DsRGetDCNameInfo *dc_info;
+-	NTSTATUS status;
+-	WERROR werr;
+-	unsigned int orig_timeout;
+-	struct dcerpc_binding_handle *b;
+-	bool retry = false;
+-	bool try_dsrgetdcname = false;
+-
+-	if (domain == NULL) {
+-		return dsgetdcname(p->mem_ctx, global_messaging_context(),
+-				   r->in.domain_name, r->in.domain_guid,
+-				   r->in.site_name ? r->in.site_name : "",
+-				   r->in.flags,
+-				   r->out.dc_info);
+-	}
+-
+-	if (domain->active_directory) {
+-		try_dsrgetdcname = true;
+-	}
+-
+-reconnect:
+-	status = cm_connect_netlogon(domain, &netlogon_pipe);
+-
+-	reset_cm_connection_on_error(domain, NULL, status);
+-	if (!NT_STATUS_IS_OK(status)) {
+-		DEBUG(10, ("Can't contact the NETLOGON pipe\n"));
+-		return status;
+-	}
+-
+-	b = netlogon_pipe->binding_handle;
+-
+-	/* This call can take a long time - allow the server to time out.
+-	   35 seconds should do it. */
+-
+-	orig_timeout = rpccli_set_timeout(netlogon_pipe, 35000);
+-
+-	if (try_dsrgetdcname) {
+-		status = dcerpc_netr_DsRGetDCName(b,
+-			p->mem_ctx, domain->dcname,
+-			r->in.domain_name, NULL, r->in.domain_guid,
+-			r->in.flags, r->out.dc_info, &werr);
+-		if (NT_STATUS_IS_OK(status) && W_ERROR_IS_OK(werr)) {
+-			goto done;
+-		}
+-		if (!retry &&
+-		    reset_cm_connection_on_error(domain, NULL, status))
+-		{
+-			retry = true;
+-			goto reconnect;
+-		}
+-		try_dsrgetdcname = false;
+-		retry = false;
+-	}
+-
+-	/*
+-	 * Fallback to less capable methods
+-	 */
+-
+-	dc_info = talloc_zero(r->out.dc_info, struct netr_DsRGetDCNameInfo);
+-	if (dc_info == NULL) {
+-		status = NT_STATUS_NO_MEMORY;
+-		goto done;
+-	}
+-
+-	if (r->in.flags & DS_PDC_REQUIRED) {
+-		status = dcerpc_netr_GetDcName(b,
+-			p->mem_ctx, domain->dcname,
+-			r->in.domain_name, &dc_info->dc_unc, &werr);
+-	} else {
+-		status = dcerpc_netr_GetAnyDCName(b,
+-			p->mem_ctx, domain->dcname,
+-			r->in.domain_name, &dc_info->dc_unc, &werr);
+-	}
+-
+-	if (!retry && reset_cm_connection_on_error(domain, b, status)) {
+-		retry = true;
+-		goto reconnect;
+-	}
+-	if (!NT_STATUS_IS_OK(status)) {
+-		DEBUG(10, ("dcerpc_netr_Get[Any]DCName failed: %s\n",
+-			   nt_errstr(status)));
+-		goto done;
+-	}
+-	if (!W_ERROR_IS_OK(werr)) {
+-		DEBUG(10, ("dcerpc_netr_Get[Any]DCName failed: %s\n",
+-			   win_errstr(werr)));
+-		status = werror_to_ntstatus(werr);
+-		goto done;
+-	}
+-
+-	*r->out.dc_info = dc_info;
+-	status = NT_STATUS_OK;
+-
+-done:
+-	/* And restore our original timeout. */
+-	rpccli_set_timeout(netlogon_pipe, orig_timeout);
+-
+-	return status;
++	return dsgetdcname(p->mem_ctx, global_messaging_context(),
++			   r->in.domain_name, r->in.domain_guid,
++			   r->in.site_name ? r->in.site_name : "",
++			   r->in.flags,
++			   r->out.dc_info);
+ }
+ 
+ NTSTATUS _wbint_LookupRids(struct pipes_struct *p, struct wbint_LookupRids *r)
+-- 
+2.50.0
 

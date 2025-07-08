@@ -147,7 +147,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.19.4
-%global baserelease 8
+%global baserelease 9
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -4479,6 +4479,10 @@ fi
 %endif
 
 %changelog
+* Mon Jul 07 2025 Andreas Schneider <asn@redhat.com> - 4.19.4-9
+- Fix DC discovery after Windows netlogon hardening
+- resolves: RHEL-101902
+
 * Thu Apr 17 2025 Pavel Filipenský <pfilipen@redhat.com> - 4.19.4-8
 - resolves: RHEL-87030 - Fix winbind memory leak
 
