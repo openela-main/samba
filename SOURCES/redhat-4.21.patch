@@ -1,7 +1,7 @@
 From 9032322cc713e82a316b271bb2fa0a867c69b021 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jul 2024 12:26:55 +0200
-Subject: [PATCH 01/24] s3:notifyd: Use a watcher per db record
+Subject: [PATCH 01/31] s3:notifyd: Use a watcher per db record
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -509,13 +509,13 @@ index 36c08f47c54..db8e6e1c005 100644
  
  #endif
 -- 
-2.49.0
+2.50.0
 
 
 From da6309049eb21ec5cd6bdf7942203960adbc37c0 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Thu, 5 Dec 2024 16:35:51 +1300
-Subject: [PATCH 02/24] util: add a crypt wrapper, derived from
+Subject: [PATCH 02/31] util: add a crypt wrapper, derived from
  dsdb:password_hash
 
 This is going to be used by the dsdb password_hash module, and exposed
@@ -661,13 +661,13 @@ index b4fcfeaba07..7de9c0b7b17 100644
      bld.SAMBA_SUBSYSTEM('UNIX_PRIVS',
                          source='unix_privs.c',
 -- 
-2.49.0
+2.50.0
 
 
 From 334093563640f232bb337675417f1e8a410987de Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 20 Jan 2025 16:00:51 +0100
-Subject: [PATCH 03/24] s3: Add new keytab specifiers
+Subject: [PATCH 03/31] s3: Add new keytab specifiers
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2122,13 +2122,13 @@ index 2c38b53ccca..82c64984787 100755
  # Other approach could e.g. compare first six entries from the template.
  # The 6 entries correspond to password and old_password, each has 3 enc. types.
 -- 
-2.49.0
+2.50.0
 
 
 From f1e0fce49fbd1890da053d05c8511010cb7f2911 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 14 Jan 2025 11:29:54 +0100
-Subject: [PATCH 04/24] docs-xml:smbdotconf: Document new options for 'sync
+Subject: [PATCH 04/31] docs-xml:smbdotconf: Document new options for 'sync
  machinepassword to keytab'
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2279,13 +2279,13 @@ index f7dc30023d4..02eaf3162c0 100644
                        <smbconfoption name="dedicated keytab file"/>.
                  </para>
 -- 
-2.49.0
+2.50.0
 
 
 From 4dc163e87824aac33107767881d4a47033c5d9dd Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Fri, 14 Feb 2025 17:28:54 +0100
-Subject: [PATCH 05/24] s3:libads: Remove specifier for 'host' principal from
+Subject: [PATCH 05/31] s3:libads: Remove specifier for 'host' principal from
  'sync machine password to keytab'
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2486,13 +2486,13 @@ index 82c64984787..21edf8b8882 100755
    5  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
    6  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
 -- 
-2.49.0
+2.50.0
 
 
 From 8bb9f6f5d9f5db755dfd950260288dfd746cfbb6 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Fri, 14 Feb 2025 17:27:26 +0100
-Subject: [PATCH 06/24] docs: Update documentation for 'sync machine password
+Subject: [PATCH 06/31] docs: Update documentation for 'sync machine password
  to keytab'
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2578,13 +2578,13 @@ index 02eaf3162c0..ec3fffc1119 100644
  If sync_etypes or sync_kvno or sync_spns is present then winbind connects to DC. For "offline domain join" it might be useful not to use these options.
  </para>
 -- 
-2.49.0
+2.50.0
 
 
 From 205bed2a3a8cb8d2ff9651244aab02b2f9f602ae Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Wed, 15 Jan 2025 10:21:19 -0800
-Subject: [PATCH 07/24] auth: Add missing talloc_free() in error code path.
+Subject: [PATCH 07/31] auth: Add missing talloc_free() in error code path.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2615,13 +2615,13 @@ index b6272ac15eb..1f7d3e7ef26 100644
  		}
  
 -- 
-2.49.0
+2.50.0
 
 
 From b531c84559e2391c38e4c7640610462046d2d7c6 Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Thu, 16 Jan 2025 16:12:31 -0800
-Subject: [PATCH 08/24] auth: Cleanup exit code paths in kerberos_decode_pac().
+Subject: [PATCH 08/31] auth: Cleanup exit code paths in kerberos_decode_pac().
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2887,13 +2887,13 @@ index 1f7d3e7ef26..4c61cfe838f 100644
  
  NTSTATUS kerberos_pac_logon_info(TALLOC_CTX *mem_ctx,
 -- 
-2.49.0
+2.50.0
 
 
 From ffdb675281389635e34b6f06d68222db5f2e83a5 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 9 Jan 2025 08:57:17 +0100
-Subject: [PATCH 09/24] dbwrap: check for option "tdb_hash_size:DBNAME.tdb" in
+Subject: [PATCH 09/31] dbwrap: check for option "tdb_hash_size:DBNAME.tdb" in
  db_open()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -2922,13 +2922,13 @@ index 52c8a94aeff..91556f22819 100644
  		bool try_readonly = false;
  
 -- 
-2.49.0
+2.50.0
 
 
 From fd7331e9e50c130d98b490c3cc1d8fa77ec575a1 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 9 Jan 2025 12:27:43 +0100
-Subject: [PATCH 10/24] smbtorture: add test "open-brlock-deadlock"
+Subject: [PATCH 10/31] smbtorture: add test "open-brlock-deadlock"
 
 smbtorture reproducer for bug 15767. As it needs a very specific setup that
 can't easily be done in selftest, the test is only executed when manually called
@@ -3255,13 +3255,13 @@ index eac0d557fc3..e5cf61a471a 100644
  	suite->description = talloc_strdup(suite, "SMB2-LOCK tests");
  
 -- 
-2.49.0
+2.50.0
 
 
 From fe9563bc0140fbbb2aa5a6342a1948984c59043a Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 6 Jan 2025 15:59:27 +0100
-Subject: [PATCH 11/24] s3/brlock: split out brl_get_locks_readonly_parse()
+Subject: [PATCH 11/31] s3/brlock: split out brl_get_locks_readonly_parse()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -3351,13 +3351,13 @@ index b0295174954..c75b83c048d 100644
  	 * Cache the brlock struct, invalidated when the dbwrap_seqnum
  	 * changes. See beginning of this routine.
 -- 
-2.49.0
+2.50.0
 
 
 From 2c3e6fed2b1fc6e854293446ed74b9e98900815e Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 6 Jan 2025 17:07:11 +0100
-Subject: [PATCH 12/24] s3/brlock: add brl_req_set()
+Subject: [PATCH 12/31] s3/brlock: add brl_req_set()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -3404,13 +3404,13 @@ index 7fc177d7aa6..3413596baed 100644
  const struct GUID *brl_req_guid(const struct byte_range_lock *brl);
  
 -- 
-2.49.0
+2.50.0
 
 
 From 1a3c7565c112ba2bf6342c93f74b1888fb1dcdfc Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Sat, 1 Feb 2025 10:37:40 +0100
-Subject: [PATCH 13/24] s3/brlock: add share_mode_do_locked_brl()
+Subject: [PATCH 13/31] s3/brlock: add share_mode_do_locked_brl()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -3561,13 +3561,13 @@ index 3413596baed..c9d769ba53f 100644
  					files_struct *fsp);
  struct byte_range_lock *brl_get_locks_readonly(files_struct *fsp);
 -- 
-2.49.0
+2.50.0
 
 
 From f29fdf9d8da34db5b129f2ccd00a597dcfe68e55 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 8 Jan 2025 15:43:04 +0100
-Subject: [PATCH 14/24] s3/brlock: don't increment current_lock_count if
+Subject: [PATCH 14/31] s3/brlock: don't increment current_lock_count if
  do_lock_fn() failed
 
 Also only assign psmblctx and pblocker_pid if the lock request failed.
@@ -3617,13 +3617,13 @@ index 41b54b14c6b..ea692711627 100644
  
  /****************************************************************************
 -- 
-2.49.0
+2.50.0
 
 
 From 68a48f73a8987db27d80d13f2871fd9c057df196 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 29 Jan 2025 06:13:29 +0100
-Subject: [PATCH 15/24] s3/locking: add brl_set_modified()
+Subject: [PATCH 15/31] s3/locking: add brl_set_modified()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -3661,13 +3661,13 @@ index c9d769ba53f..c74539c8161 100644
  /* The following definitions come from locking/locking.c  */
  
 -- 
-2.49.0
+2.50.0
 
 
 From 4888165536438d742e46be57087dbc2b29bd190c Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 29 Jan 2025 06:13:44 +0100
-Subject: [PATCH 16/24] smbd: use share_mode_do_locked_brl()
+Subject: [PATCH 16/31] smbd: use share_mode_do_locked_brl()
 
 Fix a deadlock that can happen if two clients happen to open and byte-range-lock
 two different files whos record in locking.tdb and brlock.tdb happen to sit on
@@ -4865,13 +4865,13 @@ index 2b65fb30d76..3de36a7d673 100644
  		return status;
  	}
 -- 
-2.49.0
+2.50.0
 
 
 From 45211424de82b03e187369286034b7c49136ba5f Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 8 Jan 2025 12:51:37 +0100
-Subject: [PATCH 17/24] s3/brlock: remove brl_get_locks_for_locking()
+Subject: [PATCH 17/31] s3/brlock: remove brl_get_locks_for_locking()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -4930,13 +4930,13 @@ index e332abf34ec..44b43c1b1e2 100644
  typedef void (*share_mode_do_locked_brl_fn_t)(
  	struct share_mode_lock *lck,
 -- 
-2.49.0
+2.50.0
 
 
 From ef4e89916360c8d7f2372c8508c8a79dfd995c47 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 27 Jan 2025 15:22:26 +0100
-Subject: [PATCH 18/24] smbd: call locking_close_file() while still holding a
+Subject: [PATCH 18/31] smbd: call locking_close_file() while still holding a
  glock on the locking.tdb record
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -5000,13 +5000,13 @@ index 1b027a319a4..964c3530e8d 100644
  	/*
  	 * Ensure pending modtime is set before closing underlying fd.
 -- 
-2.49.0
+2.50.0
 
 
 From 96d3bacbd967b355c91bc1d9e583edb1cdd3bd19 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 30 Jan 2025 17:35:26 +0100
-Subject: [PATCH 19/24] s3/locking: prepare brl_locktest() for upgradable
+Subject: [PATCH 19/31] s3/locking: prepare brl_locktest() for upgradable
  read-only locks
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -5080,13 +5080,13 @@ index 44b43c1b1e2..44808171f1a 100644
  		uint64_t *psmblctx,
  		struct server_id pid,
 -- 
-2.49.0
+2.50.0
 
 
 From b88988bcc9ce1fa0b8152e0eb89cb496f675fbc1 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 2 Apr 2025 12:43:15 +0200
-Subject: [PATCH 20/24] smbd: check can_lock in strict_lock_check_default()
+Subject: [PATCH 20/31] smbd: check can_lock in strict_lock_check_default()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -5115,13 +5115,13 @@ index 993d3a96591..ce2ccaccd11 100644
  	}
  
 -- 
-2.49.0
+2.50.0
 
 
 From e5d8f12b8ecfcd52ec8dc32147b1f2c6d8115c37 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 30 Jan 2025 07:40:32 +0100
-Subject: [PATCH 21/24] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 21/31] smbd: use share_mode_do_locked_brl() in
  strict_lock_check_default()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -5205,13 +5205,13 @@ index ce2ccaccd11..ddaa5405f02 100644
  
  	DBG_DEBUG("flavour = %s brl start=%" PRIu64 " "
 -- 
-2.49.0
+2.50.0
 
 
 From c26eded8448722126d73f3113da6b27378185475 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 28 Jan 2025 11:19:05 +0100
-Subject: [PATCH 22/24] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 22/31] smbd: use share_mode_do_locked_brl() in
  vfs_default_durable_disconnect()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -5456,13 +5456,13 @@ index bd0c9f58e24..d315cb21ccc 100644
  	status = vfs_stat_fsp(fsp);
  	if (!NT_STATUS_IS_OK(status)) {
 -- 
-2.49.0
+2.50.0
 
 
 From 33afc50416b09f2c025975fd7a98686f046005ae Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 2 Apr 2025 14:52:03 +0200
-Subject: [PATCH 23/24] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 23/31] smbd: use share_mode_do_locked_brl() in
  vfs_default_durable_reconnect()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -6155,13 +6155,13 @@ index d315cb21ccc..82777d3b81b 100644
 +	return NT_STATUS_OK;
  }
 -- 
-2.49.0
+2.50.0
 
 
 From 810c9268742b761d3e32aedb624d343bdf51d467 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 28 Jan 2025 14:48:39 +0100
-Subject: [PATCH 24/24] s3:rpc_server/srvsvc: use brl_get_locks_readonly()
+Subject: [PATCH 24/31] s3:rpc_server/srvsvc: use brl_get_locks_readonly()
  instead of brl_get_locks()
 
 No need to keep the record locked longer then needed.
@@ -6207,5 +6207,782 @@ index 1129576f751..b19baf9e625 100644
  
  	return WERR_OK;
 -- 
-2.49.0
+2.50.0
+
+
+From 9dda09d94accbec2e7554ff5e5856e4e3f233780 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Wed, 16 Apr 2025 11:01:53 +0200
+Subject: [PATCH 25/31] third_party/socket_wrapper: SO_REUSEPORT is not
+ supported on a unix socket
+
+---
+ third_party/socket_wrapper/socket_wrapper.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/third_party/socket_wrapper/socket_wrapper.c b/third_party/socket_wrapper/socket_wrapper.c
+index 37799c82419..db20eac4ba2 100644
+--- a/third_party/socket_wrapper/socket_wrapper.c
++++ b/third_party/socket_wrapper/socket_wrapper.c
+@@ -5110,6 +5110,13 @@ static int swrap_setsockopt(int s, int level, int optname,
+ 	}
+ 
+ 	if (level == SOL_SOCKET) {
++		/*
++		 * SO_REUSEPORT is not supported on a unix socket. glibc 2.40
++		 * returns ENOTSUPP now.
++		 */
++		if (optname == SO_REUSEPORT) {
++			return 0;
++		}
+ 		return libc_setsockopt(s,
+ 				       level,
+ 				       optname,
+-- 
+2.50.0
+
+
+From 8f08fd875e426d19418e7e2a3319f8b9fd5d86ee Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Tue, 14 Jan 2025 01:40:05 +0100
+Subject: [PATCH 26/31] s3-libads: dump ADS_MODSLIST before attempting the LDAP
+ modify
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15777
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit f02a4002d5c3cfcd7f36b3bcf13310ffd155de90)
+---
+ source3/libads/ldap.c | 66 +++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 66 insertions(+)
+
+diff --git a/source3/libads/ldap.c b/source3/libads/ldap.c
+index 6fad112ca00..a2654c1f504 100644
+--- a/source3/libads/ldap.c
++++ b/source3/libads/ldap.c
+@@ -1968,6 +1968,67 @@ static ADS_STATUS ads_modlist_add(TALLOC_CTX *ctx, ADS_MODLIST *mods,
+ 	return ADS_ERROR(LDAP_SUCCESS);
+ }
+ 
++/*
++  dump a ADS_MODSLIST via DEBUG
++*/
++static void ads_dump_modlist(ADS_MODLIST *mods)
++{
++	LDAPMod **modlist = (LDAPMod **)*mods;
++	const char *op = NULL;
++	size_t i, j;
++	char *buf = NULL;
++
++	if (mods == NULL || DEBUGLEVEL < DBGLVL_DEBUG) {
++		return;
++	}
++
++	buf = talloc_strdup(talloc_tos(), "");
++
++	for (i = 0; modlist[i] != NULL; i++) {
++
++		/* only ever used three ops */
++
++		switch (modlist[i]->mod_op) {
++		case LDAP_MOD_DELETE:
++			op = "LDAP_MOD_DELETE";
++			break;
++		case LDAP_MOD_REPLACE:
++			op = "LDAP_MOD_REPLACE";
++			break;
++		case LDAP_MOD_REPLACE | LDAP_MOD_BVALUES:
++			op = "LDAP_MOD_REPLACE | LDAP_MOD_BVALUES";
++			break;
++		default:
++			op = "unknown";
++			break;
++		}
++
++		talloc_asprintf_addbuf(&buf, "mod[%zu]: mod_op: %s\n", i, op);
++		talloc_asprintf_addbuf(&buf,
++				       "mod[%zu]: mod_type: %s\n",
++				       i,
++				       modlist[i]->mod_type);
++
++		if (modlist[i]->mod_op & LDAP_MOD_BVALUES) {
++			continue;
++		}
++
++		for (j = 0; modlist[i]->mod_values[j] != NULL; j++) {
++			talloc_asprintf_addbuf(
++				&buf,
++				"mod[%zu]: mod_values[%zu]: %s\n",
++				i,
++				j,
++				modlist[i]->mod_values[j]);
++		}
++	}
++
++	if (buf != NULL) {
++		DBG_DEBUG("%s", buf);
++		TALLOC_FREE(buf);
++	}
++}
++
+ /**
+  * Add a single string value to a mod list
+  * @param ctx An initialized TALLOC_CTX
+@@ -2075,6 +2136,9 @@ ADS_STATUS ads_gen_mod(ADS_STRUCT *ads, const char *mod_dn, ADS_MODLIST mods)
+ 	for(i=0;(mods[i]!=0)&&(mods[i]!=(LDAPMod *) -1);i++);
+ 	/* make sure the end of the list is NULL */
+ 	mods[i] = NULL;
++
++	ads_dump_modlist(&mods);
++
+ 	ret = ldap_modify_ext_s(ads->ldap.ld, utf8_dn,
+ 				(LDAPMod **) mods, controls, NULL);
+ 	ads_print_error(ret, ads->ldap.ld);
+@@ -2107,6 +2171,8 @@ ADS_STATUS ads_gen_add(ADS_STRUCT *ads, const char *new_dn, ADS_MODLIST mods)
+ 	/* make sure the end of the list is NULL */
+ 	mods[i] = NULL;
+ 
++	ads_dump_modlist(&mods);
++
+ 	ret = ldap_add_ext_s(ads->ldap.ld, utf8_dn, (LDAPMod**)mods, NULL, NULL);
+ 	ads_print_error(ret, ads->ldap.ld);
+ 	TALLOC_FREE(utf8_dn);
+-- 
+2.50.0
+
+
+From 533e8f650e3aec632730d144f629a97e6fe37afc Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Mon, 13 Jan 2025 20:26:01 +0100
+Subject: [PATCH 27/31] selfest: add test for non-local offlinejoin provision
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15777
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 6d4ad4d6824e81ef85dd924d550222dd6a322a15)
+---
+ testprogs/blackbox/test_net_offline.sh | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/testprogs/blackbox/test_net_offline.sh b/testprogs/blackbox/test_net_offline.sh
+index d885b337cea..e5b57e5431a 100755
+--- a/testprogs/blackbox/test_net_offline.sh
++++ b/testprogs/blackbox/test_net_offline.sh
+@@ -34,6 +34,20 @@ samba_texpect="$BINDIR/texpect"
+ 
+ netbios=$(grep "netbios name" $BASEDIR/$WORKDIR/client.conf | cut -f2 -d= | awk '{$1=$1};1')
+ 
++# 0. Test with machine_name != lp_netbios_name()
++
++NONLOCALMACHINE=win11
++
++testit "provision with non local machine name" \
++	${VALGRIND} ${net_tool} offlinejoin provision domain="${REALM}" machine_name="${NONLOCALMACHINE}" savefile="${ODJFILE}" -U"${DC_USERNAME}%${DC_PASSWORD}" || \
++	failed=$((failed + 1))
++
++testit "net rpc user delete" \
++	${VALGRIND} ${net_tool} rpc user delete "${NONLOCALMACHINE}$" -U"${DC_USERNAME}%${DC_PASSWORD}" -S "${DC_SERVER}" || \
++	failed=$((failed + 1))
++
++rm -f "${ODJFILE}"
++
+ # 1. Test w/o dcname
+ 
+ testit "provision without dcname" $VALGRIND $net_tool offlinejoin provision domain=$REALM machine_name=$netbios savefile=$ODJFILE -U$DC_USERNAME%$DC_PASSWORD || failed=$(expr $failed + 1)
+-- 
+2.50.0
+
+
+From acf26ab8f5cc1ab4aef98c00143a2ed21468d45d Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Tue, 14 Jan 2025 19:16:31 +0100
+Subject: [PATCH 28/31] s3-libnet: avoid using lp_dns_hostname() in join code
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15777
+
+This codepath is also used for provisiong non-local machines into AD
+during offlinejoin operations. When creating accounts for non-local
+machines we certainly need to be able to use arbitrary hostname other
+than lp_netbios_name() (which is used internally by lp_dns_hostname()).
+This partly reverts 0e96092c1895ecb41d4064111566b4ada71fe457.
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Andreas Schneider <asn@cryptomilk.org>
+Autobuild-Date(master): Thu Jan 30 07:35:05 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 062dc07e9b9c8e260548d0bca4d02819bdc60326)
+---
+ source3/libnet/libnet_join.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/source3/libnet/libnet_join.c b/source3/libnet/libnet_join.c
+index d49d54436bb..f98d132d50f 100644
+--- a/source3/libnet/libnet_join.c
++++ b/source3/libnet/libnet_join.c
+@@ -552,7 +552,14 @@ static ADS_STATUS libnet_join_set_machine_spn(TALLOC_CTX *mem_ctx,
+ 	 * Register dns_hostname if needed, add_uniq_spn() will avoid
+ 	 * duplicates.
+ 	 */
+-	dns_hostname = lp_dns_hostname();
++	if (r->in.dnshostname != NULL) {
++		dns_hostname = talloc_strdup(frame, r->in.dnshostname);
++	} else {
++		dns_hostname = talloc_asprintf(frame,
++					       "%s.%s",
++					       r->in.machine_name,
++					       r->out.dns_domain_name);
++	}
+ 	if (dns_hostname == NULL) {
+ 		status = ADS_ERROR_LDAP(LDAP_NO_MEMORY);
+ 		goto done;
+-- 
+2.50.0
+
+
+From 85ced19665fd27f1ab33b9bf9b971e640d3212ea Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Fri, 11 Oct 2024 13:32:22 +0000
+Subject: [PATCH 29/31] s3:libsmb: let discover_dc_netbios() return
+ DOMAIN_CONTROLLER_NOT_FOUND
+
+We may get NT_STATUS_NOT_FOUND when the name can't be resolved
+and NT_STATUS_INVALID_ADDRESS if the system doesn't have ipv4
+addresses...
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit e47ce1d10b13d8ef165c70984e6e490f4c2a64c2)
+---
+ source3/libsmb/dsgetdcname.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/source3/libsmb/dsgetdcname.c b/source3/libsmb/dsgetdcname.c
+index 654893c172c..00e1fac6b93 100644
+--- a/source3/libsmb/dsgetdcname.c
++++ b/source3/libsmb/dsgetdcname.c
+@@ -483,7 +483,19 @@ static NTSTATUS discover_dc_netbios(TALLOC_CTX *mem_ctx,
+ 					&count,
+ 					resolve_order);
+ 	if (!NT_STATUS_IS_OK(status)) {
+-		DEBUG(10,("discover_dc_netbios: failed to find DC\n"));
++		NTSTATUS raw_status = status;
++
++		if (NT_STATUS_EQUAL(status, NT_STATUS_NOT_FOUND)) {
++			status = NT_STATUS_DOMAIN_CONTROLLER_NOT_FOUND;
++		}
++		if (NT_STATUS_EQUAL(status, NT_STATUS_INVALID_ADDRESS)) {
++			status = NT_STATUS_DOMAIN_CONTROLLER_NOT_FOUND;
++		}
++
++		DBG_DEBUG("failed to find DC for %s: %s => %s\n",
++			  domain_name,
++			  nt_errstr(raw_status),
++			  nt_errstr(status));
+ 		return status;
+ 	}
+ 
+-- 
+2.50.0
+
+
+From 721eb10e2b2a409daac3b241b894ac2ebafd47f8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Wed, 2 Jul 2025 21:59:48 +0200
+Subject: [PATCH 30/31] s3-winbindd: Fix internal winbind dsgetdcname calls
+ w.r.t. domain name
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+when winbind calls to dsgetdcname internally, make sure to
+prefer the DNS domain name if we have it. Makes DNS lookups much more
+likely to succeed.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+
+Autobuild-User(master): Ralph Böhme <slow@samba.org>
+Autobuild-Date(master): Mon Jul  7 10:44:37 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 2560c9b3224816ffd371a62103f65b3aca301ad5)
+---
+ source3/winbindd/wb_queryuser.c   | 17 +++++++++++++----
+ source3/winbindd/wb_sids2xids.c   | 17 +++++++++++++----
+ source3/winbindd/wb_xids2sids.c   | 12 +++++++++---
+ source3/winbindd/winbindd_dual.c  |  6 +++++-
+ source3/winbindd/winbindd_proto.h |  1 +
+ source3/winbindd/winbindd_util.c  | 19 +++++++++++++++++++
+ 6 files changed, 60 insertions(+), 12 deletions(-)
+
+diff --git a/source3/winbindd/wb_queryuser.c b/source3/winbindd/wb_queryuser.c
+index c2758f1b76a..db8e946ba71 100644
+--- a/source3/winbindd/wb_queryuser.c
++++ b/source3/winbindd/wb_queryuser.c
+@@ -289,10 +289,19 @@ static void wb_queryuser_done(struct tevent_req *subreq)
+ 
+ 	if (NT_STATUS_EQUAL(result, NT_STATUS_DOMAIN_CONTROLLER_NOT_FOUND) &&
+ 	    !state->tried_dclookup) {
+-		D_DEBUG("GetNssInfo got DOMAIN_CONTROLLER_NOT_FOUND, calling wb_dsgetdcname_send()\n");
+-		subreq = wb_dsgetdcname_send(
+-			state, state->ev, state->info->domain_name, NULL, NULL,
+-			DS_RETURN_DNS_NAME);
++		const char *domain_name = find_dns_domain_name(
++			state->info->domain_name);
++
++		D_DEBUG("GetNssInfo got DOMAIN_CONTROLLER_NOT_FOUND, calling "
++			"wb_dsgetdcname_send(%s)\n",
++			domain_name);
++
++		subreq = wb_dsgetdcname_send(state,
++					     state->ev,
++					     domain_name,
++					     NULL,
++					     NULL,
++					     DS_RETURN_DNS_NAME);
+ 		if (tevent_req_nomem(subreq, req)) {
+ 			return;
+ 		}
+diff --git a/source3/winbindd/wb_sids2xids.c b/source3/winbindd/wb_sids2xids.c
+index f0f6c23fc20..03e5e7e0258 100644
+--- a/source3/winbindd/wb_sids2xids.c
++++ b/source3/winbindd/wb_sids2xids.c
+@@ -612,13 +612,22 @@ static void wb_sids2xids_done(struct tevent_req *subreq)
+ 	    !state->tried_dclookup) {
+ 
+ 		struct lsa_DomainInfo *d;
++		const char *domain_name = NULL;
+ 
+-		D_DEBUG("Domain controller not found. Calling wb_dsgetdcname_send() to get it.\n");
+ 		d = &state->idmap_doms.domains[state->dom_index];
+ 
+-		subreq = wb_dsgetdcname_send(
+-			state, state->ev, d->name.string, NULL, NULL,
+-			DS_RETURN_DNS_NAME);
++		domain_name = find_dns_domain_name(d->name.string);
++
++		D_DEBUG("Domain controller not found. Calling "
++			"wb_dsgetdcname_send(%s) to get it.\n",
++			domain_name);
++
++		subreq = wb_dsgetdcname_send(state,
++					     state->ev,
++					     domain_name,
++					     NULL,
++					     NULL,
++					     DS_RETURN_DNS_NAME);
+ 		if (tevent_req_nomem(subreq, req)) {
+ 			return;
+ 		}
+diff --git a/source3/winbindd/wb_xids2sids.c b/source3/winbindd/wb_xids2sids.c
+index 86bd7f9deab..6fcf524d94f 100644
+--- a/source3/winbindd/wb_xids2sids.c
++++ b/source3/winbindd/wb_xids2sids.c
+@@ -143,9 +143,15 @@ static void wb_xids2sids_dom_done(struct tevent_req *subreq)
+ 	if (NT_STATUS_EQUAL(result, NT_STATUS_DOMAIN_CONTROLLER_NOT_FOUND) &&
+ 	    !state->tried_dclookup) {
+ 
+-		subreq = wb_dsgetdcname_send(
+-			state, state->ev, state->dom_map->name, NULL, NULL,
+-			DS_RETURN_DNS_NAME);
++		const char *domain_name = find_dns_domain_name(
++			state->dom_map->name);
++
++		subreq = wb_dsgetdcname_send(state,
++					     state->ev,
++					     domain_name,
++					     NULL,
++					     NULL,
++					     DS_RETURN_DNS_NAME);
+ 		if (tevent_req_nomem(subreq, req)) {
+ 			return;
+ 		}
+diff --git a/source3/winbindd/winbindd_dual.c b/source3/winbindd/winbindd_dual.c
+index c27fa2653f2..6570c3dec23 100644
+--- a/source3/winbindd/winbindd_dual.c
++++ b/source3/winbindd/winbindd_dual.c
+@@ -532,6 +532,7 @@ static void wb_domain_request_trigger(struct tevent_req *req,
+ 	struct wb_domain_request_state *state = tevent_req_data(
+ 		req, struct wb_domain_request_state);
+ 	struct winbindd_domain *domain = state->domain;
++	const char *domain_name = NULL;
+ 	struct tevent_req *subreq = NULL;
+ 	size_t shortest_queue_length;
+ 
+@@ -604,8 +605,11 @@ static void wb_domain_request_trigger(struct tevent_req *req,
+ 	 * which is indicated by DS_RETURN_DNS_NAME.
+ 	 * For NT4 domains we still get the netbios name.
+ 	 */
++
++	domain_name = find_dns_domain_name(state->domain->name);
++
+ 	subreq = wb_dsgetdcname_send(state, state->ev,
+-				     state->domain->name,
++				     domain_name,
+ 				     NULL, /* domain_guid */
+ 				     NULL, /* site_name */
+ 				     DS_RETURN_DNS_NAME); /* flags */
+diff --git a/source3/winbindd/winbindd_proto.h b/source3/winbindd/winbindd_proto.h
+index 5b90a7a731f..e318911d192 100644
+--- a/source3/winbindd/winbindd_proto.h
++++ b/source3/winbindd/winbindd_proto.h
+@@ -610,6 +610,7 @@ bool parse_sidlist(TALLOC_CTX *mem_ctx, const char *sidstr,
+ 		   struct dom_sid **sids, uint32_t *num_sids);
+ bool parse_xidlist(TALLOC_CTX *mem_ctx, const char *xidstr,
+ 		   struct unixid **pxids, uint32_t *pnum_xids);
++const char *find_dns_domain_name(const char *domain_name);
+ 
+ /* The following definitions come from winbindd/winbindd_wins.c  */
+ 
+diff --git a/source3/winbindd/winbindd_util.c b/source3/winbindd/winbindd_util.c
+index 2234efeed54..c94d313e9fd 100644
+--- a/source3/winbindd/winbindd_util.c
++++ b/source3/winbindd/winbindd_util.c
+@@ -2241,3 +2241,22 @@ fail:
+ 	TALLOC_FREE(xids);
+ 	return false;
+ }
++
++/**
++ * Helper to extract the DNS Domain Name from a struct winbindd_domain
++ */
++const char *find_dns_domain_name(const char *domain_name)
++{
++	struct winbindd_domain *wbdom = NULL;
++
++	wbdom = find_domain_from_name(domain_name);
++	if (wbdom == NULL) {
++		return domain_name;
++	}
++
++	if (wbdom->active_directory && wbdom->alt_name != NULL) {
++		return wbdom->alt_name;
++	}
++
++	return wbdom->name;
++}
+-- 
+2.50.0
+
+
+From ea989a77c0f55b6be75cc274b351b9745fdb52f1 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Fri, 9 May 2025 09:38:41 +0200
+Subject: [PATCH 31/31] s3:winbindd: avoid using any netlogon call to get a dc
+ name
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+(cherry picked from commit f86a4bf6848ade2db7229d182576db3320c3ece7)
+---
+ source3/winbindd/winbindd_cm.c       | 150 ---------------------------
+ source3/winbindd/winbindd_dual_srv.c | 105 +------------------
+ 2 files changed, 5 insertions(+), 250 deletions(-)
+
+diff --git a/source3/winbindd/winbindd_cm.c b/source3/winbindd/winbindd_cm.c
+index f33e0bcb165..602f81ad621 100644
+--- a/source3/winbindd/winbindd_cm.c
++++ b/source3/winbindd/winbindd_cm.c
+@@ -475,140 +475,6 @@ static bool cm_is_ipc_credentials(struct cli_credentials *creds)
+ 	return ret;
+ }
+ 
+-static bool get_dc_name_via_netlogon(struct winbindd_domain *domain,
+-				     fstring dcname,
+-				     struct sockaddr_storage *dc_ss,
+-				     uint32_t request_flags)
+-{
+-	struct winbindd_domain *our_domain = NULL;
+-	struct rpc_pipe_client *netlogon_pipe = NULL;
+-	NTSTATUS result;
+-	WERROR werr;
+-	TALLOC_CTX *mem_ctx;
+-	unsigned int orig_timeout;
+-	const char *tmp = NULL;
+-	const char *p;
+-	struct dcerpc_binding_handle *b;
+-
+-	/* Hmmmm. We can only open one connection to the NETLOGON pipe at the
+-	 * moment.... */
+-
+-	if (IS_DC) {
+-		return False;
+-	}
+-
+-	if (domain->primary) {
+-		return False;
+-	}
+-
+-	our_domain = find_our_domain();
+-
+-	if ((mem_ctx = talloc_init("get_dc_name_via_netlogon")) == NULL) {
+-		return False;
+-	}
+-
+-	result = cm_connect_netlogon(our_domain, &netlogon_pipe);
+-	if (!NT_STATUS_IS_OK(result)) {
+-		talloc_destroy(mem_ctx);
+-		return False;
+-	}
+-
+-	b = netlogon_pipe->binding_handle;
+-
+-	/* This call can take a long time - allow the server to time out.
+-	   35 seconds should do it. */
+-
+-	orig_timeout = rpccli_set_timeout(netlogon_pipe, 35000);
+-
+-	if (our_domain->active_directory) {
+-		struct netr_DsRGetDCNameInfo *domain_info = NULL;
+-
+-		/*
+-		 * TODO request flags are not respected in the server
+-		 * (and in some cases, like REQUIRE_PDC, causes an error)
+-		 */
+-		result = dcerpc_netr_DsRGetDCName(b,
+-						  mem_ctx,
+-						  our_domain->dcname,
+-						  domain->name,
+-						  NULL,
+-						  NULL,
+-						  request_flags|DS_RETURN_DNS_NAME,
+-						  &domain_info,
+-						  &werr);
+-		if (NT_STATUS_IS_OK(result) && W_ERROR_IS_OK(werr)) {
+-			tmp = talloc_strdup(
+-				mem_ctx, domain_info->dc_unc);
+-			if (tmp == NULL) {
+-				DBG_ERR("talloc_strdup failed for dc_unc[%s]\n",
+-					domain_info->dc_unc);
+-				talloc_destroy(mem_ctx);
+-				return false;
+-			}
+-			if (domain->alt_name == NULL) {
+-				domain->alt_name = talloc_strdup(domain,
+-								 domain_info->domain_name);
+-				if (domain->alt_name == NULL) {
+-					DBG_ERR("talloc_strdup failed for "
+-						"domain_info->domain_name[%s]\n",
+-						domain_info->domain_name);
+-					talloc_destroy(mem_ctx);
+-					return false;
+-				}
+-			}
+-			if (domain->forest_name == NULL) {
+-				domain->forest_name = talloc_strdup(domain,
+-								    domain_info->forest_name);
+-				if (domain->forest_name == NULL) {
+-					DBG_ERR("talloc_strdup failed for "
+-						"domain_info->forest_name[%s]\n",
+-						domain_info->forest_name);
+-					talloc_destroy(mem_ctx);
+-					return false;
+-				}
+-			}
+-		}
+-	} else {
+-		result = dcerpc_netr_GetAnyDCName(b, mem_ctx,
+-						  our_domain->dcname,
+-						  domain->name,
+-						  &tmp,
+-						  &werr);
+-	}
+-
+-	/* And restore our original timeout. */
+-	rpccli_set_timeout(netlogon_pipe, orig_timeout);
+-
+-	if (!NT_STATUS_IS_OK(result)) {
+-		DEBUG(10,("dcerpc_netr_GetAnyDCName failed: %s\n",
+-			nt_errstr(result)));
+-		talloc_destroy(mem_ctx);
+-		return false;
+-	}
+-
+-	if (!W_ERROR_IS_OK(werr)) {
+-		DEBUG(10,("dcerpc_netr_GetAnyDCName failed: %s\n",
+-			   win_errstr(werr)));
+-		talloc_destroy(mem_ctx);
+-		return false;
+-	}
+-
+-	/* dcerpc_netr_GetAnyDCName gives us a name with \\ */
+-	p = strip_hostname(tmp);
+-
+-	fstrcpy(dcname, p);
+-
+-	talloc_destroy(mem_ctx);
+-
+-	DEBUG(10,("dcerpc_netr_GetAnyDCName returned %s\n", dcname));
+-
+-	if (!resolve_name(dcname, dc_ss, 0x20, true)) {
+-		return False;
+-	}
+-
+-	return True;
+-}
+-
+ /**
+  * Helper function to assemble trust password and account name
+  */
+@@ -1298,24 +1164,8 @@ static bool get_dcs(TALLOC_CTX *mem_ctx, struct winbindd_domain *domain,
+ 	struct  samba_sockaddr *sa_list = NULL;
+ 	size_t     salist_size = 0;
+ 	size_t     i;
+-	bool    is_our_domain;
+ 	enum security_types sec = (enum security_types)lp_security();
+ 
+-	is_our_domain = strequal(domain->name, lp_workgroup());
+-
+-	/* If not our domain, get the preferred DC, by asking our primary DC */
+-	if ( !is_our_domain
+-		&& get_dc_name_via_netlogon(domain, dcname, &ss, request_flags)
+-		&& add_one_dc_unique(mem_ctx, domain->name, dcname, &ss, dcs,
+-		       num_dcs) )
+-	{
+-		char addr[INET6_ADDRSTRLEN];
+-		print_sockaddr(addr, sizeof(addr), &ss);
+-		DEBUG(10, ("Retrieved DC %s at %s via netlogon\n",
+-			   dcname, addr));
+-		return True;
+-	}
+-
+ 	if ((sec == SEC_ADS) && (domain->alt_name != NULL)) {
+ 		char *sitename = NULL;
+ 
+diff --git a/source3/winbindd/winbindd_dual_srv.c b/source3/winbindd/winbindd_dual_srv.c
+index 0c7e9dd5491..4f855d424e5 100644
+--- a/source3/winbindd/winbindd_dual_srv.c
++++ b/source3/winbindd/winbindd_dual_srv.c
+@@ -662,106 +662,11 @@ NTSTATUS _wbint_QueryUserRidList(struct pipes_struct *p,
+ 
+ NTSTATUS _wbint_DsGetDcName(struct pipes_struct *p, struct wbint_DsGetDcName *r)
+ {
+-	struct winbindd_domain *domain = wb_child_domain();
+-	struct rpc_pipe_client *netlogon_pipe;
+-	struct netr_DsRGetDCNameInfo *dc_info;
+-	NTSTATUS status;
+-	WERROR werr;
+-	unsigned int orig_timeout;
+-	struct dcerpc_binding_handle *b;
+-	bool retry = false;
+-	bool try_dsrgetdcname = false;
+-
+-	if (domain == NULL) {
+-		return dsgetdcname(p->mem_ctx, global_messaging_context(),
+-				   r->in.domain_name, r->in.domain_guid,
+-				   r->in.site_name ? r->in.site_name : "",
+-				   r->in.flags,
+-				   r->out.dc_info);
+-	}
+-
+-	if (domain->active_directory) {
+-		try_dsrgetdcname = true;
+-	}
+-
+-reconnect:
+-	status = cm_connect_netlogon(domain, &netlogon_pipe);
+-
+-	reset_cm_connection_on_error(domain, NULL, status);
+-	if (!NT_STATUS_IS_OK(status)) {
+-		DEBUG(10, ("Can't contact the NETLOGON pipe\n"));
+-		return status;
+-	}
+-
+-	b = netlogon_pipe->binding_handle;
+-
+-	/* This call can take a long time - allow the server to time out.
+-	   35 seconds should do it. */
+-
+-	orig_timeout = rpccli_set_timeout(netlogon_pipe, 35000);
+-
+-	if (try_dsrgetdcname) {
+-		status = dcerpc_netr_DsRGetDCName(b,
+-			p->mem_ctx, domain->dcname,
+-			r->in.domain_name, NULL, r->in.domain_guid,
+-			r->in.flags, r->out.dc_info, &werr);
+-		if (NT_STATUS_IS_OK(status) && W_ERROR_IS_OK(werr)) {
+-			goto done;
+-		}
+-		if (!retry &&
+-		    reset_cm_connection_on_error(domain, NULL, status))
+-		{
+-			retry = true;
+-			goto reconnect;
+-		}
+-		try_dsrgetdcname = false;
+-		retry = false;
+-	}
+-
+-	/*
+-	 * Fallback to less capable methods
+-	 */
+-
+-	dc_info = talloc_zero(r->out.dc_info, struct netr_DsRGetDCNameInfo);
+-	if (dc_info == NULL) {
+-		status = NT_STATUS_NO_MEMORY;
+-		goto done;
+-	}
+-
+-	if (r->in.flags & DS_PDC_REQUIRED) {
+-		status = dcerpc_netr_GetDcName(b,
+-			p->mem_ctx, domain->dcname,
+-			r->in.domain_name, &dc_info->dc_unc, &werr);
+-	} else {
+-		status = dcerpc_netr_GetAnyDCName(b,
+-			p->mem_ctx, domain->dcname,
+-			r->in.domain_name, &dc_info->dc_unc, &werr);
+-	}
+-
+-	if (!retry && reset_cm_connection_on_error(domain, b, status)) {
+-		retry = true;
+-		goto reconnect;
+-	}
+-	if (!NT_STATUS_IS_OK(status)) {
+-		DEBUG(10, ("dcerpc_netr_Get[Any]DCName failed: %s\n",
+-			   nt_errstr(status)));
+-		goto done;
+-	}
+-	if (!W_ERROR_IS_OK(werr)) {
+-		DEBUG(10, ("dcerpc_netr_Get[Any]DCName failed: %s\n",
+-			   win_errstr(werr)));
+-		status = werror_to_ntstatus(werr);
+-		goto done;
+-	}
+-
+-	*r->out.dc_info = dc_info;
+-	status = NT_STATUS_OK;
+-
+-done:
+-	/* And restore our original timeout. */
+-	rpccli_set_timeout(netlogon_pipe, orig_timeout);
+-
+-	return status;
++	return dsgetdcname(p->mem_ctx, global_messaging_context(),
++			   r->in.domain_name, r->in.domain_guid,
++			   r->in.site_name ? r->in.site_name : "",
++			   r->in.flags,
++			   r->out.dc_info);
+ }
+ 
+ NTSTATUS _wbint_LookupRids(struct pipes_struct *p, struct wbint_LookupRids *r)
+-- 
+2.50.0
 
