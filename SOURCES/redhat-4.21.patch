@@ -1,7 +1,7 @@
 From 9032322cc713e82a316b271bb2fa0a867c69b021 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jul 2024 12:26:55 +0200
-Subject: [PATCH 01/31] s3:notifyd: Use a watcher per db record
+Subject: [PATCH 01/43] s3:notifyd: Use a watcher per db record
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -509,13 +509,13 @@ index 36c08f47c54..db8e6e1c005 100644
  
  #endif
 -- 
-2.50.0
+2.51.0
 
 
 From da6309049eb21ec5cd6bdf7942203960adbc37c0 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Thu, 5 Dec 2024 16:35:51 +1300
-Subject: [PATCH 02/31] util: add a crypt wrapper, derived from
+Subject: [PATCH 02/43] util: add a crypt wrapper, derived from
  dsdb:password_hash
 
 This is going to be used by the dsdb password_hash module, and exposed
@@ -661,13 +661,13 @@ index b4fcfeaba07..7de9c0b7b17 100644
      bld.SAMBA_SUBSYSTEM('UNIX_PRIVS',
                          source='unix_privs.c',
 -- 
-2.50.0
+2.51.0
 
 
 From 334093563640f232bb337675417f1e8a410987de Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 20 Jan 2025 16:00:51 +0100
-Subject: [PATCH 03/31] s3: Add new keytab specifiers
+Subject: [PATCH 03/43] s3: Add new keytab specifiers
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2122,13 +2122,13 @@ index 2c38b53ccca..82c64984787 100755
  # Other approach could e.g. compare first six entries from the template.
  # The 6 entries correspond to password and old_password, each has 3 enc. types.
 -- 
-2.50.0
+2.51.0
 
 
 From f1e0fce49fbd1890da053d05c8511010cb7f2911 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 14 Jan 2025 11:29:54 +0100
-Subject: [PATCH 04/31] docs-xml:smbdotconf: Document new options for 'sync
+Subject: [PATCH 04/43] docs-xml:smbdotconf: Document new options for 'sync
  machinepassword to keytab'
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2279,13 +2279,13 @@ index f7dc30023d4..02eaf3162c0 100644
                        <smbconfoption name="dedicated keytab file"/>.
                  </para>
 -- 
-2.50.0
+2.51.0
 
 
 From 4dc163e87824aac33107767881d4a47033c5d9dd Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Fri, 14 Feb 2025 17:28:54 +0100
-Subject: [PATCH 05/31] s3:libads: Remove specifier for 'host' principal from
+Subject: [PATCH 05/43] s3:libads: Remove specifier for 'host' principal from
  'sync machine password to keytab'
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2486,13 +2486,13 @@ index 82c64984787..21edf8b8882 100755
    5  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
    6  aes256-cts-hmac-sha1-96                     wurst1/brot@ADDOM.SAMBA.EXAMPLE.COM
 -- 
-2.50.0
+2.51.0
 
 
 From 8bb9f6f5d9f5db755dfd950260288dfd746cfbb6 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Fri, 14 Feb 2025 17:27:26 +0100
-Subject: [PATCH 06/31] docs: Update documentation for 'sync machine password
+Subject: [PATCH 06/43] docs: Update documentation for 'sync machine password
  to keytab'
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2578,13 +2578,13 @@ index 02eaf3162c0..ec3fffc1119 100644
  If sync_etypes or sync_kvno or sync_spns is present then winbind connects to DC. For "offline domain join" it might be useful not to use these options.
  </para>
 -- 
-2.50.0
+2.51.0
 
 
 From 205bed2a3a8cb8d2ff9651244aab02b2f9f602ae Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Wed, 15 Jan 2025 10:21:19 -0800
-Subject: [PATCH 07/31] auth: Add missing talloc_free() in error code path.
+Subject: [PATCH 07/43] auth: Add missing talloc_free() in error code path.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2615,13 +2615,13 @@ index b6272ac15eb..1f7d3e7ef26 100644
  		}
  
 -- 
-2.50.0
+2.51.0
 
 
 From b531c84559e2391c38e4c7640610462046d2d7c6 Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Thu, 16 Jan 2025 16:12:31 -0800
-Subject: [PATCH 08/31] auth: Cleanup exit code paths in kerberos_decode_pac().
+Subject: [PATCH 08/43] auth: Cleanup exit code paths in kerberos_decode_pac().
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2887,13 +2887,13 @@ index 1f7d3e7ef26..4c61cfe838f 100644
  
  NTSTATUS kerberos_pac_logon_info(TALLOC_CTX *mem_ctx,
 -- 
-2.50.0
+2.51.0
 
 
 From ffdb675281389635e34b6f06d68222db5f2e83a5 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 9 Jan 2025 08:57:17 +0100
-Subject: [PATCH 09/31] dbwrap: check for option "tdb_hash_size:DBNAME.tdb" in
+Subject: [PATCH 09/43] dbwrap: check for option "tdb_hash_size:DBNAME.tdb" in
  db_open()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -2922,13 +2922,13 @@ index 52c8a94aeff..91556f22819 100644
  		bool try_readonly = false;
  
 -- 
-2.50.0
+2.51.0
 
 
 From fd7331e9e50c130d98b490c3cc1d8fa77ec575a1 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 9 Jan 2025 12:27:43 +0100
-Subject: [PATCH 10/31] smbtorture: add test "open-brlock-deadlock"
+Subject: [PATCH 10/43] smbtorture: add test "open-brlock-deadlock"
 
 smbtorture reproducer for bug 15767. As it needs a very specific setup that
 can't easily be done in selftest, the test is only executed when manually called
@@ -3255,13 +3255,13 @@ index eac0d557fc3..e5cf61a471a 100644
  	suite->description = talloc_strdup(suite, "SMB2-LOCK tests");
  
 -- 
-2.50.0
+2.51.0
 
 
 From fe9563bc0140fbbb2aa5a6342a1948984c59043a Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 6 Jan 2025 15:59:27 +0100
-Subject: [PATCH 11/31] s3/brlock: split out brl_get_locks_readonly_parse()
+Subject: [PATCH 11/43] s3/brlock: split out brl_get_locks_readonly_parse()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -3351,13 +3351,13 @@ index b0295174954..c75b83c048d 100644
  	 * Cache the brlock struct, invalidated when the dbwrap_seqnum
  	 * changes. See beginning of this routine.
 -- 
-2.50.0
+2.51.0
 
 
 From 2c3e6fed2b1fc6e854293446ed74b9e98900815e Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 6 Jan 2025 17:07:11 +0100
-Subject: [PATCH 12/31] s3/brlock: add brl_req_set()
+Subject: [PATCH 12/43] s3/brlock: add brl_req_set()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -3404,13 +3404,13 @@ index 7fc177d7aa6..3413596baed 100644
  const struct GUID *brl_req_guid(const struct byte_range_lock *brl);
  
 -- 
-2.50.0
+2.51.0
 
 
 From 1a3c7565c112ba2bf6342c93f74b1888fb1dcdfc Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Sat, 1 Feb 2025 10:37:40 +0100
-Subject: [PATCH 13/31] s3/brlock: add share_mode_do_locked_brl()
+Subject: [PATCH 13/43] s3/brlock: add share_mode_do_locked_brl()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -3561,13 +3561,13 @@ index 3413596baed..c9d769ba53f 100644
  					files_struct *fsp);
  struct byte_range_lock *brl_get_locks_readonly(files_struct *fsp);
 -- 
-2.50.0
+2.51.0
 
 
 From f29fdf9d8da34db5b129f2ccd00a597dcfe68e55 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 8 Jan 2025 15:43:04 +0100
-Subject: [PATCH 14/31] s3/brlock: don't increment current_lock_count if
+Subject: [PATCH 14/43] s3/brlock: don't increment current_lock_count if
  do_lock_fn() failed
 
 Also only assign psmblctx and pblocker_pid if the lock request failed.
@@ -3617,13 +3617,13 @@ index 41b54b14c6b..ea692711627 100644
  
  /****************************************************************************
 -- 
-2.50.0
+2.51.0
 
 
 From 68a48f73a8987db27d80d13f2871fd9c057df196 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 29 Jan 2025 06:13:29 +0100
-Subject: [PATCH 15/31] s3/locking: add brl_set_modified()
+Subject: [PATCH 15/43] s3/locking: add brl_set_modified()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -3661,13 +3661,13 @@ index c9d769ba53f..c74539c8161 100644
  /* The following definitions come from locking/locking.c  */
  
 -- 
-2.50.0
+2.51.0
 
 
 From 4888165536438d742e46be57087dbc2b29bd190c Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 29 Jan 2025 06:13:44 +0100
-Subject: [PATCH 16/31] smbd: use share_mode_do_locked_brl()
+Subject: [PATCH 16/43] smbd: use share_mode_do_locked_brl()
 
 Fix a deadlock that can happen if two clients happen to open and byte-range-lock
 two different files whos record in locking.tdb and brlock.tdb happen to sit on
@@ -4865,13 +4865,13 @@ index 2b65fb30d76..3de36a7d673 100644
  		return status;
  	}
 -- 
-2.50.0
+2.51.0
 
 
 From 45211424de82b03e187369286034b7c49136ba5f Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 8 Jan 2025 12:51:37 +0100
-Subject: [PATCH 17/31] s3/brlock: remove brl_get_locks_for_locking()
+Subject: [PATCH 17/43] s3/brlock: remove brl_get_locks_for_locking()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -4930,13 +4930,13 @@ index e332abf34ec..44b43c1b1e2 100644
  typedef void (*share_mode_do_locked_brl_fn_t)(
  	struct share_mode_lock *lck,
 -- 
-2.50.0
+2.51.0
 
 
 From ef4e89916360c8d7f2372c8508c8a79dfd995c47 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 27 Jan 2025 15:22:26 +0100
-Subject: [PATCH 18/31] smbd: call locking_close_file() while still holding a
+Subject: [PATCH 18/43] smbd: call locking_close_file() while still holding a
  glock on the locking.tdb record
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -5000,13 +5000,13 @@ index 1b027a319a4..964c3530e8d 100644
  	/*
  	 * Ensure pending modtime is set before closing underlying fd.
 -- 
-2.50.0
+2.51.0
 
 
 From 96d3bacbd967b355c91bc1d9e583edb1cdd3bd19 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 30 Jan 2025 17:35:26 +0100
-Subject: [PATCH 19/31] s3/locking: prepare brl_locktest() for upgradable
+Subject: [PATCH 19/43] s3/locking: prepare brl_locktest() for upgradable
  read-only locks
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -5080,13 +5080,13 @@ index 44b43c1b1e2..44808171f1a 100644
  		uint64_t *psmblctx,
  		struct server_id pid,
 -- 
-2.50.0
+2.51.0
 
 
 From b88988bcc9ce1fa0b8152e0eb89cb496f675fbc1 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 2 Apr 2025 12:43:15 +0200
-Subject: [PATCH 20/31] smbd: check can_lock in strict_lock_check_default()
+Subject: [PATCH 20/43] smbd: check can_lock in strict_lock_check_default()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -5115,13 +5115,13 @@ index 993d3a96591..ce2ccaccd11 100644
  	}
  
 -- 
-2.50.0
+2.51.0
 
 
 From e5d8f12b8ecfcd52ec8dc32147b1f2c6d8115c37 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 30 Jan 2025 07:40:32 +0100
-Subject: [PATCH 21/31] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 21/43] smbd: use share_mode_do_locked_brl() in
  strict_lock_check_default()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -5205,13 +5205,13 @@ index ce2ccaccd11..ddaa5405f02 100644
  
  	DBG_DEBUG("flavour = %s brl start=%" PRIu64 " "
 -- 
-2.50.0
+2.51.0
 
 
 From c26eded8448722126d73f3113da6b27378185475 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 28 Jan 2025 11:19:05 +0100
-Subject: [PATCH 22/31] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 22/43] smbd: use share_mode_do_locked_brl() in
  vfs_default_durable_disconnect()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -5456,13 +5456,13 @@ index bd0c9f58e24..d315cb21ccc 100644
  	status = vfs_stat_fsp(fsp);
  	if (!NT_STATUS_IS_OK(status)) {
 -- 
-2.50.0
+2.51.0
 
 
 From 33afc50416b09f2c025975fd7a98686f046005ae Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 2 Apr 2025 14:52:03 +0200
-Subject: [PATCH 23/31] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 23/43] smbd: use share_mode_do_locked_brl() in
  vfs_default_durable_reconnect()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -6155,13 +6155,13 @@ index d315cb21ccc..82777d3b81b 100644
 +	return NT_STATUS_OK;
  }
 -- 
-2.50.0
+2.51.0
 
 
 From 810c9268742b761d3e32aedb624d343bdf51d467 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 28 Jan 2025 14:48:39 +0100
-Subject: [PATCH 24/31] s3:rpc_server/srvsvc: use brl_get_locks_readonly()
+Subject: [PATCH 24/43] s3:rpc_server/srvsvc: use brl_get_locks_readonly()
  instead of brl_get_locks()
 
 No need to keep the record locked longer then needed.
@@ -6207,13 +6207,13 @@ index 1129576f751..b19baf9e625 100644
  
  	return WERR_OK;
 -- 
-2.50.0
+2.51.0
 
 
 From 9dda09d94accbec2e7554ff5e5856e4e3f233780 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 16 Apr 2025 11:01:53 +0200
-Subject: [PATCH 25/31] third_party/socket_wrapper: SO_REUSEPORT is not
+Subject: [PATCH 25/43] third_party/socket_wrapper: SO_REUSEPORT is not
  supported on a unix socket
 
 ---
@@ -6239,13 +6239,13 @@ index 37799c82419..db20eac4ba2 100644
  				       level,
  				       optname,
 -- 
-2.50.0
+2.51.0
 
 
 From 8f08fd875e426d19418e7e2a3319f8b9fd5d86ee Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 14 Jan 2025 01:40:05 +0100
-Subject: [PATCH 26/31] s3-libads: dump ADS_MODSLIST before attempting the LDAP
+Subject: [PATCH 26/43] s3-libads: dump ADS_MODSLIST before attempting the LDAP
  modify
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15777
@@ -6351,13 +6351,13 @@ index 6fad112ca00..a2654c1f504 100644
  	ads_print_error(ret, ads->ldap.ld);
  	TALLOC_FREE(utf8_dn);
 -- 
-2.50.0
+2.51.0
 
 
 From 533e8f650e3aec632730d144f629a97e6fe37afc Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Mon, 13 Jan 2025 20:26:01 +0100
-Subject: [PATCH 27/31] selfest: add test for non-local offlinejoin provision
+Subject: [PATCH 27/43] selfest: add test for non-local offlinejoin provision
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15777
 
@@ -6396,13 +6396,13 @@ index d885b337cea..e5b57e5431a 100755
  
  testit "provision without dcname" $VALGRIND $net_tool offlinejoin provision domain=$REALM machine_name=$netbios savefile=$ODJFILE -U$DC_USERNAME%$DC_PASSWORD || failed=$(expr $failed + 1)
 -- 
-2.50.0
+2.51.0
 
 
 From acf26ab8f5cc1ab4aef98c00143a2ed21468d45d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 14 Jan 2025 19:16:31 +0100
-Subject: [PATCH 28/31] s3-libnet: avoid using lp_dns_hostname() in join code
+Subject: [PATCH 28/43] s3-libnet: avoid using lp_dns_hostname() in join code
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15777
 
@@ -6446,13 +6446,13 @@ index d49d54436bb..f98d132d50f 100644
  		status = ADS_ERROR_LDAP(LDAP_NO_MEMORY);
  		goto done;
 -- 
-2.50.0
+2.51.0
 
 
 From 85ced19665fd27f1ab33b9bf9b971e640d3212ea Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 11 Oct 2024 13:32:22 +0000
-Subject: [PATCH 29/31] s3:libsmb: let discover_dc_netbios() return
+Subject: [PATCH 29/43] s3:libsmb: let discover_dc_netbios() return
  DOMAIN_CONTROLLER_NOT_FOUND
 
 We may get NT_STATUS_NOT_FOUND when the name can't be resolved
@@ -6492,13 +6492,13 @@ index 654893c172c..00e1fac6b93 100644
  	}
  
 -- 
-2.50.0
+2.51.0
 
 
 From 721eb10e2b2a409daac3b241b894ac2ebafd47f8 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Wed, 2 Jul 2025 21:59:48 +0200
-Subject: [PATCH 30/31] s3-winbindd: Fix internal winbind dsgetdcname calls
+Subject: [PATCH 30/43] s3-winbindd: Fix internal winbind dsgetdcname calls
  w.r.t. domain name
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -6676,13 +6676,13 @@ index 2234efeed54..c94d313e9fd 100644
 +	return wbdom->name;
 +}
 -- 
-2.50.0
+2.51.0
 
 
 From ea989a77c0f55b6be75cc274b351b9745fdb52f1 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 9 May 2025 09:38:41 +0200
-Subject: [PATCH 31/31] s3:winbindd: avoid using any netlogon call to get a dc
+Subject: [PATCH 31/43] s3:winbindd: avoid using any netlogon call to get a dc
  name
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
@@ -6984,5 +6984,1150 @@ index 0c7e9dd5491..4f855d424e5 100644
  
  NTSTATUS _wbint_LookupRids(struct pipes_struct *p, struct wbint_LookupRids *r)
 -- 
-2.50.0
+2.51.0
+
+
+From e4b8f235c45054cd3a29a9a54b2f835fce3fcdd3 Mon Sep 17 00:00:00 2001
+From: Aleksandr Sharov <asharov@redhat.com>
+Date: Fri, 4 Jul 2025 15:32:28 +0200
+Subject: [PATCH 32/43] Add check for the GPO link to have at least two
+ attributes separated by semicolumn. Allows to handle empty links.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15877
+RN: Fix handling of empty GPO link
+
+Singed-off-by: Alex Sharov (kororland@gmail.com)
+Reviewed-by: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Andreas Schneider <asn@cryptomilk.org>
+Autobuild-Date(master): Thu Jul 10 18:55:33 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 44ee31c0258b0afb3d3f2ce17942cc86e308a690)
+---
+ python/samba/gp/gpclass.py | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/python/samba/gp/gpclass.py b/python/samba/gp/gpclass.py
+index d86aacec138..07b4fb3e7bd 100644
+--- a/python/samba/gp/gpclass.py
++++ b/python/samba/gp/gpclass.py
+@@ -673,8 +673,10 @@ class GP_LINK:
+         self.gp_opts = int(gPOptions)
+ 
+     def gpo_parse_gplink(self, gPLink):
++        # normally formed link looks like [LDAP://host/path;options]
++        # empty link looks like [ ]
+         for p in gPLink.decode().split(']'):
+-            if not p:
++            if not p or ';' not in p:
+                 continue
+             log.debug('gpo_parse_gplink: processing link')
+             p = p.lstrip('[')
+-- 
+2.51.0
+
+
+From 683da4a43c1fc8ffabd44dbf829a6cb20ab93057 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Sun, 20 Jul 2025 17:59:37 +0200
+Subject: [PATCH 33/43] s3-selftest: add tests for "net ads kerberos" commands
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 18d0574a0fe4b5fd468f949cfaa507ab4519c9e6)
+---
+ selftest/knownfail                            |   3 +
+ source3/script/tests/test_net_ads_kerberos.sh | 158 ++++++++++++++++++
+ source3/selftest/tests.py                     |  12 ++
+ 3 files changed, 173 insertions(+)
+ create mode 100755 source3/script/tests/test_net_ads_kerberos.sh
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index 5f64e4edad0..802567c2404 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -344,3 +344,6 @@
+ # We currently don't send referrals for LDAP modify of non-replicated attrs
+ ^samba4.ldap.rodc.python\(rodc\).__main__.RodcTests.test_modify_nonreplicated.*
+ 
++# net ads kerberos
++samba3.blackbox.net_ads_kerberos.*net_ads_kerberos_kinit.*
++samba3.blackbox.net_ads_kerberos.*net_ads_kerberos_renew.*
+diff --git a/source3/script/tests/test_net_ads_kerberos.sh b/source3/script/tests/test_net_ads_kerberos.sh
+new file mode 100755
+index 00000000000..8a3c9ef2bc7
+--- /dev/null
++++ b/source3/script/tests/test_net_ads_kerberos.sh
+@@ -0,0 +1,158 @@
++#!/bin/sh
++
++if [ $# -lt 5 ]; then
++	cat <<EOF
++Usage: test_net_ads_kerberos.sh USERNAME REALM PASSWORD PREFIX
++EOF
++	exit 1
++fi
++
++USERNAME="$1"
++REALM="$2"
++PASSWORD="$3"
++PREFIX="$4"
++shift 4
++ADDARGS="$*"
++
++incdir=$(dirname "$0")/../../../testprogs/blackbox
++. "$incdir"/subunit.sh
++
++mkdir -p "$PREFIX"/private
++PACFILE=$PREFIX/private/pacsave.$$
++
++KRB5CCNAME_PATH="$PREFIX/net_ads_kerberos_krb5ccache"
++rm -f "$KRB5CCNAME_PATH"
++
++KRB5CCNAME="FILE:$KRB5CCNAME_PATH"
++
++
++#################################################
++## Test "net ads kerberos kinit" variants
++#################################################
++
++testit "net_ads_kerberos_kinit" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
++	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
++	|| failed=$((failed + 1))
++
++export KRB5CCNAME="$KRB5CCNAME_PATH"
++testit "net_ads_kerberos_kinit (KRB5CCNAME env set)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
++	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
++	|| failed=$((failed + 1))
++unset KRB5CCNAME
++rm -f "$KRB5CCNAME_PATH"
++
++# --use-krb5-ccache is not working
++#testit "net_ads_kerberos_kinit (with --use-krb5-ccache)" \
++#	$VALGRIND $BINDIR/net ads kerberos kinit \
++#	-U$USERNAME%$PASSWORD $ADDARGS \
++#	--use-krb5-ccache=${KRB5CCNAME} \
++#	|| failed=$((failed + 1))
++
++testit "net_ads_kerberos_kinit (-P)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
++	-P "$ADDARGS" \
++	|| failed=$((failed + 1))
++
++export KRB5CCNAME="$KRB5CCNAME_PATH"
++testit "net_ads_kerberos_kinit (-P and KRB5CCNAME env set)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
++	-P "$ADDARGS" \
++	|| failed=$((failed + 1))
++unset KRB5CCNAME
++rm -f "$KRB5CCNAME_PATH"
++
++# --use-krb5-ccache is not working
++#testit "net_ads_kerberos_kinit (-P with --use-krb5-ccache)" \
++#	$VALGRIND $BINDIR/net ads kerberos kinit \
++#	-P $ADDARGS \
++#	--use-krb5-ccache=${KRB5CCNAME} \
++#	|| failed=$((failed + 1))
++
++
++#################################################
++## Test "net ads kerberos renew" variants
++#################################################
++
++#testit "net_ads_kerberos_renew" \
++#	$VALGRIND $BINDIR/net ads kerberos renew \
++#	-U$USERNAME%$PASSWORD $ADDARGS \
++#	|| failed=$((failed + 1))
++#
++#export KRB5CCNAME=$KRB5CCNAME_PATH
++#testit "net_ads_kerberos_renew (KRB5CCNAME env)" \
++#	$VALGRIND $BINDIR/net ads kerberos renew \
++#	-U$USERNAME%$PASSWORD $ADDARGS \
++#	|| failed=$((failed + 1))
++#unset KRB5CCNAME
++#rm -f $KRB5CCNAME_PATH
++#
++# renew only succeeds with pre-kinit
++export KRB5CCNAME="$KRB5CCNAME_PATH"
++testit "net_ads_kerberos_kinit (KRB5CCNAME env set)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
++	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
++	|| failed=$((failed + 1))
++
++testit "net_ads_kerberos_renew" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos renew \
++	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
++	|| failed=$((failed + 1))
++unset KRB5CCNAME
++rm -f "$KRB5CCNAME_PATH"
++
++
++#################################################
++## Test "net ads kerberos pac" variants
++#################################################
++
++testit "net_ads_kerberos_pac_dump" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos pac dump \
++	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
++	|| failed=$((failed + 1))
++
++testit "net_ads_kerberos_pac_dump (-P)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos pac dump \
++	-P "$ADDARGS" \
++	|| failed=$((failed + 1))
++
++IMPERSONATE_PRINC="alice@$REALM"
++
++#testit "net_ads_kerberos_pac_dump (impersonate)" \
++#	$VALGRIND $BINDIR/net ads kerberos pac dump \
++#	-U$USERNAME%$PASSWORD \
++#	impersonate=$IMPERSONATE_PRINC $ADDARGS \
++#	|| failed=$((failed + 1))
++
++testit "net_ads_kerberos_pac_dump (impersonate and -P)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos pac dump \
++	-P \
++	impersonate="$IMPERSONATE_PRINC" "$ADDARGS" \
++	|| failed=$((failed + 1))
++
++# no clue why this doesn't work...
++#
++#testit_expect_failure "net_ads_kerberos_pac_save (without filename)"
++#	$VALGRIND $BINDIR/net ads kerberos pac save \
++#	-U$USERNAME%$PASSWORD $ADDARGS \
++#	|| failed=$((failed + 1))
++
++testit "net_ads_kerberos_pac_save" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos pac save \
++	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
++	filename="$PACFILE" \
++	|| failed=$((failed + 1))
++
++rm -f "$PACFILE"
++
++testit "net_ads_kerberos_pac_save (-P)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos pac save \
++	-P "$ADDARGS" \
++	filename="$PACFILE" \
++	|| failed=$((failed + 1))
++
++rm -f "$PACFILE"
++rm -f "$KRB5CCNAME_PATH"
++
++testok "$0" "$failed"
+diff --git a/source3/selftest/tests.py b/source3/selftest/tests.py
+index fe67a4df896..86d660800dc 100755
+--- a/source3/selftest/tests.py
++++ b/source3/selftest/tests.py
+@@ -1887,6 +1887,18 @@ plantestsuite(
+      "bin/samba-tool",
+      '$DNSNAME'])
+ 
++for auth in ["$DC_USERNAME", "$DOMAIN\\\\$DC_USERNAME", "$DC_USERNAME@$REALM" ]:
++    plantestsuite(
++        "samba3.blackbox.net_ads_kerberos (%s)" % auth,
++        "ad_member:local",
++        [os.path.join(samba3srcdir,
++                      "script/tests/test_net_ads_kerberos.sh"),
++         auth,
++         '$REALM',
++         '$DC_PASSWORD',
++         '$PREFIX',
++         configuration])
++
+ plantestsuite("samba3.blackbox.force-user-unlink",
+               "maptoguest:local",
+               [os.path.join(samba3srcdir,
+-- 
+2.51.0
+
+
+From 67778c21802a69a71973d35ee0e6746ffb844cb2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Sun, 20 Jul 2025 18:00:22 +0200
+Subject: [PATCH 34/43] s3-net: fix "net ads kerberos" krb5ccname handling
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+We can only rely on KRB5CCNAME being set, --use-krb5-ccname content is
+not available.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Günther Deschner <gd@samba.org>
+Autobuild-Date(master): Thu Jul 24 17:31:14 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 8a97afdae788e8d10a51035f8b287dc00293f90d)
+---
+ selftest/knownfail      |  4 ----
+ source3/utils/net.c     | 15 +++++++++++++++
+ source3/utils/net.h     |  1 +
+ source3/utils/net_ads.c |  6 +++---
+ 4 files changed, 19 insertions(+), 7 deletions(-)
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index 802567c2404..a7a2e2b2251 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -343,7 +343,3 @@
+ 
+ # We currently don't send referrals for LDAP modify of non-replicated attrs
+ ^samba4.ldap.rodc.python\(rodc\).__main__.RodcTests.test_modify_nonreplicated.*
+-
+-# net ads kerberos
+-samba3.blackbox.net_ads_kerberos.*net_ads_kerberos_kinit.*
+-samba3.blackbox.net_ads_kerberos.*net_ads_kerberos_renew.*
+diff --git a/source3/utils/net.c b/source3/utils/net.c
+index c432ebe991f..7ce93ced79e 100644
+--- a/source3/utils/net.c
++++ b/source3/utils/net.c
+@@ -1394,6 +1394,7 @@ static struct functable net_func[] = {
+ 			cli_credentials_get_principal_obtained(c->creds);
+ 		enum credentials_obtained password_obtained =
+ 			cli_credentials_get_password_obtained(c->creds);
++		char *krb5ccname = NULL;
+ 
+ 		if (principal_obtained == CRED_SPECIFIED) {
+ 			c->explicit_credentials = true;
+@@ -1410,6 +1411,20 @@ static struct functable net_func[] = {
+ 				GENSEC_FEATURE_NTLM_CCACHE,
+ 				CRED_SPECIFIED);
+ 		}
++
++		/* cli_credentials_get_ccache_name_obtained() would not work
++		 * here, we also cannot get the content of --use-krb5-ccache= so
++		 * for now at least honour the KRB5CCNAME environment variable
++		 * to get 'net ads kerberos' functions to work at all - gd */
++
++		krb5ccname = getenv("KRB5CCNAME");
++		if (krb5ccname == NULL) {
++			krb5ccname = talloc_strdup(c, "MEMORY:net");
++		}
++		if (krb5ccname == NULL) {
++			exit(1);
++		}
++		c->opt_krb5_ccache = krb5ccname;
+ 	}
+ 
+ 	c->msg_ctx = cmdline_messaging_context(get_dyn_CONFIGFILE());
+diff --git a/source3/utils/net.h b/source3/utils/net.h
+index 8540a6db9d4..8a4218b529f 100644
+--- a/source3/utils/net.h
++++ b/source3/utils/net.h
+@@ -97,6 +97,7 @@ struct net_context {
+ 	const char *opt_witness_new_ip;
+ 	int opt_witness_new_node;
+ 	const char *opt_witness_forced_response;
++	const char *opt_krb5_ccache;
+ 
+ 	int opt_have_ip;
+ 	struct sockaddr_storage opt_dest_ip;
+diff --git a/source3/utils/net_ads.c b/source3/utils/net_ads.c
+index 0e5da492faf..394a65d9a59 100644
+--- a/source3/utils/net_ads.c
++++ b/source3/utils/net_ads.c
+@@ -3041,7 +3041,7 @@ static int net_ads_kerberos_renew(struct net_context *c, int argc, const char **
+ 		return -1;
+ 	}
+ 
+-	ret = smb_krb5_renew_ticket(NULL, NULL, NULL, NULL);
++	ret = smb_krb5_renew_ticket(c->opt_krb5_ccache, NULL, NULL, NULL);
+ 	if (ret) {
+ 		d_printf(_("failed to renew kerberos ticket: %s\n"),
+ 			error_message(ret));
+@@ -3096,7 +3096,7 @@ static int net_ads_kerberos_pac_common(struct net_context *c, int argc, const ch
+ 				     0,
+ 				     NULL,
+ 				     NULL,
+-				     NULL,
++				     c->opt_krb5_ccache,
+ 				     true,
+ 				     true,
+ 				     2592000, /* one month */
+@@ -3277,7 +3277,7 @@ static int net_ads_kerberos_kinit(struct net_context *c, int argc, const char **
+ 					  0,
+ 					  NULL,
+ 					  NULL,
+-					  NULL,
++					  c->opt_krb5_ccache,
+ 					  true,
+ 					  true,
+ 					  2592000, /* one month */
+-- 
+2.51.0
+
+
+From d5f1752f88264d39bfb9bc2532d1d005e797aaf9 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Wed, 23 Jul 2025 15:09:21 +0200
+Subject: [PATCH 35/43] s3:winbindd: Resolve dc name using CLDAP also for
+ ROLE_IPA_DC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+server role ROLE_IPA_DC (introduced in e2d5b4d) needs special handling
+in dcip_check_name().  We should resolve the DC name using:
+- CLDAP in dcip_check_name_ads()
+instead of:
+- NETBIOS in nbt_getdc() that fails if Windows is not providing netbios.
+
+The impacted environment has:
+
+domain->alt_name = example.com
+domain->active_directory = 1
+security = USER
+server role = ROLE_IPA_DC
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15891
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Pair-programmed-with: Andreas Schneider <asn@samba.org>
+
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+(cherry picked from commit 4921c3304e5e0480e5bb80a757b3f04b3b92c3b1)
+(cherry picked from commit fe8eafc289dfbb6f2b6c706f2a8a68186807d4f8)
+---
+ source3/winbindd/winbindd_cm.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/winbindd/winbindd_cm.c b/source3/winbindd/winbindd_cm.c
+index 602f81ad621..95438d6cebc 100644
+--- a/source3/winbindd/winbindd_cm.c
++++ b/source3/winbindd/winbindd_cm.c
+@@ -1089,7 +1089,9 @@ static bool dcip_check_name(TALLOC_CTX *mem_ctx,
+ 
+ 	if ((lp_security() == SEC_ADS) && (domain->alt_name != NULL)) {
+ 		is_ad_domain = true;
+-	} else if (lp_server_role() == ROLE_ACTIVE_DIRECTORY_DC) {
++	} else if (lp_server_role() == ROLE_ACTIVE_DIRECTORY_DC ||
++		   lp_server_role() == ROLE_IPA_DC)
++	{
+ 		is_ad_domain = domain->active_directory;
+ 	}
+ 
+-- 
+2.51.0
+
+
+From c5c6536e41d07b8a3d54d7159e44cbf2d8db22f2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 4 Aug 2025 08:35:29 +0200
+Subject: [PATCH 36/43] docs-xml: Make smb.conf 'server role' value consistent
+ with ROLE_IPA_DC in libparam
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15891
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit d88268102ade07fab345e04109818d97d8843a14)
+(cherry picked from commit d14fa6eb96a9f296d386ff4864e4f016440f2ac8)
+---
+ docs-xml/smbdotconf/security/serverrole.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/docs-xml/smbdotconf/security/serverrole.xml b/docs-xml/smbdotconf/security/serverrole.xml
+index 4ea4e4751ee..40244e125ce 100644
+--- a/docs-xml/smbdotconf/security/serverrole.xml
++++ b/docs-xml/smbdotconf/security/serverrole.xml
+@@ -78,7 +78,7 @@
+     url="http://wiki.samba.org/index.php/Samba4/HOWTO">Samba4
+     HOWTO</ulink></para>
+ 
+-    <para><anchor id="IPA-DC"/><emphasis>SERVER ROLE = IPA DOMAIN CONTROLLER</emphasis></para>
++    <para><anchor id="IPA-DC"/><emphasis>SERVER ROLE = IPA PRIMARY DOMAIN CONTROLLER</emphasis></para>
+ 
+     <para>This mode of operation runs Samba in a hybrid mode for IPA
+     domain controller, providing forest trust to Active Directory.
+-- 
+2.51.0
+
+
+From c3f3ffa897890ebf0bceaff2fd50ff03d978b336 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 4 Aug 2025 23:26:02 +0200
+Subject: [PATCH 37/43] s3:netlogon: IPA DC is the PDC as well - allow
+ ROLE_IPA_DC in _netr_DsRGetForestTrustInformation()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15891
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 1dbafcc4e4ff8f39af5ca737b30e9821413dd1f2)
+(cherry picked from commit 00adb3104e745babb2c330fa9c9e324805395edb)
+---
+ source3/rpc_server/netlogon/srv_netlog_nt.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/source3/rpc_server/netlogon/srv_netlog_nt.c b/source3/rpc_server/netlogon/srv_netlog_nt.c
+index 2ba16d423e3..613269824d6 100644
+--- a/source3/rpc_server/netlogon/srv_netlog_nt.c
++++ b/source3/rpc_server/netlogon/srv_netlog_nt.c
+@@ -2655,7 +2655,10 @@ WERROR _netr_DsRGetForestTrustInformation(struct pipes_struct *p,
+ 		return WERR_INVALID_FLAGS;
+ 	}
+ 
+-	if ((r->in.flags & DS_GFTI_UPDATE_TDO) && (lp_server_role() != ROLE_DOMAIN_PDC)) {
++	if ((r->in.flags & DS_GFTI_UPDATE_TDO) &&
++	    (lp_server_role() != ROLE_DOMAIN_PDC) &&
++	    (lp_server_role() != ROLE_IPA_DC))
++	{
+ 		p->fault_state = DCERPC_FAULT_OP_RNG_ERROR;
+ 		return WERR_NERR_NOTPRIMARY;
+ 	}
+-- 
+2.51.0
+
+
+From dac03d657380df79111ef642bc8e9ea9091f1a59 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 4 Aug 2025 23:28:24 +0200
+Subject: [PATCH 38/43] s3:utils: Allow ROLE_IPA_DC to allow to use Kerberos in
+ gensec
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15891
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Andreas Schneider <asn@cryptomilk.org>
+Autobuild-Date(master): Tue Aug  5 14:51:51 UTC 2025 on atb-devel-224
+
+(cherry picked from commit a4dff82e45308db3ccabac2a55c03d52f04d7b4d)
+
+Autobuild-User(v4-22-test): Jule Anger <janger@samba.org>
+Autobuild-Date(v4-22-test): Mon Aug 11 07:53:47 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 3364797676624aa9367076a69b2daf73870429ba)
+---
+ source3/utils/ntlm_auth.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/source3/utils/ntlm_auth.c b/source3/utils/ntlm_auth.c
+index e9b644724d9..df1484ecd21 100644
+--- a/source3/utils/ntlm_auth.c
++++ b/source3/utils/ntlm_auth.c
+@@ -1355,7 +1355,11 @@ static NTSTATUS ntlm_auth_prepare_gensec_server(TALLOC_CTX *mem_ctx,
+ 
+ 	cli_credentials_set_conf(server_credentials, lp_ctx);
+ 
+-	if (lp_server_role() == ROLE_ACTIVE_DIRECTORY_DC || lp_security() == SEC_ADS || USE_KERBEROS_KEYTAB) {
++	if (lp_server_role() == ROLE_ACTIVE_DIRECTORY_DC ||
++	    lp_server_role() == ROLE_IPA_DC ||
++	    lp_security() == SEC_ADS ||
++	    USE_KERBEROS_KEYTAB)
++	{
+ 		cli_credentials_set_kerberos_state(server_credentials,
+ 						   CRED_USE_KERBEROS_DESIRED,
+ 						   CRED_SPECIFIED);
+-- 
+2.51.0
+
+
+From 5e745666e306a8a39d6953df9c60a2ba49810bfa Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 22 Jul 2025 19:22:31 +0200
+Subject: [PATCH 39/43] libads: fix get_kdc_ip_string()
+
+Correctly handle the interaction between optionally passed in DC via
+pss and DC lookup.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(backported with some changes from commit 23f100f67c0586a940e91e9e1e6f42b804401322)
+---
+ source3/libads/kerberos.c | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/source3/libads/kerberos.c b/source3/libads/kerberos.c
+index 72ce5b7bb34..e0d8fe689d4 100644
+--- a/source3/libads/kerberos.c
++++ b/source3/libads/kerberos.c
+@@ -531,10 +531,12 @@ static char *get_kdc_ip_string(char *mem_ctx,
+ 	DBG_DEBUG("%zu additional KDCs to test\n", num_dcs);
+ 	if (num_dcs == 0) {
+ 		/*
+-		 * We do not have additional KDCs, but we have the one passed
+-		 * in via `pss`. So just use that one and leave.
++		 * We do not have additional KDCs, but if we have one passed
++		 * in via `pss` just use that one, otherwise fail
+ 		 */
+-		result = talloc_move(mem_ctx, &kdc_str);
++		if (pss != NULL) {
++			result = talloc_move(mem_ctx, &kdc_str);
++		}
+ 		goto out;
+ 	}
+ 
+@@ -575,6 +577,13 @@ static char *get_kdc_ip_string(char *mem_ctx,
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		DEBUG(10,("get_kdc_ip_string: cldap_multi_netlogon failed: "
+ 			  "%s\n", nt_errstr(status)));
++		/*
++		 * cldap_multi_netlogon() failed, but if we have one passed
++		 * in via `pss` just just use that one, otherwise fail
++		 */
++		if (pss != NULL) {
++			result = talloc_move(mem_ctx, &kdc_str);
++		}
+ 		goto out;
+ 	}
+ 
+-- 
+2.51.0
+
+
+From 49de00806ca9a31f838bb638592a544935540fa2 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 22 Jul 2025 19:16:14 +0200
+Subject: [PATCH 40/43] winbindd: use find_domain_from_name_noinit() in
+ find_dns_domain_name()
+
+Avoid triggering a connection to a DC of a trusted domain.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 9ad2e59a464bb472da2071c61a254547b6497625)
+---
+ source3/winbindd/winbindd_util.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source3/winbindd/winbindd_util.c b/source3/winbindd/winbindd_util.c
+index c94d313e9fd..79ed3f55423 100644
+--- a/source3/winbindd/winbindd_util.c
++++ b/source3/winbindd/winbindd_util.c
+@@ -2249,7 +2249,7 @@ const char *find_dns_domain_name(const char *domain_name)
+ {
+ 	struct winbindd_domain *wbdom = NULL;
+ 
+-	wbdom = find_domain_from_name(domain_name);
++	wbdom = find_domain_from_name_noinit(domain_name);
+ 	if (wbdom == NULL) {
+ 		return domain_name;
+ 	}
+-- 
+2.51.0
+
+
+From 7d0cb7446237e8058c916b523ebe588825744f86 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Tue, 29 Jul 2025 11:19:07 +0200
+Subject: [PATCH 41/43] selftest: Add the short name for localvampiredc to
+ hosts file
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15905
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+(cherry picked from commit 5d2f60ae5aa96751b74901ae5384291ef338b152)
+---
+ selftest/target/Samba4.pm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/selftest/target/Samba4.pm b/selftest/target/Samba4.pm
+index e917f65fc36..1a86f7a07d5 100755
+--- a/selftest/target/Samba4.pm
++++ b/selftest/target/Samba4.pm
+@@ -869,7 +869,7 @@ nogroup:x:65534:nobody
+ 
+ 	my $hostname = lc($ctx->{hostname});
+ 	open(HOSTS, ">>$ctx->{nsswrap_hosts}");
+-	if ($hostname eq "localdc") {
++	if ($hostname eq "localdc" || $hostname eq "localvampiredc") {
+ 		print HOSTS "$ctx->{ipv4} ${hostname}.$ctx->{dnsname} $ctx->{dnsname} ${hostname}\n";
+ 		print HOSTS "$ctx->{ipv6} ${hostname}.$ctx->{dnsname} $ctx->{dnsname} ${hostname}\n";
+ 	} else {
+-- 
+2.51.0
+
+
+From 915e0029ce8b476c15408fba5a74a8d32a80c2c5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 4 Aug 2025 11:20:54 +0200
+Subject: [PATCH 42/43] tests: Add test for 'net ads join' to a preferred DC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15905
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+(backported from commit 36f6ac547c09f492d1dcab11570e8bcbd377cf26)
+---
+ selftest/knownfail                            |  1 +
+ source4/selftest/tests.py                     |  1 +
+ .../test_net_ads_join_to_preferred_dc.sh      | 61 +++++++++++++++++++
+ 3 files changed, 63 insertions(+)
+ create mode 100755 testprogs/blackbox/test_net_ads_join_to_preferred_dc.sh
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index a7a2e2b2251..94d9ffc5fcb 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -340,6 +340,7 @@
+ ^samba.tests.dcerpc.dnsserver.samba.tests.dcerpc.dnsserver.DnsserverTests.test_security_descriptor.*
+ ^samba4.blackbox.dbcheck-links.release-4-5-0-pre1.dbcheck_dangling_multi_valued_clean
+ ^samba4.blackbox.dbcheck-links.release-4-5-0-pre1.dangling_multi_valued_check_missing
++^samba4.blackbox.net_ads_join.join
+ 
+ # We currently don't send referrals for LDAP modify of non-replicated attrs
+ ^samba4.ldap.rodc.python\(rodc\).__main__.RodcTests.test_modify_nonreplicated.*
+diff --git a/source4/selftest/tests.py b/source4/selftest/tests.py
+index 3b046c27a28..a77a3d8f780 100755
+--- a/source4/selftest/tests.py
++++ b/source4/selftest/tests.py
+@@ -897,6 +897,7 @@ plantestsuite("samba4.blackbox.rfc2307_mapping",
+ plantestsuite("samba4.blackbox.chgdcpass", "chgdcpass", [os.path.join(bbdir, "test_chgdcpass.sh"), '$SERVER', r"CHGDCPASS\$", '$REALM', '$DOMAIN', '$PREFIX/chgdcpass', "aes256-cts-hmac-sha1-96", '$PREFIX/chgdcpass', smbclient3])
+ plantestsuite("samba4.blackbox.samba_upgradedns(chgdcpass:local)", "chgdcpass:local", [os.path.join(bbdir, "test_samba_upgradedns.sh"), '$SERVER', '$REALM', '$PREFIX', '$SELFTEST_PREFIX/chgdcpass'])
+ plantestsuite("samba4.blackbox.net_ads", "ad_dc:client", [os.path.join(bbdir, "test_net_ads.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX_ABS'])
++plantestsuite("samba4.blackbox.net_ads_join", "vampire_dc:client", [os.path.join(bbdir, "test_net_ads_join_to_preferred_dc.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX'])
+ plantestsuite("samba4.blackbox.net_offlinejoin", "ad_dc:client", [os.path.join(bbdir, "test_net_offline.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX_ABS'])
+ plantestsuite("samba4.blackbox.client_etypes_all(ad_dc:client)", "ad_dc:client", [os.path.join(bbdir, "test_client_etypes.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX_ABS', 'all', '17_18_23'])
+ plantestsuite("samba4.blackbox.client_etypes_legacy(ad_dc:client)", "ad_dc:client", [os.path.join(bbdir, "test_client_etypes.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX_ABS', 'legacy', '23'])
+diff --git a/testprogs/blackbox/test_net_ads_join_to_preferred_dc.sh b/testprogs/blackbox/test_net_ads_join_to_preferred_dc.sh
+new file mode 100755
+index 00000000000..1bebc2f4dbe
+--- /dev/null
++++ b/testprogs/blackbox/test_net_ads_join_to_preferred_dc.sh
+@@ -0,0 +1,61 @@
++if [ $# -lt 4 ]; then
++	cat <<EOF
++Usage: test_net_ads.sh DC_SERVER DC_USERNAME DC_PASSWORD BASEDIR
++EOF
++	exit 1
++fi
++
++DC_SERVER=$1
++DC_USERNAME=$2
++DC_PASSWORD=$3
++BASEDIR=$4
++
++HOSTNAME=$(dd if=/dev/urandom bs=1 count=32 2>/dev/null | sha1sum | cut -b 1-10)
++
++RUNDIR=$(pwd)
++cd $BASEDIR
++WORKDIR=$(mktemp -d -p .)
++WORKDIR=$(basename $WORKDIR)
++cp -a client/* $WORKDIR/
++sed -ri "s@(dir|directory) = (.*)/client/@\1 = \2/$WORKDIR/@" $WORKDIR/client.conf
++sed -ri "s/netbios name = .*/netbios name = $HOSTNAME/" $WORKDIR/client.conf
++rm -f $WORKDIR/private/secrets.tdb
++cd $RUNDIR
++
++failed=0
++
++net_tool="$BINDIR/net --configfile=$BASEDIR/$WORKDIR/client.conf --option=security=ads"
++
++# Load test functions
++. $(dirname $0)/subunit.sh
++. "$(dirname "${0}")/common_test_fns.inc"
++
++# This test is run in environment with two DCs ('localdc' and 'localvampiredc')
++# The 'net ads join' has these two steps:
++#   1. create machine account at DC ('-S' points to 'localvampiredc')
++#   2. create keytab and sync the KVNO from a DC
++#
++# It must be ensured that in step #2 the keytab code contacts the same DC
++# ('localvampiredc'). The configuration below tries to break it.
++# We disable [SAF/DOMAIN/...] and [SAFJOIN/DOMAIN/...] by setting TTL to '-1'
++# And via setting 'password server' to 'localdc' we manage that
++# get_dc_list() returns 'localdc' instead of 'localvampiredc'
++#
++# As long as the keytab code is not explicitly told to use the same DC as join,
++# we get failure:
++# gensec_gse_client_prepare_ccache: Kinit for F0D26C71F6$@SAMBA.EXAMPLE.COM to access ldap/localdc.samba.example.com failed: Client not found in Kerberos database: NT_STATUS_LOGON_FAILURE
++
++cat <<EOF >>$BASEDIR/$WORKDIR/client.conf
++sync machine password to keytab = $BASEDIR/keytab:account_name:machine_password:sync_kvno
++password server = $DC_SERVER
++saf: join ttl = -1
++saf: ttl = -1
++EOF
++
++testit "join" $VALGRIND $net_tool ads join -S$SERVER -U$DC_USERNAME%$DC_PASSWORD || failed=$(expr $failed + 1)
++
++testit "leave" $VALGRIND $net_tool ads leave -U$DC_USERNAME%$DC_PASSWORD || failed=$(expr $failed + 1)
++
++rm -rf $BASEDIR/$WORKDIR
++
++exit $failed
+-- 
+2.51.0
+
+
+From f05b9d0ff206bd0ab8ab7b98f7458775ff0274dd Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Mon, 28 Jul 2025 10:43:36 +0200
+Subject: [PATCH 43/43] s3:net: Pass down the server from cmdline to
+ sync_pw2keytabs()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This makes sure that during 'net ads join' the keytab create code
+- sync_pw2keytabs() talks to the same DC at what the machine account
+was created.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15905
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Pair-Programmed-With: Pavel Filipenský <pfilipensky@samba.org>
+
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Fri Sep  5 13:38:33 UTC 2025 on atb-devel-224
+
+(backported from commit 5d1d3a8b568b5a07ed1ed537d20aa93820cecc14)
+---
+ selftest/knownfail                       |  1 -
+ source3/include/secrets.h                | 25 ++++++++++++++----------
+ source3/libads/ads_proto.h               |  2 +-
+ source3/libads/kerberos_keytab.c         | 24 ++++++++++++++++++++---
+ source3/libads/trusts_util.c             | 15 ++++++++------
+ source3/libads/util.c                    | 10 ++++++----
+ source3/libnet/libnet_join.c             |  2 +-
+ source3/passdb/machine_account_secrets.c | 10 ++++++----
+ source3/utils/net.c                      | 10 ++++++----
+ source3/utils/net_ads.c                  |  2 +-
+ 10 files changed, 66 insertions(+), 35 deletions(-)
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index 94d9ffc5fcb..a7a2e2b2251 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -340,7 +340,6 @@
+ ^samba.tests.dcerpc.dnsserver.samba.tests.dcerpc.dnsserver.DnsserverTests.test_security_descriptor.*
+ ^samba4.blackbox.dbcheck-links.release-4-5-0-pre1.dbcheck_dangling_multi_valued_clean
+ ^samba4.blackbox.dbcheck-links.release-4-5-0-pre1.dangling_multi_valued_check_missing
+-^samba4.blackbox.net_ads_join.join
+ 
+ # We currently don't send referrals for LDAP modify of non-replicated attrs
+ ^samba4.ldap.rodc.python\(rodc\).__main__.RodcTests.test_modify_nonreplicated.*
+diff --git a/source3/include/secrets.h b/source3/include/secrets.h
+index a454c8bb8ff..061b9c6ef34 100644
+--- a/source3/include/secrets.h
++++ b/source3/include/secrets.h
+@@ -125,12 +125,15 @@ char *secrets_domain_info_string(TALLOC_CTX *mem_ctx, const struct secrets_domai
+ NTSTATUS secrets_fetch_or_upgrade_domain_info(const char *domain,
+ 					TALLOC_CTX *mem_ctx,
+ 					struct secrets_domain_info1 **pinfo);
+-NTSTATUS secrets_prepare_password_change(const char *domain, const char *dcname,
+-					 const char *cleartext_unix,
+-					 TALLOC_CTX *mem_ctx,
+-					 struct secrets_domain_info1 **pinfo,
+-					 struct secrets_domain_info1_change **pprev,
+-					 NTSTATUS (*sync_pw2keytabs_fn)(void));
++NTSTATUS secrets_prepare_password_change(
++	const char *domain,
++	const char *dcname,
++	const char *cleartext_unix,
++	TALLOC_CTX *mem_ctx,
++	struct secrets_domain_info1 **pinfo,
++	struct secrets_domain_info1_change **pprev,
++	NTSTATUS (*sync_pw2keytabs_fn)(const char *),
++	const char *opt_host);
+ NTSTATUS secrets_failed_password_change(const char *change_server,
+ 					NTSTATUS local_status,
+ 					NTSTATUS remote_status,
+@@ -139,10 +142,12 @@ NTSTATUS secrets_defer_password_change(const char *change_server,
+ 				       NTSTATUS local_status,
+ 				       NTSTATUS remote_status,
+ 				       const struct secrets_domain_info1 *info);
+-NTSTATUS secrets_finish_password_change(const char *change_server,
+-					NTTIME change_time,
+-					const struct secrets_domain_info1 *info,
+-					NTSTATUS (*sync_pw2keytabs_fn)(void));
++NTSTATUS secrets_finish_password_change(
++	const char *change_server,
++	NTTIME change_time,
++	const struct secrets_domain_info1 *info,
++	NTSTATUS (*sync_pw2keytabs_fn)(const char *),
++	const char *prefer_dc);
+ bool secrets_delete_machine_password_ex(const char *domain, const char *realm);
+ bool secrets_delete_domain_sid(const char *domain);
+ char *secrets_fetch_prev_machine_password(const char *domain);
+diff --git a/source3/libads/ads_proto.h b/source3/libads/ads_proto.h
+index 8440c35e46d..2e67eef155c 100644
+--- a/source3/libads/ads_proto.h
++++ b/source3/libads/ads_proto.h
+@@ -230,6 +230,6 @@ struct spn_struct {
+ /* parse a windows style SPN, returns NULL if parsing fails */
+ struct spn_struct *parse_spn(TALLOC_CTX *ctx, const char *srvprinc);
+ 
+-NTSTATUS sync_pw2keytabs(void);
++NTSTATUS sync_pw2keytabs(const char *prefer_dc);
+ 
+ #endif /* _LIBADS_ADS_PROTO_H_ */
+diff --git a/source3/libads/kerberos_keytab.c b/source3/libads/kerberos_keytab.c
+index 5913db299ad..a549f42e5d3 100644
+--- a/source3/libads/kerberos_keytab.c
++++ b/source3/libads/kerberos_keytab.c
+@@ -84,6 +84,7 @@ struct pw2kt_global_state {
+ 	char *ad_upn;
+ 	char *ad_sam_account;
+ 	char **ad_spn_array;
++	const char *prefer_dc;
+ 	size_t ad_num_spns;
+ 	/* This is from secrets.db */
+ 	struct secrets_domain_info1 *info;
+@@ -852,8 +853,11 @@ static ADS_STATUS pw2kt_get_dc_info(struct pw2kt_global_state *state)
+ 	int count;
+ 	bool ok;
+ 	TALLOC_CTX *tmp_ctx = talloc_stackframe();
+-	ADS_STRUCT *ads = ads_init(
+-		tmp_ctx, lp_realm(), lp_workgroup(), NULL, ADS_SASL_SIGN);
++	ADS_STRUCT *ads = ads_init(tmp_ctx,
++				   lp_realm(),
++				   lp_workgroup(),
++				   state->prefer_dc,
++				   ADS_SASL_SIGN);
+ 
+ 	if (ads == NULL) {
+ 		DBG_ERR("ads_init() failed\n");
+@@ -1012,7 +1016,20 @@ static bool pw2kt_default_keytab_name(char *name_str, size_t name_size)
+ 	return true;
+ }
+ 
+-NTSTATUS sync_pw2keytabs(void)
++/**
++ * @internal
++ *
++ * @brief Sync machine password from secrets to keytab
++ *
++ * @param prefer_dc  The DC we should talk to. This is especially important
++ *                   during domain join. Pass NULL if we should pick a random
++ *                   one.
++ *
++ * @return An NTSTATUS error code.
++ *
++ * @see NT_STATUS_IS_OK()
++ */
++NTSTATUS sync_pw2keytabs(const char *prefer_dc)
+ {
+ 	TALLOC_CTX *frame = talloc_stackframe();
+ 	const struct loadparm_substitution *lp_sub =
+@@ -1038,6 +1055,7 @@ NTSTATUS sync_pw2keytabs(void)
+ 		TALLOC_FREE(frame);
+ 		return NT_STATUS_NO_MEMORY;
+ 	}
++	state->prefer_dc = prefer_dc;
+ 
+ 	lp_ptr = lp_sync_machine_password_to_keytab();
+ 	if (lp_ptr == NULL) {
+diff --git a/source3/libads/trusts_util.c b/source3/libads/trusts_util.c
+index 6f805f2365e..e774a0b73e6 100644
+--- a/source3/libads/trusts_util.c
++++ b/source3/libads/trusts_util.c
+@@ -325,10 +325,11 @@ NTSTATUS trust_pw_change(struct netlogon_creds_cli_context *context,
+ 							 &info,
+ 							 &prev,
+ #ifdef HAVE_ADS
+-							 sync_pw2keytabs);
++							 sync_pw2keytabs,
+ #else
+-							 NULL);
++							 NULL,
+ #endif
++							 NULL /* opt_host */);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DEBUG(0, ("secrets_prepare_password_change() failed for domain %s!\n",
+ 				  domain));
+@@ -429,10 +430,11 @@ NTSTATUS trust_pw_change(struct netlogon_creds_cli_context *context,
+ 			prev->password->change_time,
+ 			info,
+ #ifdef HAVE_ADS
+-			sync_pw2keytabs);
++			sync_pw2keytabs,
+ #else
+-			NULL);
++			NULL,
+ #endif
++			prev->password->change_server);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DEBUG(0, ("secrets_prepare_password_change() failed for domain %s!\n",
+ 				  domain));
+@@ -578,10 +580,11 @@ NTSTATUS trust_pw_change(struct netlogon_creds_cli_context *context,
+ 			info->next_change->change_time,
+ 			info,
+ #ifdef HAVE_ADS
+-			sync_pw2keytabs);
++			sync_pw2keytabs,
+ #else
+-			NULL);
++			NULL,
+ #endif
++			info->next_change->change_server);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DEBUG(0, ("secrets_finish_password_change() failed for domain %s!\n",
+ 				  domain));
+diff --git a/source3/libads/util.c b/source3/libads/util.c
+index 243dd09f3d0..360e556ab9b 100644
+--- a/source3/libads/util.c
++++ b/source3/libads/util.c
+@@ -59,10 +59,11 @@ ADS_STATUS ads_change_trust_account_password(ADS_STRUCT *ads, char *host_princip
+ 						 &info,
+ 						 &prev,
+ #ifdef HAVE_ADS
+-						 sync_pw2keytabs);
++						 sync_pw2keytabs,
+ #else
+-						 NULL);
++						 NULL,
+ #endif
++						 ads->auth.kdc_server);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		return ADS_ERROR_NT(status);
+ 	}
+@@ -138,10 +139,11 @@ ADS_STATUS ads_change_trust_account_password(ADS_STRUCT *ads, char *host_princip
+ 						now,
+ 						info,
+ #ifdef HAVE_ADS
+-						sync_pw2keytabs);
++						sync_pw2keytabs,
+ #else
+-						NULL);
++						NULL,
+ #endif
++						ads->auth.kdc_server);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		DEBUG(1,("Failed to save machine password\n"));
+ 		return ADS_ERROR_NT(status);
+diff --git a/source3/libnet/libnet_join.c b/source3/libnet/libnet_join.c
+index f98d132d50f..a3a08e34295 100644
+--- a/source3/libnet/libnet_join.c
++++ b/source3/libnet/libnet_join.c
+@@ -866,7 +866,7 @@ static ADS_STATUS libnet_join_set_etypes(TALLOC_CTX *mem_ctx,
+ static bool libnet_join_create_keytab(TALLOC_CTX *mem_ctx,
+ 				      struct libnet_JoinCtx *r)
+ {
+-	NTSTATUS ntstatus = sync_pw2keytabs();
++	NTSTATUS ntstatus = sync_pw2keytabs(r->in.dc_name);
+ 
+ 	return NT_STATUS_IS_OK(ntstatus);
+ }
+diff --git a/source3/passdb/machine_account_secrets.c b/source3/passdb/machine_account_secrets.c
+index 21571349004..8e16b2c5640 100644
+--- a/source3/passdb/machine_account_secrets.c
++++ b/source3/passdb/machine_account_secrets.c
+@@ -1674,7 +1674,8 @@ NTSTATUS secrets_prepare_password_change(const char *domain, const char *dcname,
+ 					 TALLOC_CTX *mem_ctx,
+ 					 struct secrets_domain_info1 **pinfo,
+ 					 struct secrets_domain_info1_change **pprev,
+-					 NTSTATUS (*sync_pw2keytabs_fn)(void))
++					 NTSTATUS (*sync_pw2keytabs_fn)(const char *),
++					 const char *opt_host)
+ {
+ 	TALLOC_CTX *frame = talloc_stackframe();
+ 	struct db_context *db = NULL;
+@@ -1770,7 +1771,7 @@ NTSTATUS secrets_prepare_password_change(const char *domain, const char *dcname,
+ 	}
+ 
+ 	if (prev == NULL && sync_pw2keytabs_fn != NULL) {
+-		status = sync_pw2keytabs_fn();
++		status = sync_pw2keytabs_fn(opt_host);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DBG_ERR("Sync of machine password failed.\n");
+ 			dbwrap_transaction_cancel(db);
+@@ -2023,7 +2024,8 @@ NTSTATUS secrets_defer_password_change(const char *change_server,
+ NTSTATUS secrets_finish_password_change(const char *change_server,
+ 					NTTIME change_time,
+ 					const struct secrets_domain_info1 *cookie,
+-					NTSTATUS (*sync_pw2keytabs_fn)(void))
++					NTSTATUS (*sync_pw2keytabs_fn)(const char *),
++					const char *prefer_dc)
+ {
+ 	const char *domain = cookie->domain_info.name.string;
+ 	TALLOC_CTX *frame = talloc_stackframe();
+@@ -2102,7 +2104,7 @@ NTSTATUS secrets_finish_password_change(const char *change_server,
+ 	}
+ 
+ 	if (sync_pw2keytabs_fn != NULL) {
+-		status = sync_pw2keytabs_fn();
++		status = sync_pw2keytabs_fn(prefer_dc);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DBG_ERR("Sync of machine password failed.\n");
+ 			TALLOC_FREE(frame);
+diff --git a/source3/utils/net.c b/source3/utils/net.c
+index 7ce93ced79e..ecabd980d0c 100644
+--- a/source3/utils/net.c
++++ b/source3/utils/net.c
+@@ -235,10 +235,11 @@ static int net_changesecretpw(struct net_context *c, int argc,
+ 							 &info,
+ 							 &prev,
+ #ifdef HAVE_ADS
+-							 sync_pw2keytabs);
++							 sync_pw2keytabs,
+ #else
+-							 NULL);
++							 NULL,
+ #endif
++							 c->opt_host);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			d_fprintf(stderr,
+ 			        _("Unable to write the machine account password in the secrets database"));
+@@ -261,10 +262,11 @@ static int net_changesecretpw(struct net_context *c, int argc,
+ 							now,
+ 							info,
+ #ifdef HAVE_ADS
+-							sync_pw2keytabs);
++							sync_pw2keytabs,
+ #else
+-							NULL);
++							NULL,
+ #endif
++							c->opt_host);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			d_fprintf(stderr,
+ 			        _("Unable to write the machine account password in the secrets database"));
+diff --git a/source3/utils/net_ads.c b/source3/utils/net_ads.c
+index 394a65d9a59..8fdf39f2e00 100644
+--- a/source3/utils/net_ads.c
++++ b/source3/utils/net_ads.c
+@@ -2968,7 +2968,7 @@ static int net_ads_keytab_create(struct net_context *c, int argc, const char **a
+ 		goto out;
+ 	}
+ 
+-	ntstatus = sync_pw2keytabs();
++	ntstatus = sync_pw2keytabs(c->opt_host);
+ 	ret = NT_STATUS_IS_OK(ntstatus) ? 0 : 1;
+ out:
+ 	TALLOC_FREE(tmp_ctx);
+-- 
+2.51.0
 

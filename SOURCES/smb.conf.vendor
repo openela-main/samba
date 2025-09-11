@@ -35,7 +35,8 @@
 [print$]
 	comment = Printer Drivers
 	path = /var/lib/samba/drivers
-	write list = @printadmin root
-	force group = @printadmin
+	# printadmin is a local group
+	write list = printadmin root
+	force group = printadmin
 	create mask = 0664
 	directory mask = 0775
