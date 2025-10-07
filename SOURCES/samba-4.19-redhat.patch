@@ -1,7 +1,7 @@
 From 3c29fc78029e1274f931e171c9e04c19ad0182c1 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:05:54 +0300
-Subject: [PATCH 01/38] gp: Support more global trust directories
+Subject: [PATCH 01/44] gp: Support more global trust directories
 
 In addition to the SUSE global trust directory, add support for RHEL and
 Debian-based distributions (including Ubuntu).
@@ -60,13 +60,13 @@ index 312c8ddf467..1b90ab46e90 100644
          # Symlink the certs to global trust dir
          dst = os.path.join(global_trust_dir, os.path.basename(src))
 -- 
-2.50.0
+2.51.0
 
 
 From 063606e8ec83a58972df47eb561ab267f8937ba4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:09:28 +0300
-Subject: [PATCH 02/38] gp: Support update-ca-trust helper
+Subject: [PATCH 02/44] gp: Support update-ca-trust helper
 
 This is used on RHEL/Fedora instead of update-ca-certificates. They
 behave similarly so it's enough to change the command name.
@@ -104,13 +104,13 @@ index 1b90ab46e90..cefdafa21b2 100644
          Popen([update]).wait()
      # Setup Certificate Auto Enrollment
 -- 
-2.50.0
+2.51.0
 
 
 From 3b548bf280ca59ef12a7af10a9131813067a850a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 11 Aug 2023 18:46:42 +0300
-Subject: [PATCH 03/38] gp: Change root cert extension suffix
+Subject: [PATCH 03/44] gp: Change root cert extension suffix
 
 On Ubuntu, certificates must end in '.crt' in order to be considered by
 the `update-ca-certificates` helper.
@@ -138,13 +138,13 @@ index cefdafa21b2..c562722906b 100644
                  w.write(cert)
              root_certs.append(dest)
 -- 
-2.50.0
+2.51.0
 
 
 From 7592ed5032836dc43f657f66607a0a4661edcdb4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:06:43 +0300
-Subject: [PATCH 04/38] gp: Test with binary content for certificate data
+Subject: [PATCH 04/44] gp: Test with binary content for certificate data
 
 This fails all GPO-related tests that call `gpupdate --rsop`.
 
@@ -216,13 +216,13 @@ index 00000000000..0aad59607c2
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.50.0
+2.51.0
 
 
 From 7f7b235bda9e85c5ea330e52e734d1113a884571 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:20:11 +0300
-Subject: [PATCH 05/38] gp: Convert CA certificates to base64
+Subject: [PATCH 05/44] gp: Convert CA certificates to base64
 
 I don't know whether this applies universally, but in our case the
 contents of `es['cACertificate'][0]` are binary, so cleanly converting
@@ -289,13 +289,13 @@ index 0aad59607c2..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.50.0
+2.51.0
 
 
 From 49cc74015a603e80048a38fe635cd1ac28938ee4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:16:23 +0300
-Subject: [PATCH 06/38] gp: Test adding new cert templates enforces changes
+Subject: [PATCH 06/44] gp: Test adding new cert templates enforces changes
 
 Ensure that cepces-submit reporting additional templates and re-applying
 will enforce the updated policy.
@@ -422,13 +422,13 @@ index 00000000000..4edc1dce730
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.50.0
+2.51.0
 
 
 From 4c0906bd79f030e591701234bc54bc749a42d686 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:37:17 +0300
-Subject: [PATCH 07/38] gp: Template changes should invalidate cache
+Subject: [PATCH 07/44] gp: Template changes should invalidate cache
 
 If certificate templates are added or removed, the autoenroll extension
 should react to this and reapply the policy. Previously this wasn't
@@ -487,13 +487,13 @@ index 4edc1dce730..00000000000
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_advanced_gp_cert_auto_enroll_ext
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.50.0
+2.51.0
 
 
 From e61f30dc2518d5a1c239f090baea4a309307f3f8 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:26:59 +0300
-Subject: [PATCH 08/38] gp: Test disabled enrollment unapplies policy
+Subject: [PATCH 08/44] gp: Test disabled enrollment unapplies policy
 
 For this we need to stage a Registry.pol file with certificate
 autoenrollment enabled, but with checkboxes unticked.
@@ -588,13 +588,13 @@ index 00000000000..83bc9f0ac1f
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.50.0
+2.51.0
 
 
 From 7757b9b48546d71e19798d1260da97780caa99c3 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:33:59 +0300
-Subject: [PATCH 09/38] gp: Send list of keys instead of dict to remove
+Subject: [PATCH 09/44] gp: Send list of keys instead of dict to remove
 
 `cache_get_all_attribute_values` returns a dict whereas we need to pass
 a list of keys to `remove`. These will be interpolated in the gpdb search.
@@ -634,13 +634,13 @@ index 83bc9f0ac1f..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext
 -- 
-2.50.0
+2.51.0
 
 
 From 4e9b2e6409c5764ec0e66cc6c90b08e70f702e7c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 9 Jan 2024 08:50:01 +0100
-Subject: [PATCH 10/38] python:gp: Print a nice message if cepces-submit can't
+Subject: [PATCH 10/44] python:gp: Print a nice message if cepces-submit can't
  be found
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15552
@@ -691,13 +691,13 @@ index 64c35782ae8..08d1a7348cd 100644
  
  def getca(ca, url, trust_dir):
 -- 
-2.50.0
+2.51.0
 
 
 From fb3aefff51c02cf8ba3f8dfeb7d3f971e8d4902a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Mon, 8 Jan 2024 18:05:08 +0200
-Subject: [PATCH 11/38] gpo: Test certificate policy without NDES
+Subject: [PATCH 11/44] gpo: Test certificate policy without NDES
 
 As of 8231eaf856b, the NDES feature is no longer required on Windows, as
 cert auto-enroll can use the certificate from the LDAP request.
@@ -895,13 +895,13 @@ index 00000000000..f1e590bc7d8
 @@ -0,0 +1 @@
 +^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.50.0
+2.51.0
 
 
 From 1a9af36177c7491687c75df151474bb10285f00e Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 18 Jan 2024 20:23:24 +0200
-Subject: [PATCH 12/38] gpo: Decode base64 root cert before importing
+Subject: [PATCH 12/44] gpo: Decode base64 root cert before importing
 
 The reasoning behind this is described in the previous commit message,
 but essentially this should either be wrapped in certificate blocks and
@@ -948,13 +948,13 @@ index f1e590bc7d8..00000000000
 @@ -1 +0,0 @@
 -^samba.tests.gpo.samba.tests.gpo.GPOTests.test_gp_cert_auto_enroll_ext_without_ndes
 -- 
-2.50.0
+2.51.0
 
 
 From f5fc88f9ae255f4dc135580f0fa4a02f5addc390 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 19 Jan 2024 11:36:19 +0200
-Subject: [PATCH 13/38] gpo: Do not get templates list on first run
+Subject: [PATCH 13/44] gpo: Do not get templates list on first run
 
 This is a visual fix and has no impact on functionality apart from
 cleaner log messages.
@@ -997,13 +997,13 @@ index cd5e54f1110..559c903e1a2 100644
          if changed(new_data, old_data) or self.cache_get_apply_state() == GPOSTATE.ENFORCE:
              self.unapply(guid, attribute, old_val)
 -- 
-2.50.0
+2.51.0
 
 
 From e8a6219181f2af87813b53fd09684650c1aa6f90 Mon Sep 17 00:00:00 2001
 From: David Mulder <dmulder@samba.org>
 Date: Fri, 5 Jan 2024 08:47:07 -0700
-Subject: [PATCH 14/38] gp: Skip site GP list if no site is found
+Subject: [PATCH 14/44] gp: Skip site GP list if no site is found
 
 [MS-GPOL] 3.2.5.1.4 Site Search says if the site
 search returns ERROR_NO_SITENAME, the GP site
@@ -1065,13 +1065,13 @@ index 617ef79350c..babd8f90748 100644
      # (L)ocal
      gpo_list.insert(0, gpo.GROUP_POLICY_OBJECT("Local Policy",
 -- 
-2.50.0
+2.51.0
 
 
 From d0d1a890d6f2466691fa4ee663232ee0bd1c3776 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:14:30 +0100
-Subject: [PATCH 15/38] python:gp: Avoid path check for cepces-submit
+Subject: [PATCH 15/44] python:gp: Avoid path check for cepces-submit
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1111,13 +1111,13 @@ index 559c903e1a2..7325d5132cf 100644
                    '%s --server=%s --auth=%s' % (cepces_submit,
                    ca['hostname'], auth)],
 -- 
-2.50.0
+2.51.0
 
 
 From 7f6c9a4945635c6eb8ada2255bd0febbf0f4e540 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:07:47 +0100
-Subject: [PATCH 16/38] python:gp: Improve logging for certificate enrollment
+Subject: [PATCH 16/44] python:gp: Improve logging for certificate enrollment
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1171,13 +1171,13 @@ index 7325d5132cf..a25a9678587 100644
      getcert = which('getcert')
      cepces_submit = find_cepces_submit()
 -- 
-2.50.0
+2.51.0
 
 
 From 5321d5b5bd24d7659743576f2e12a7dc0a93a828 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:04:36 +0100
-Subject: [PATCH 17/38] python:gp: Do not print an error, if CA already exists
+Subject: [PATCH 17/44] python:gp: Do not print an error, if CA already exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1217,13 +1217,13 @@ index a25a9678587..0b23cd688db 100644
          for template in supported_templates:
              attrs = fetch_template_attrs(ldb, template)
 -- 
-2.50.0
+2.51.0
 
 
 From 6a7a8a4090b8cdb8e71f4ad590260ceeda253ce2 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:02 +0100
-Subject: [PATCH 18/38] python:gp: Do not print an error if template already
+Subject: [PATCH 18/44] python:gp: Do not print an error if template already
  exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1264,13 +1264,13 @@ index 0b23cd688db..db681cb6f69 100644
              data['templates'].append(nickname)
          if update is not None:
 -- 
-2.50.0
+2.51.0
 
 
 From 43dc3d5d833bc1db885eb45402decd3225a7c946 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:24 +0100
-Subject: [PATCH 19/38] python:gp: Log an error if update fails
+Subject: [PATCH 19/44] python:gp: Log an error if update fails
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1301,13 +1301,13 @@ index db681cb6f69..c8ad2039dc6 100644
          log.warn('certmonger and cepces must be installed for ' +
                   'certificate auto enrollment to work')
 -- 
-2.50.0
+2.51.0
 
 
 From d8276d6a098d10f405b8f24c4dfb82af4496607c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:46:24 +0100
-Subject: [PATCH 20/38] python:gp: Improve working of log messages to avoid
+Subject: [PATCH 20/44] python:gp: Improve working of log messages to avoid
  confusion
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1354,13 +1354,13 @@ index c8ad2039dc6..2b7f7d22c2b 100644
              log.warn('Installing the server certificate only.')
              der_certificate = base64.b64decode(ca['cACertificate'])
 -- 
-2.50.0
+2.51.0
 
 
 From 585357bf0d8889747a2769c2451ee34766087d95 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 29 Jan 2024 17:46:30 +0100
-Subject: [PATCH 21/38] python:gp: Fix logging with gp
+Subject: [PATCH 21/44] python:gp: Fix logging with gp
 
 This allows enable INFO level logging with: `samba-gpupdate -d3`
 
@@ -1396,13 +1396,13 @@ index a74a8707d50..c3de32825db 100644
      logger.setLevel(logging.CRITICAL)
      if log_level == 1:
 -- 
-2.50.0
+2.51.0
 
 
 From 14ceb0b5f2f954bbabdaf78b8185fc515e3c8294 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 13 Mar 2024 13:55:41 +0100
-Subject: [PATCH 22/38] docs-xml: Add parameter all_groupmem to idmap_ad
+Subject: [PATCH 22/44] docs-xml: Add parameter all_groupmem to idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1438,13 +1438,13 @@ index b364bbfa231..de6d36afe95 100644
  		<listitem><para>This parameter is a list of OUs from
  		which objects will not be mapped via the ad idmap
 -- 
-2.50.0
+2.51.0
 
 
 From ac4184c8c3220263cb6f1a46a012533ed1c4e047 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 12 Mar 2024 13:20:24 +0100
-Subject: [PATCH 23/38] s3:winbindd: Improve performance of lookup_groupmem()
+Subject: [PATCH 23/44] s3:winbindd: Improve performance of lookup_groupmem()
  in idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1521,13 +1521,13 @@ index d7a665abbc6..e625aa6473f 100644
  	if (!NT_STATUS_IS_OK(status)) {
  		DEBUG(10, ("%s: add_primary_group_members failed: %s\n",
 -- 
-2.50.0
+2.51.0
 
 
 From d0e2002efcc37055b35c351a6b936e6ab89fad32 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 25 Mar 2024 22:38:18 +0100
-Subject: [PATCH 24/38] selftest: Add "winbind expand groups = 1" to
+Subject: [PATCH 24/44] selftest: Add "winbind expand groups = 1" to
  setup_ad_member_idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1555,13 +1555,13 @@ index 44ac4a5901a..606c65f8ab1 100755
  
  	my $ret = $self->provision(
 -- 
-2.50.0
+2.51.0
 
 
 From 9625b6aed981aa4e70fe11d9d1acdb54db7591a3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 14 Mar 2024 15:24:21 +0100
-Subject: [PATCH 25/38] tests: Add a test for "all_groups=no" to
+Subject: [PATCH 25/44] tests: Add a test for "all_groups=no" to
  test_idmap_ad.sh
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1628,13 +1628,13 @@ index 7ae112ada71..1d4bd395ba9 100755
  changetype: delete
  EOF
 -- 
-2.50.0
+2.51.0
 
 
 From e5890e63c35a4a5af29ae16e6dd734c4a3a304cc Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:51:53 +0200
-Subject: [PATCH 26/38] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
+Subject: [PATCH 26/44] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
  IP
 
 Remove the requirement to provide an IP address. We should look up the
@@ -1693,13 +1693,13 @@ index 50f4a6de3c6..ddf97c11973 100644
  
  	/*
 -- 
-2.50.0
+2.51.0
 
 
 From 96a1ecd8db249fa03db60259cf76fdef9c1bd749 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:53:51 +0200
-Subject: [PATCH 27/38] s3:libads: Do not fail if we don't get an IP passed
+Subject: [PATCH 27/44] s3:libads: Do not fail if we don't get an IP passed
  down
 
 The IP should be optional and we should look it up if not provided.
@@ -1727,13 +1727,13 @@ index ddf97c11973..f74d8eb567c 100644
  	}
  
 -- 
-2.50.0
+2.51.0
 
 
 From 4934642b7a7d92c6d81ba25ef6e4b66e3805f708 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:54:24 +0200
-Subject: [PATCH 28/38] s3:winbind: Fix idmap_ad creating an invalid local
+Subject: [PATCH 28/44] s3:winbind: Fix idmap_ad creating an invalid local
  krb5.conf
 
 In case of a trusted domain, we are providing the realm of the primary
@@ -1783,13 +1783,13 @@ index 5c9fe07db95..b8002825161 100644
  	if (!ok) {
  		DBG_DEBUG("Could not create private krb5.conf\n");
 -- 
-2.50.0
+2.51.0
 
 
 From cccc902c64c93db317bf4707d0af5e56b2887286 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jul 2024 12:26:55 +0200
-Subject: [PATCH 29/38] s3:notifyd: Use a watcher per db record
+Subject: [PATCH 29/44] s3:notifyd: Use a watcher per db record
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2301,13 +2301,13 @@ index 36c08f47c54..db8e6e1c005 100644
  
  #endif
 -- 
-2.50.0
+2.51.0
 
 
 From b04cb93ee52aac0ce7213d0581d69e852df52d4a Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 5 Feb 2024 15:03:48 +0100
-Subject: [PATCH 30/38] smbd: simplify handling of failing fstat() after
+Subject: [PATCH 30/44] smbd: simplify handling of failing fstat() after
  unlinking file
 
 close_remove_share_mode() already called vfs_stat_fsp(), so we can skip the
@@ -2365,13 +2365,13 @@ index 3581c4b9173..93c12e00eb0 100644
  	}
  
 -- 
-2.50.0
+2.51.0
 
 
 From 29f0c0fb2f1cb0cfc4c615d31e82048b46a2cb0d Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Tue, 20 Feb 2024 09:26:29 +0000
-Subject: [PATCH 31/38] s3/smbd: If we fail to close file_handle ensure we
+Subject: [PATCH 31/44] s3/smbd: If we fail to close file_handle ensure we
  should reset the fd
 
 if fsp_flags.fstat_before_close == true then close_file_smb will call
@@ -2446,13 +2446,13 @@ index 93c12e00eb0..74be444fef5 100644
  
  /****************************************************************************
 -- 
-2.50.0
+2.51.0
 
 
 From ed138c4d679e8291de18162e1cac65cc9da33b4d Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Wed, 15 Jan 2025 10:21:19 -0800
-Subject: [PATCH 32/38] auth: Add missing talloc_free() in error code path.
+Subject: [PATCH 32/44] auth: Add missing talloc_free() in error code path.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2483,13 +2483,13 @@ index b914075d85c..196654b36bd 100644
  		}
  
 -- 
-2.50.0
+2.51.0
 
 
 From f8a7d7a3e8c3be3c7742c874239766b34c25ef3e Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Thu, 16 Jan 2025 16:12:31 -0800
-Subject: [PATCH 33/38] auth: Cleanup exit code paths in kerberos_decode_pac().
+Subject: [PATCH 33/44] auth: Cleanup exit code paths in kerberos_decode_pac().
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2755,13 +2755,13 @@ index 196654b36bd..abb096bde1b 100644
  
  NTSTATUS kerberos_pac_logon_info(TALLOC_CTX *mem_ctx,
 -- 
-2.50.0
+2.51.0
 
 
 From 9fd06d5c331f5babaf417cc7339d12854a79fe4b Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 15 Feb 2024 17:29:46 +0100
-Subject: [PATCH 34/38] s3:libsmb/dsgetdcname: use
+Subject: [PATCH 34/44] s3:libsmb/dsgetdcname: use
  NETLOGON_NT_VERSION_AVOID_NT4EMUL
 
 In 2024 we always want an active directory response...
@@ -2792,13 +2792,13 @@ index 280ccd585b0..6fcaa26810c 100644
  
  	snprintf(my_acct_name,
 -- 
-2.50.0
+2.51.0
 
 
 From 58e28d056f2df0906ee77ccfb9b56e8a764b38b4 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Tue, 7 May 2024 14:53:24 +0000
-Subject: [PATCH 35/38] s3:libsmb: allow store_cldap_reply() to work with a
+Subject: [PATCH 35/44] s3:libsmb: allow store_cldap_reply() to work with a
  ipv6 response
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15642
@@ -2850,13 +2850,13 @@ index 6fcaa26810c..da173e7bbb0 100644
  	ndr_err = ndr_push_struct_blob(&blob, mem_ctx, r,
  		       (ndr_push_flags_fn_t)ndr_push_NETLOGON_SAM_LOGON_RESPONSE_EX);
 -- 
-2.50.0
+2.51.0
 
 
 From e4d5269b2359c670acdf0cba81248f148ae68c17 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 11 Oct 2024 13:32:22 +0000
-Subject: [PATCH 36/38] s3:libsmb: let discover_dc_netbios() return
+Subject: [PATCH 36/44] s3:libsmb: let discover_dc_netbios() return
  DOMAIN_CONTROLLER_NOT_FOUND
 
 We may get NT_STATUS_NOT_FOUND when the name can't be resolved
@@ -2896,13 +2896,13 @@ index da173e7bbb0..8278959dd7d 100644
  	}
  
 -- 
-2.50.0
+2.51.0
 
 
 From d90d2b0e985913247f43192cb94eec0efb3e9046 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Wed, 2 Jul 2025 21:59:48 +0200
-Subject: [PATCH 37/38] s3-winbindd: Fix internal winbind dsgetdcname calls
+Subject: [PATCH 37/44] s3-winbindd: Fix internal winbind dsgetdcname calls
  w.r.t. domain name
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3080,13 +3080,13 @@ index fe93528787d..eca4116d0c8 100644
 +	return wbdom->name;
 +}
 -- 
-2.50.0
+2.51.0
 
 
 From 7da6072ce95bca445368f6d0453247c8f92fcdf2 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 9 May 2025 09:38:41 +0200
-Subject: [PATCH 38/38] s3:winbindd: avoid using any netlogon call to get a dc
+Subject: [PATCH 38/44] s3:winbindd: avoid using any netlogon call to get a dc
  name
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
@@ -3383,5 +3383,270 @@ index f0fd18a8fa6..47c68257b12 100644
  
  NTSTATUS _wbint_LookupRids(struct pipes_struct *p, struct wbint_LookupRids *r)
 -- 
-2.50.0
+2.51.0
+
+
+From ad54ceadacfbcf0d9c96ad773e50db96003e2c08 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Wed, 23 Jul 2025 15:09:21 +0200
+Subject: [PATCH 39/44] s3:winbindd: Resolve dc name using CLDAP also for
+ ROLE_IPA_DC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+server role ROLE_IPA_DC (introduced in e2d5b4d) needs special handling
+in dcip_check_name().  We should resolve the DC name using:
+- CLDAP in dcip_check_name_ads()
+instead of:
+- NETBIOS in nbt_getdc() that fails if Windows is not providing netbios.
+
+The impacted environment has:
+
+domain->alt_name = example.com
+domain->active_directory = 1
+security = USER
+server role = ROLE_IPA_DC
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15891
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Pair-programmed-with: Andreas Schneider <asn@samba.org>
+
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+(cherry picked from commit 4921c3304e5e0480e5bb80a757b3f04b3b92c3b1)
+(cherry picked from commit fe8eafc289dfbb6f2b6c706f2a8a68186807d4f8)
+---
+ source3/winbindd/winbindd_cm.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/winbindd/winbindd_cm.c b/source3/winbindd/winbindd_cm.c
+index 195259daa43..86dbf68f033 100644
+--- a/source3/winbindd/winbindd_cm.c
++++ b/source3/winbindd/winbindd_cm.c
+@@ -1075,7 +1075,9 @@ static bool dcip_check_name(TALLOC_CTX *mem_ctx,
+ 
+ 	if ((lp_security() == SEC_ADS) && (domain->alt_name != NULL)) {
+ 		is_ad_domain = true;
+-	} else if (lp_server_role() == ROLE_ACTIVE_DIRECTORY_DC) {
++	} else if (lp_server_role() == ROLE_ACTIVE_DIRECTORY_DC ||
++		   lp_server_role() == ROLE_IPA_DC)
++	{
+ 		is_ad_domain = domain->active_directory;
+ 	}
+ 
+-- 
+2.51.0
+
+
+From b73efffbb02903427af2c2cc57171d4848ca11f8 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 4 Aug 2025 08:35:29 +0200
+Subject: [PATCH 40/44] docs-xml: Make smb.conf 'server role' value consistent
+ with ROLE_IPA_DC in libparam
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15891
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit d88268102ade07fab345e04109818d97d8843a14)
+(cherry picked from commit d14fa6eb96a9f296d386ff4864e4f016440f2ac8)
+---
+ docs-xml/smbdotconf/security/serverrole.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/docs-xml/smbdotconf/security/serverrole.xml b/docs-xml/smbdotconf/security/serverrole.xml
+index 4ea4e4751ee..40244e125ce 100644
+--- a/docs-xml/smbdotconf/security/serverrole.xml
++++ b/docs-xml/smbdotconf/security/serverrole.xml
+@@ -78,7 +78,7 @@
+     url="http://wiki.samba.org/index.php/Samba4/HOWTO">Samba4
+     HOWTO</ulink></para>
+ 
+-    <para><anchor id="IPA-DC"/><emphasis>SERVER ROLE = IPA DOMAIN CONTROLLER</emphasis></para>
++    <para><anchor id="IPA-DC"/><emphasis>SERVER ROLE = IPA PRIMARY DOMAIN CONTROLLER</emphasis></para>
+ 
+     <para>This mode of operation runs Samba in a hybrid mode for IPA
+     domain controller, providing forest trust to Active Directory.
+-- 
+2.51.0
+
+
+From 832a4e31630fd441f8ab4325439f90d561cb8fa4 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 4 Aug 2025 23:26:02 +0200
+Subject: [PATCH 41/44] s3:netlogon: IPA DC is the PDC as well - allow
+ ROLE_IPA_DC in _netr_DsRGetForestTrustInformation()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15891
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 1dbafcc4e4ff8f39af5ca737b30e9821413dd1f2)
+(cherry picked from commit 00adb3104e745babb2c330fa9c9e324805395edb)
+---
+ source3/rpc_server/netlogon/srv_netlog_nt.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/source3/rpc_server/netlogon/srv_netlog_nt.c b/source3/rpc_server/netlogon/srv_netlog_nt.c
+index c5a4b0ef30c..7957d3ab34d 100644
+--- a/source3/rpc_server/netlogon/srv_netlog_nt.c
++++ b/source3/rpc_server/netlogon/srv_netlog_nt.c
+@@ -2613,7 +2613,10 @@ WERROR _netr_DsRGetForestTrustInformation(struct pipes_struct *p,
+ 		return WERR_INVALID_FLAGS;
+ 	}
+ 
+-	if ((r->in.flags & DS_GFTI_UPDATE_TDO) && (lp_server_role() != ROLE_DOMAIN_PDC)) {
++	if ((r->in.flags & DS_GFTI_UPDATE_TDO) &&
++	    (lp_server_role() != ROLE_DOMAIN_PDC) &&
++	    (lp_server_role() != ROLE_IPA_DC))
++	{
+ 		p->fault_state = DCERPC_FAULT_OP_RNG_ERROR;
+ 		return WERR_NERR_NOTPRIMARY;
+ 	}
+-- 
+2.51.0
+
+
+From 8d5638581dfc539c8524d7a507e8cc8977e827a2 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 4 Aug 2025 23:28:24 +0200
+Subject: [PATCH 42/44] s3:utils: Allow ROLE_IPA_DC to allow to use Kerberos in
+ gensec
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15891
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Andreas Schneider <asn@cryptomilk.org>
+Autobuild-Date(master): Tue Aug  5 14:51:51 UTC 2025 on atb-devel-224
+
+(cherry picked from commit a4dff82e45308db3ccabac2a55c03d52f04d7b4d)
+
+Autobuild-User(v4-22-test): Jule Anger <janger@samba.org>
+Autobuild-Date(v4-22-test): Mon Aug 11 07:53:47 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 3364797676624aa9367076a69b2daf73870429ba)
+---
+ source3/utils/ntlm_auth.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/source3/utils/ntlm_auth.c b/source3/utils/ntlm_auth.c
+index cff3c53845f..2968ca47734 100644
+--- a/source3/utils/ntlm_auth.c
++++ b/source3/utils/ntlm_auth.c
+@@ -1341,7 +1341,11 @@ static NTSTATUS ntlm_auth_prepare_gensec_server(TALLOC_CTX *mem_ctx,
+ 
+ 	cli_credentials_set_conf(server_credentials, lp_ctx);
+ 
+-	if (lp_server_role() == ROLE_ACTIVE_DIRECTORY_DC || lp_security() == SEC_ADS || USE_KERBEROS_KEYTAB) {
++	if (lp_server_role() == ROLE_ACTIVE_DIRECTORY_DC ||
++	    lp_server_role() == ROLE_IPA_DC ||
++	    lp_security() == SEC_ADS ||
++	    USE_KERBEROS_KEYTAB)
++	{
+ 		cli_credentials_set_kerberos_state(server_credentials,
+ 						   CRED_USE_KERBEROS_DESIRED,
+ 						   CRED_SPECIFIED);
+-- 
+2.51.0
+
+
+From 3ef02a381cdc83549506e159ebc457730c06c547 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 22 Jul 2025 19:22:31 +0200
+Subject: [PATCH 43/44] libads: fix get_kdc_ip_string()
+
+Correctly handle the interaction between optionally passed in DC via
+pss and DC lookup.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 23f100f67c0586a940e91e9e1e6f42b804401322)
+---
+ source3/libads/kerberos.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/source3/libads/kerberos.c b/source3/libads/kerberos.c
+index f74d8eb567c..f324321c87b 100644
+--- a/source3/libads/kerberos.c
++++ b/source3/libads/kerberos.c
+@@ -523,10 +523,12 @@ static char *get_kdc_ip_string(char *mem_ctx,
+ 	DBG_DEBUG("%zu additional KDCs to test\n", num_dcs);
+ 	if (num_dcs == 0) {
+ 		/*
+-		 * We do not have additional KDCs, but we have the one passed
+-		 * in via `pss`. So just use that one and leave.
++		 * We do not have additional KDCs, but if we have one passed
++		 * in via `pss` just use that one, otherwise fail
+ 		 */
+-		result = talloc_move(mem_ctx, &kdc_str);
++		if (pss != NULL) {
++			result = talloc_move(mem_ctx, &kdc_str);
++		}
+ 		goto out;
+ 	}
+ 
+@@ -567,6 +569,9 @@ static char *get_kdc_ip_string(char *mem_ctx,
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		DEBUG(10,("get_kdc_ip_string: cldap_multi_netlogon failed: "
+ 			  "%s\n", nt_errstr(status)));
++		if (pss != NULL) {
++			result = talloc_move(mem_ctx, &kdc_str);
++		}
+ 		goto out;
+ 	}
+ 
+-- 
+2.51.0
+
+
+From b0dbc167f85deabff2af5b18bc201e8db0d3b97d Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 22 Jul 2025 19:16:14 +0200
+Subject: [PATCH 44/44] winbindd: use find_domain_from_name_noinit() in
+ find_dns_domain_name()
+
+Avoid triggering a connection to a DC of a trusted domain.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 9ad2e59a464bb472da2071c61a254547b6497625)
+---
+ source3/winbindd/winbindd_util.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source3/winbindd/winbindd_util.c b/source3/winbindd/winbindd_util.c
+index eca4116d0c8..3a7a9114988 100644
+--- a/source3/winbindd/winbindd_util.c
++++ b/source3/winbindd/winbindd_util.c
+@@ -2189,7 +2189,7 @@ const char *find_dns_domain_name(const char *domain_name)
+ {
+ 	struct winbindd_domain *wbdom = NULL;
+ 
+-	wbdom = find_domain_from_name(domain_name);
++	wbdom = find_domain_from_name_noinit(domain_name);
+ 	if (wbdom == NULL) {
+ 		return domain_name;
+ 	}
+-- 
+2.51.0
 
