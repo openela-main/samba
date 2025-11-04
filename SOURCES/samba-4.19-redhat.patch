@@ -1,7 +1,7 @@
 From 3c29fc78029e1274f931e171c9e04c19ad0182c1 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:05:54 +0300
-Subject: [PATCH 01/44] gp: Support more global trust directories
+Subject: [PATCH 01/63] gp: Support more global trust directories
 
 In addition to the SUSE global trust directory, add support for RHEL and
 Debian-based distributions (including Ubuntu).
@@ -66,7 +66,7 @@ index 312c8ddf467..1b90ab46e90 100644
 From 063606e8ec83a58972df47eb561ab267f8937ba4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:09:28 +0300
-Subject: [PATCH 02/44] gp: Support update-ca-trust helper
+Subject: [PATCH 02/63] gp: Support update-ca-trust helper
 
 This is used on RHEL/Fedora instead of update-ca-certificates. They
 behave similarly so it's enough to change the command name.
@@ -110,7 +110,7 @@ index 1b90ab46e90..cefdafa21b2 100644
 From 3b548bf280ca59ef12a7af10a9131813067a850a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 11 Aug 2023 18:46:42 +0300
-Subject: [PATCH 03/44] gp: Change root cert extension suffix
+Subject: [PATCH 03/63] gp: Change root cert extension suffix
 
 On Ubuntu, certificates must end in '.crt' in order to be considered by
 the `update-ca-certificates` helper.
@@ -144,7 +144,7 @@ index cefdafa21b2..c562722906b 100644
 From 7592ed5032836dc43f657f66607a0a4661edcdb4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:06:43 +0300
-Subject: [PATCH 04/44] gp: Test with binary content for certificate data
+Subject: [PATCH 04/63] gp: Test with binary content for certificate data
 
 This fails all GPO-related tests that call `gpupdate --rsop`.
 
@@ -222,7 +222,7 @@ index 00000000000..0aad59607c2
 From 7f7b235bda9e85c5ea330e52e734d1113a884571 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:20:11 +0300
-Subject: [PATCH 05/44] gp: Convert CA certificates to base64
+Subject: [PATCH 05/63] gp: Convert CA certificates to base64
 
 I don't know whether this applies universally, but in our case the
 contents of `es['cACertificate'][0]` are binary, so cleanly converting
@@ -295,7 +295,7 @@ index 0aad59607c2..00000000000
 From 49cc74015a603e80048a38fe635cd1ac28938ee4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:16:23 +0300
-Subject: [PATCH 06/44] gp: Test adding new cert templates enforces changes
+Subject: [PATCH 06/63] gp: Test adding new cert templates enforces changes
 
 Ensure that cepces-submit reporting additional templates and re-applying
 will enforce the updated policy.
@@ -428,7 +428,7 @@ index 00000000000..4edc1dce730
 From 4c0906bd79f030e591701234bc54bc749a42d686 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:37:17 +0300
-Subject: [PATCH 07/44] gp: Template changes should invalidate cache
+Subject: [PATCH 07/63] gp: Template changes should invalidate cache
 
 If certificate templates are added or removed, the autoenroll extension
 should react to this and reapply the policy. Previously this wasn't
@@ -493,7 +493,7 @@ index 4edc1dce730..00000000000
 From e61f30dc2518d5a1c239f090baea4a309307f3f8 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:26:59 +0300
-Subject: [PATCH 08/44] gp: Test disabled enrollment unapplies policy
+Subject: [PATCH 08/63] gp: Test disabled enrollment unapplies policy
 
 For this we need to stage a Registry.pol file with certificate
 autoenrollment enabled, but with checkboxes unticked.
@@ -594,7 +594,7 @@ index 00000000000..83bc9f0ac1f
 From 7757b9b48546d71e19798d1260da97780caa99c3 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:33:59 +0300
-Subject: [PATCH 09/44] gp: Send list of keys instead of dict to remove
+Subject: [PATCH 09/63] gp: Send list of keys instead of dict to remove
 
 `cache_get_all_attribute_values` returns a dict whereas we need to pass
 a list of keys to `remove`. These will be interpolated in the gpdb search.
@@ -640,7 +640,7 @@ index 83bc9f0ac1f..00000000000
 From 4e9b2e6409c5764ec0e66cc6c90b08e70f702e7c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 9 Jan 2024 08:50:01 +0100
-Subject: [PATCH 10/44] python:gp: Print a nice message if cepces-submit can't
+Subject: [PATCH 10/63] python:gp: Print a nice message if cepces-submit can't
  be found
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15552
@@ -697,7 +697,7 @@ index 64c35782ae8..08d1a7348cd 100644
 From fb3aefff51c02cf8ba3f8dfeb7d3f971e8d4902a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Mon, 8 Jan 2024 18:05:08 +0200
-Subject: [PATCH 11/44] gpo: Test certificate policy without NDES
+Subject: [PATCH 11/63] gpo: Test certificate policy without NDES
 
 As of 8231eaf856b, the NDES feature is no longer required on Windows, as
 cert auto-enroll can use the certificate from the LDAP request.
@@ -901,7 +901,7 @@ index 00000000000..f1e590bc7d8
 From 1a9af36177c7491687c75df151474bb10285f00e Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 18 Jan 2024 20:23:24 +0200
-Subject: [PATCH 12/44] gpo: Decode base64 root cert before importing
+Subject: [PATCH 12/63] gpo: Decode base64 root cert before importing
 
 The reasoning behind this is described in the previous commit message,
 but essentially this should either be wrapped in certificate blocks and
@@ -954,7 +954,7 @@ index f1e590bc7d8..00000000000
 From f5fc88f9ae255f4dc135580f0fa4a02f5addc390 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 19 Jan 2024 11:36:19 +0200
-Subject: [PATCH 13/44] gpo: Do not get templates list on first run
+Subject: [PATCH 13/63] gpo: Do not get templates list on first run
 
 This is a visual fix and has no impact on functionality apart from
 cleaner log messages.
@@ -1003,7 +1003,7 @@ index cd5e54f1110..559c903e1a2 100644
 From e8a6219181f2af87813b53fd09684650c1aa6f90 Mon Sep 17 00:00:00 2001
 From: David Mulder <dmulder@samba.org>
 Date: Fri, 5 Jan 2024 08:47:07 -0700
-Subject: [PATCH 14/44] gp: Skip site GP list if no site is found
+Subject: [PATCH 14/63] gp: Skip site GP list if no site is found
 
 [MS-GPOL] 3.2.5.1.4 Site Search says if the site
 search returns ERROR_NO_SITENAME, the GP site
@@ -1071,7 +1071,7 @@ index 617ef79350c..babd8f90748 100644
 From d0d1a890d6f2466691fa4ee663232ee0bd1c3776 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:14:30 +0100
-Subject: [PATCH 15/44] python:gp: Avoid path check for cepces-submit
+Subject: [PATCH 15/63] python:gp: Avoid path check for cepces-submit
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1117,7 +1117,7 @@ index 559c903e1a2..7325d5132cf 100644
 From 7f6c9a4945635c6eb8ada2255bd0febbf0f4e540 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:07:47 +0100
-Subject: [PATCH 16/44] python:gp: Improve logging for certificate enrollment
+Subject: [PATCH 16/63] python:gp: Improve logging for certificate enrollment
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1177,7 +1177,7 @@ index 7325d5132cf..a25a9678587 100644
 From 5321d5b5bd24d7659743576f2e12a7dc0a93a828 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:04:36 +0100
-Subject: [PATCH 17/44] python:gp: Do not print an error, if CA already exists
+Subject: [PATCH 17/63] python:gp: Do not print an error, if CA already exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1223,7 +1223,7 @@ index a25a9678587..0b23cd688db 100644
 From 6a7a8a4090b8cdb8e71f4ad590260ceeda253ce2 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:02 +0100
-Subject: [PATCH 18/44] python:gp: Do not print an error if template already
+Subject: [PATCH 18/63] python:gp: Do not print an error if template already
  exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1270,7 +1270,7 @@ index 0b23cd688db..db681cb6f69 100644
 From 43dc3d5d833bc1db885eb45402decd3225a7c946 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:24 +0100
-Subject: [PATCH 19/44] python:gp: Log an error if update fails
+Subject: [PATCH 19/63] python:gp: Log an error if update fails
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1307,7 +1307,7 @@ index db681cb6f69..c8ad2039dc6 100644
 From d8276d6a098d10f405b8f24c4dfb82af4496607c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:46:24 +0100
-Subject: [PATCH 20/44] python:gp: Improve working of log messages to avoid
+Subject: [PATCH 20/63] python:gp: Improve working of log messages to avoid
  confusion
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1360,7 +1360,7 @@ index c8ad2039dc6..2b7f7d22c2b 100644
 From 585357bf0d8889747a2769c2451ee34766087d95 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 29 Jan 2024 17:46:30 +0100
-Subject: [PATCH 21/44] python:gp: Fix logging with gp
+Subject: [PATCH 21/63] python:gp: Fix logging with gp
 
 This allows enable INFO level logging with: `samba-gpupdate -d3`
 
@@ -1402,7 +1402,7 @@ index a74a8707d50..c3de32825db 100644
 From 14ceb0b5f2f954bbabdaf78b8185fc515e3c8294 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 13 Mar 2024 13:55:41 +0100
-Subject: [PATCH 22/44] docs-xml: Add parameter all_groupmem to idmap_ad
+Subject: [PATCH 22/63] docs-xml: Add parameter all_groupmem to idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1444,7 +1444,7 @@ index b364bbfa231..de6d36afe95 100644
 From ac4184c8c3220263cb6f1a46a012533ed1c4e047 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 12 Mar 2024 13:20:24 +0100
-Subject: [PATCH 23/44] s3:winbindd: Improve performance of lookup_groupmem()
+Subject: [PATCH 23/63] s3:winbindd: Improve performance of lookup_groupmem()
  in idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1527,7 +1527,7 @@ index d7a665abbc6..e625aa6473f 100644
 From d0e2002efcc37055b35c351a6b936e6ab89fad32 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 25 Mar 2024 22:38:18 +0100
-Subject: [PATCH 24/44] selftest: Add "winbind expand groups = 1" to
+Subject: [PATCH 24/63] selftest: Add "winbind expand groups = 1" to
  setup_ad_member_idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1561,7 +1561,7 @@ index 44ac4a5901a..606c65f8ab1 100755
 From 9625b6aed981aa4e70fe11d9d1acdb54db7591a3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 14 Mar 2024 15:24:21 +0100
-Subject: [PATCH 25/44] tests: Add a test for "all_groups=no" to
+Subject: [PATCH 25/63] tests: Add a test for "all_groups=no" to
  test_idmap_ad.sh
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1634,7 +1634,7 @@ index 7ae112ada71..1d4bd395ba9 100755
 From e5890e63c35a4a5af29ae16e6dd734c4a3a304cc Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:51:53 +0200
-Subject: [PATCH 26/44] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
+Subject: [PATCH 26/63] s3:libads: Allow get_kdc_ip_string() to lookup the KDCs
  IP
 
 Remove the requirement to provide an IP address. We should look up the
@@ -1699,7 +1699,7 @@ index 50f4a6de3c6..ddf97c11973 100644
 From 96a1ecd8db249fa03db60259cf76fdef9c1bd749 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:53:51 +0200
-Subject: [PATCH 27/44] s3:libads: Do not fail if we don't get an IP passed
+Subject: [PATCH 27/63] s3:libads: Do not fail if we don't get an IP passed
  down
 
 The IP should be optional and we should look it up if not provided.
@@ -1733,7 +1733,7 @@ index ddf97c11973..f74d8eb567c 100644
 From 4934642b7a7d92c6d81ba25ef6e4b66e3805f708 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:54:24 +0200
-Subject: [PATCH 28/44] s3:winbind: Fix idmap_ad creating an invalid local
+Subject: [PATCH 28/63] s3:winbind: Fix idmap_ad creating an invalid local
  krb5.conf
 
 In case of a trusted domain, we are providing the realm of the primary
@@ -1789,7 +1789,7 @@ index 5c9fe07db95..b8002825161 100644
 From cccc902c64c93db317bf4707d0af5e56b2887286 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jul 2024 12:26:55 +0200
-Subject: [PATCH 29/44] s3:notifyd: Use a watcher per db record
+Subject: [PATCH 29/63] s3:notifyd: Use a watcher per db record
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2307,7 +2307,7 @@ index 36c08f47c54..db8e6e1c005 100644
 From b04cb93ee52aac0ce7213d0581d69e852df52d4a Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 5 Feb 2024 15:03:48 +0100
-Subject: [PATCH 30/44] smbd: simplify handling of failing fstat() after
+Subject: [PATCH 30/63] smbd: simplify handling of failing fstat() after
  unlinking file
 
 close_remove_share_mode() already called vfs_stat_fsp(), so we can skip the
@@ -2371,7 +2371,7 @@ index 3581c4b9173..93c12e00eb0 100644
 From 29f0c0fb2f1cb0cfc4c615d31e82048b46a2cb0d Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Tue, 20 Feb 2024 09:26:29 +0000
-Subject: [PATCH 31/44] s3/smbd: If we fail to close file_handle ensure we
+Subject: [PATCH 31/63] s3/smbd: If we fail to close file_handle ensure we
  should reset the fd
 
 if fsp_flags.fstat_before_close == true then close_file_smb will call
@@ -2452,7 +2452,7 @@ index 93c12e00eb0..74be444fef5 100644
 From ed138c4d679e8291de18162e1cac65cc9da33b4d Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Wed, 15 Jan 2025 10:21:19 -0800
-Subject: [PATCH 32/44] auth: Add missing talloc_free() in error code path.
+Subject: [PATCH 32/63] auth: Add missing talloc_free() in error code path.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2489,7 +2489,7 @@ index b914075d85c..196654b36bd 100644
 From f8a7d7a3e8c3be3c7742c874239766b34c25ef3e Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Thu, 16 Jan 2025 16:12:31 -0800
-Subject: [PATCH 33/44] auth: Cleanup exit code paths in kerberos_decode_pac().
+Subject: [PATCH 33/63] auth: Cleanup exit code paths in kerberos_decode_pac().
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2761,7 +2761,7 @@ index 196654b36bd..abb096bde1b 100644
 From 9fd06d5c331f5babaf417cc7339d12854a79fe4b Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 15 Feb 2024 17:29:46 +0100
-Subject: [PATCH 34/44] s3:libsmb/dsgetdcname: use
+Subject: [PATCH 34/63] s3:libsmb/dsgetdcname: use
  NETLOGON_NT_VERSION_AVOID_NT4EMUL
 
 In 2024 we always want an active directory response...
@@ -2798,7 +2798,7 @@ index 280ccd585b0..6fcaa26810c 100644
 From 58e28d056f2df0906ee77ccfb9b56e8a764b38b4 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Tue, 7 May 2024 14:53:24 +0000
-Subject: [PATCH 35/44] s3:libsmb: allow store_cldap_reply() to work with a
+Subject: [PATCH 35/63] s3:libsmb: allow store_cldap_reply() to work with a
  ipv6 response
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15642
@@ -2856,7 +2856,7 @@ index 6fcaa26810c..da173e7bbb0 100644
 From e4d5269b2359c670acdf0cba81248f148ae68c17 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 11 Oct 2024 13:32:22 +0000
-Subject: [PATCH 36/44] s3:libsmb: let discover_dc_netbios() return
+Subject: [PATCH 36/63] s3:libsmb: let discover_dc_netbios() return
  DOMAIN_CONTROLLER_NOT_FOUND
 
 We may get NT_STATUS_NOT_FOUND when the name can't be resolved
@@ -2902,7 +2902,7 @@ index da173e7bbb0..8278959dd7d 100644
 From d90d2b0e985913247f43192cb94eec0efb3e9046 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Wed, 2 Jul 2025 21:59:48 +0200
-Subject: [PATCH 37/44] s3-winbindd: Fix internal winbind dsgetdcname calls
+Subject: [PATCH 37/63] s3-winbindd: Fix internal winbind dsgetdcname calls
  w.r.t. domain name
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3086,7 +3086,7 @@ index fe93528787d..eca4116d0c8 100644
 From 7da6072ce95bca445368f6d0453247c8f92fcdf2 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 9 May 2025 09:38:41 +0200
-Subject: [PATCH 38/44] s3:winbindd: avoid using any netlogon call to get a dc
+Subject: [PATCH 38/63] s3:winbindd: avoid using any netlogon call to get a dc
  name
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
@@ -3389,7 +3389,7 @@ index f0fd18a8fa6..47c68257b12 100644
 From ad54ceadacfbcf0d9c96ad773e50db96003e2c08 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 23 Jul 2025 15:09:21 +0200
-Subject: [PATCH 39/44] s3:winbindd: Resolve dc name using CLDAP also for
+Subject: [PATCH 39/63] s3:winbindd: Resolve dc name using CLDAP also for
  ROLE_IPA_DC
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3443,7 +3443,7 @@ index 195259daa43..86dbf68f033 100644
 From b73efffbb02903427af2c2cc57171d4848ca11f8 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 08:35:29 +0200
-Subject: [PATCH 40/44] docs-xml: Make smb.conf 'server role' value consistent
+Subject: [PATCH 40/63] docs-xml: Make smb.conf 'server role' value consistent
  with ROLE_IPA_DC in libparam
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3480,7 +3480,7 @@ index 4ea4e4751ee..40244e125ce 100644
 From 832a4e31630fd441f8ab4325439f90d561cb8fa4 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 23:26:02 +0200
-Subject: [PATCH 41/44] s3:netlogon: IPA DC is the PDC as well - allow
+Subject: [PATCH 41/63] s3:netlogon: IPA DC is the PDC as well - allow
  ROLE_IPA_DC in _netr_DsRGetForestTrustInformation()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3520,7 +3520,7 @@ index c5a4b0ef30c..7957d3ab34d 100644
 From 8d5638581dfc539c8524d7a507e8cc8977e827a2 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 23:28:24 +0200
-Subject: [PATCH 42/44] s3:utils: Allow ROLE_IPA_DC to allow to use Kerberos in
+Subject: [PATCH 42/63] s3:utils: Allow ROLE_IPA_DC to allow to use Kerberos in
  gensec
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3569,7 +3569,7 @@ index cff3c53845f..2968ca47734 100644
 From 3ef02a381cdc83549506e159ebc457730c06c547 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 22 Jul 2025 19:22:31 +0200
-Subject: [PATCH 43/44] libads: fix get_kdc_ip_string()
+Subject: [PATCH 43/63] libads: fix get_kdc_ip_string()
 
 Correctly handle the interaction between optionally passed in DC via
 pss and DC lookup.
@@ -3620,7 +3620,7 @@ index f74d8eb567c..f324321c87b 100644
 From b0dbc167f85deabff2af5b18bc201e8db0d3b97d Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 22 Jul 2025 19:16:14 +0200
-Subject: [PATCH 44/44] winbindd: use find_domain_from_name_noinit() in
+Subject: [PATCH 44/63] winbindd: use find_domain_from_name_noinit() in
  find_dns_domain_name()
 
 Avoid triggering a connection to a DC of a trusted domain.
@@ -3647,6 +3647,2258 @@ index eca4116d0c8..3a7a9114988 100644
  	if (wbdom == NULL) {
  		return domain_name;
  	}
+-- 
+2.51.0
+
+
+From 1961f54ce07f7dc3cfcae5c00b96b39109f08b3a Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 19 Dec 2023 11:11:55 +0100
+Subject: [PATCH 45/63] vfs_default: allow disabling /proc/fds and
+ RESOLVE_NO_SYMLINK at compile time
+
+This will be used in CI to have a gitlab runner without all modern Linux
+features we make use of as part of path processing:
+
+- O_PATH
+- openat2() with RESOLVE_NO_SYMLINKS
+- somehow safely reopen an O_PATH file handle
+
+That gives what a classix UNIX like AIX or Solaris offers feature wise.
+
+Other OSes support other combinations of those features, but we leave the
+exersize of possibly adding more runners supporting those combinations to the
+reader.
+
+The following list shows which features are available and used by Samba on a few
+OSes:
+
+        | O_PATH         | RESOLVE_NO_SYMLINKS | Safe reopen    | CI covered
+--------|----------------|---------------------|----------------------------
+        | Supported Used | Supported Used      | Supported Used |
+============================================================================
+Linux   | +         +    | +         +         | +         +    | +
+FreeBSD | +         +    | + [1]     -         | + [2]     -    | -
+AIX     | -         -    | -         -         | -         -    | +
+
+[1] via open() flag O_RESOLVE_BENEATH
+[2] via open() flag O_EMPTY_PATH
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15549
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit 5c2f96442a25a1725809a28b3719afbc0bd01830)
+---
+ source3/modules/vfs_default.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/source3/modules/vfs_default.c b/source3/modules/vfs_default.c
+index 1d4b9b1a840..8d78831492f 100644
+--- a/source3/modules/vfs_default.c
++++ b/source3/modules/vfs_default.c
+@@ -52,6 +52,9 @@ static int vfswrap_connect(vfs_handle_struct *handle, const char *service, const
+ 	bool bval;
+ 
+ 	handle->conn->have_proc_fds = sys_have_proc_fds();
++#ifdef DISABLE_PROC_FDS
++	handle->conn->have_proc_fds = false;
++#endif
+ 
+ 	/*
+ 	 * assume the kernel will support openat2(),
+@@ -70,6 +73,9 @@ static int vfswrap_connect(vfs_handle_struct *handle, const char *service, const
+ 		handle->conn->open_how_resolve |=
+ 			VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS;
+ 	}
++#ifdef DISABLE_VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS
++	handle->conn->open_how_resolve &= ~VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS;
++#endif
+ 
+ 	return 0;    /* Return >= 0 for success */
+ }
+-- 
+2.51.0
+
+
+From 26de62a2a968dd5b73af296251b26112cdd533e5 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 19 Dec 2023 11:12:49 +0100
+Subject: [PATCH 46/63] CI: disable /proc/fds and RESOLVE_NO_SYMLINK in
+ samba-no-opath-build runner
+
+This is a more sensible combination of missing Linux specific features:
+
+- O_PATH
+- openat2() with RESOLVE_NO_SYMLINKS
+- somehow safely reopen an O_PATH file handle
+
+Currently only O_PATH is disabled for these jobs, but that doesn't really match
+and know OS.
+
+The following list shows which features are available and used by Samba on a few
+OSes:
+
+        | O_PATH         | RESOLVE_NO_SYMLINKS | Safe reopen    | CI covered
+--------|----------------|---------------------|----------------------------
+        | Supported Used | Supported Used      | Supported Used |
+============================================================================
+Linux   | +         +    | +         +         | +         +    | +
+FreeBSD | +         +    | + [1]     -         | + [2]     -    | -
+AIX     | -         -    | -         -         | -         -    | +
+
+So by also disabling RESOLVE_NO_SYMLINKS and Safe Reopen, we cover classic UNIX
+systems like AIX.
+
+[1] via open() flag O_RESOLVE_BENEATH
+[2] via open() flag O_EMPTY_PATH
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15549
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit 62cbe145c7e500c4759ed2005c78bd5056c87f43)
+---
+ script/autobuild.py          | 2 +-
+ selftest/skip.opath-required | 6 ++++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/script/autobuild.py b/script/autobuild.py
+index e074c39d3c0..85043032d73 100755
+--- a/script/autobuild.py
++++ b/script/autobuild.py
+@@ -296,7 +296,7 @@ tasks = {
+     "samba-no-opath-build": {
+         "git-clone-required": True,
+         "sequence": [
+-            ("configure", "ADDITIONAL_CFLAGS='-DDISABLE_OPATH=1' ./configure.developer --without-ad-dc " + samba_configure_params),
++            ("configure", "ADDITIONAL_CFLAGS='-DDISABLE_OPATH=1 -DDISABLE_VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS=1 -DDISABLE_PROC_FDS=1' ./configure.developer --without-ad-dc " + samba_configure_params),
+             ("make", "make -j"),
+             ("check-clean-tree", CLEAN_SOURCE_TREE_CMD),
+             ("chmod-R-a-w", "chmod -R a-w ."),
+diff --git a/selftest/skip.opath-required b/selftest/skip.opath-required
+index c3a13f5ec6e..67764a0b027 100644
+--- a/selftest/skip.opath-required
++++ b/selftest/skip.opath-required
+@@ -14,3 +14,9 @@
+ # available this works fine. So for now restrict testing posix
+ # extensions to environments where we have O_PATH around
+ ^samba.tests.smb1posix
++
++# These don't work without /proc/fd support
++^samba3.blackbox.test_symlink_traversal.*\(fileserver\)
++^samba3.blackbox.shadow_copy_torture.*\(fileserver\)
++^samba3.blackbox.virus_scanner.*\(fileserver:local\)
++^samba3.blackbox.shadow_copy2.*\(fileserver.*\)
+-- 
+2.51.0
+
+
+From 2c27aae5a4c8d7368dc142fb2be36919296d2a02 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 2 Jan 2024 12:49:14 +0100
+Subject: [PATCH 47/63] smbd: pass symlink target path to
+ safe_symlink_target_path()
+
+Moves processing the symlink error response to the caller
+filename_convert_dirfsp(). Prepares for using this in
+non_widelink_open(), where it will replace symlink_target_below_conn()
+with the same functionality.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15549
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(back-ported from commit 0515dded4ddb49e5570ae7df51126af1a2d643de)
+---
+ source3/include/proto.h |  5 +++
+ source3/smbd/filename.c | 72 +++++++++++++++++++----------------------
+ 2 files changed, 38 insertions(+), 39 deletions(-)
+
+diff --git a/source3/include/proto.h b/source3/include/proto.h
+index 8eed81d8f2e..13240033bf1 100644
+--- a/source3/include/proto.h
++++ b/source3/include/proto.h
+@@ -719,6 +719,11 @@ struct smb_filename *synthetic_smb_fname(TALLOC_CTX *mem_ctx,
+ 					 const SMB_STRUCT_STAT *psbuf,
+ 					 NTTIME twrp,
+ 					 uint32_t flags);
++NTSTATUS safe_symlink_target_path(TALLOC_CTX *mem_ctx,
++				  const char *connectpath,
++				  const char *target,
++				  size_t unparsed,
++				  char **_relative);
+ NTSTATUS filename_convert_dirfsp(
+ 	TALLOC_CTX *ctx,
+ 	connection_struct *conn,
+diff --git a/source3/smbd/filename.c b/source3/smbd/filename.c
+index 8693dcf1153..45fb90381e2 100644
+--- a/source3/smbd/filename.c
++++ b/source3/smbd/filename.c
+@@ -942,44 +942,34 @@ static char *symlink_target_path(
+ 	return ret;
+ }
+ 
+-static NTSTATUS safe_symlink_target_path(
+-	TALLOC_CTX *mem_ctx,
+-	const char *connectpath,
+-	const char *name_in,
+-	const char *substitute,
+-	size_t unparsed,
+-	char **_name_out)
++NTSTATUS safe_symlink_target_path(TALLOC_CTX *mem_ctx,
++				  const char *connectpath,
++				  const char *target,
++				  size_t unparsed,
++				  char **_relative)
+ {
+-	char *target = NULL;
+ 	char *abs_target = NULL;
+ 	char *abs_target_canon = NULL;
+ 	const char *relative = NULL;
+-	char *name_out = NULL;
+-	NTSTATUS status = NT_STATUS_NO_MEMORY;
+ 	bool in_share;
++	NTSTATUS status = NT_STATUS_NO_MEMORY;
+ 
+-	target = symlink_target_path(mem_ctx, name_in, substitute, unparsed);
+-	if (target == NULL) {
+-		goto fail;
+-	}
+-
+-	DBG_DEBUG("name_in: %s, substitute: %s, unparsed: %zu, target=%s\n",
+-		  name_in,
+-		  substitute,
+-		  unparsed,
+-		  target);
++	DBG_DEBUG("connectpath [%s] target [%s] unparsed [%zu]\n",
++		  connectpath, target, unparsed);
+ 
+ 	if (target[0] == '/') {
+-		abs_target = target;
++		abs_target = talloc_strdup(mem_ctx, target);
+ 	} else {
+-		abs_target = talloc_asprintf(
+-			target, "%s/%s", connectpath, target);
+-		if (abs_target == NULL) {
+-			goto fail;
+-		}
++		abs_target = talloc_asprintf(mem_ctx,
++					     "%s/%s",
++					     connectpath,
++					     target);
++	}
++	if (abs_target == NULL) {
++		goto fail;
+ 	}
+ 
+-	abs_target_canon = canonicalize_absolute_path(target, abs_target);
++	abs_target_canon = canonicalize_absolute_path(abs_target, abs_target);
+ 	if (abs_target_canon == NULL) {
+ 		goto fail;
+ 	}
+@@ -994,15 +984,14 @@ static NTSTATUS safe_symlink_target_path(
+ 		goto fail;
+ 	}
+ 
+-	name_out = talloc_strdup(mem_ctx, relative);
+-	if (name_out == NULL) {
++	*_relative = talloc_strdup(mem_ctx, relative);
++	if (*_relative == NULL) {
+ 		goto fail;
+ 	}
+ 
+ 	status = NT_STATUS_OK;
+-	*_name_out = name_out;
+ fail:
+-	TALLOC_FREE(target);
++	TALLOC_FREE(abs_target);
+ 	return status;
+ }
+ 
+@@ -1438,6 +1427,7 @@ NTSTATUS filename_convert_dirfsp(
+ 	size_t unparsed = 0;
+ 	NTSTATUS status;
+ 	char *target = NULL;
++	char *safe_target = NULL;
+ 	size_t symlink_redirects = 0;
+ 
+ next:
+@@ -1476,17 +1466,21 @@ next:
+ 	 * resolve all symlinks locally.
+ 	 */
+ 
+-	status = safe_symlink_target_path(
+-		mem_ctx,
+-		conn->connectpath,
+-		name_in,
+-		substitute,
+-		unparsed,
+-		&target);
++	target = symlink_target_path(mem_ctx, name_in, substitute, unparsed);
++	if (target == NULL) {
++		return NT_STATUS_NO_MEMORY;
++	}
++
++	status = safe_symlink_target_path(mem_ctx,
++					  conn->connectpath,
++					  target,
++					  unparsed,
++					  &safe_target);
++	TALLOC_FREE(target);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		return status;
+ 	}
+-	name_in = target;
++	name_in = safe_target;
+ 
+ 	symlink_redirects += 1;
+ 
+-- 
+2.51.0
+
+
+From 99d7e841d4e18f760c137530bbed0dea6115311a Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 2 Jan 2024 13:25:25 +0100
+Subject: [PATCH 48/63] smbd: add a directory argument to
+ safe_symlink_target_path()
+
+Existing caller passes NULL, no change in behaviour. Prepares for
+replacing symlink_target_below_conn() in open.c.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15549
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit fc80c72d658a41fe4d93b24b793b52c91b350175)
+---
+ source3/include/proto.h |  1 +
+ source3/smbd/filename.c | 15 ++++++++++++++-
+ 2 files changed, 15 insertions(+), 1 deletion(-)
+
+diff --git a/source3/include/proto.h b/source3/include/proto.h
+index 13240033bf1..15c5839caf8 100644
+--- a/source3/include/proto.h
++++ b/source3/include/proto.h
+@@ -721,6 +721,7 @@ struct smb_filename *synthetic_smb_fname(TALLOC_CTX *mem_ctx,
+ 					 uint32_t flags);
+ NTSTATUS safe_symlink_target_path(TALLOC_CTX *mem_ctx,
+ 				  const char *connectpath,
++				  const char *dir,
+ 				  const char *target,
+ 				  size_t unparsed,
+ 				  char **_relative);
+diff --git a/source3/smbd/filename.c b/source3/smbd/filename.c
+index 45fb90381e2..55a49e0ba93 100644
+--- a/source3/smbd/filename.c
++++ b/source3/smbd/filename.c
+@@ -944,6 +944,7 @@ static char *symlink_target_path(
+ 
+ NTSTATUS safe_symlink_target_path(TALLOC_CTX *mem_ctx,
+ 				  const char *connectpath,
++				  const char *dir,
+ 				  const char *target,
+ 				  size_t unparsed,
+ 				  char **_relative)
+@@ -959,10 +960,21 @@ NTSTATUS safe_symlink_target_path(TALLOC_CTX *mem_ctx,
+ 
+ 	if (target[0] == '/') {
+ 		abs_target = talloc_strdup(mem_ctx, target);
+-	} else {
++	} else if (dir == NULL) {
++		abs_target = talloc_asprintf(mem_ctx,
++					     "%s/%s",
++					     connectpath,
++					     target);
++	} else if (dir[0] == '/') {
+ 		abs_target = talloc_asprintf(mem_ctx,
+ 					     "%s/%s",
++					     dir,
++					     target);
++	} else {
++		abs_target = talloc_asprintf(mem_ctx,
++					     "%s/%s/%s",
+ 					     connectpath,
++					     dir,
+ 					     target);
+ 	}
+ 	if (abs_target == NULL) {
+@@ -1473,6 +1485,7 @@ next:
+ 
+ 	status = safe_symlink_target_path(mem_ctx,
+ 					  conn->connectpath,
++					  NULL,
+ 					  target,
+ 					  unparsed,
+ 					  &safe_target);
+-- 
+2.51.0
+
+
+From 5041a6fa5cdfd21bf697249d900ea5c107d355a2 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 2 Jan 2024 14:34:26 +0100
+Subject: [PATCH 49/63] smbd: use safe_symlink_target_path() in
+ symlink_target_below_conn()
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15549
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit 1965fc77b3852a0593e13897af08f5304a1ce3a2)
+---
+ selftest/skip.opath-required |  2 -
+ source3/smbd/open.c          | 73 +++++++-----------------------------
+ 2 files changed, 14 insertions(+), 61 deletions(-)
+
+diff --git a/selftest/skip.opath-required b/selftest/skip.opath-required
+index 67764a0b027..9c6ba481cdf 100644
+--- a/selftest/skip.opath-required
++++ b/selftest/skip.opath-required
+@@ -16,7 +16,5 @@
+ ^samba.tests.smb1posix
+ 
+ # These don't work without /proc/fd support
+-^samba3.blackbox.test_symlink_traversal.*\(fileserver\)
+ ^samba3.blackbox.shadow_copy_torture.*\(fileserver\)
+ ^samba3.blackbox.virus_scanner.*\(fileserver:local\)
+-^samba3.blackbox.shadow_copy2.*\(fileserver.*\)
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index 74be444fef5..6582bd60245 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -571,7 +571,6 @@ out:
+ static NTSTATUS symlink_target_below_conn(
+ 	TALLOC_CTX *mem_ctx,
+ 	const char *connection_path,
+-	size_t connection_path_len,
+ 	struct files_struct *fsp,
+ 	struct files_struct *dirfsp,
+ 	struct smb_filename *symlink_name,
+@@ -579,9 +578,7 @@ static NTSTATUS symlink_target_below_conn(
+ {
+ 	char *target = NULL;
+ 	char *absolute = NULL;
+-	const char *relative = NULL;
+ 	NTSTATUS status;
+-	bool ok;
+ 
+ 	if (fsp_get_pathref_fd(fsp) != -1) {
+ 		/*
+@@ -594,69 +591,28 @@ static NTSTATUS symlink_target_below_conn(
+ 			talloc_tos(), dirfsp, symlink_name, &target);
+ 	}
+ 
++	status = safe_symlink_target_path(talloc_tos(),
++					  connection_path,
++					  dirfsp->fsp_name->base_name,
++					  target,
++					  0,
++					  &absolute);
+ 	if (!NT_STATUS_IS_OK(status)) {
+-		DBG_DEBUG("readlink_talloc failed: %s\n", nt_errstr(status));
++		DBG_DEBUG("safe_symlink_target_path() failed: %s\n",
++			  nt_errstr(status));
+ 		return status;
+ 	}
+ 
+-	if (target[0] != '/') {
+-		char *tmp = talloc_asprintf(
+-			talloc_tos(),
+-			"%s/%s/%s",
+-			connection_path,
+-			dirfsp->fsp_name->base_name,
+-			target);
+-
+-		TALLOC_FREE(target);
+-
+-		if (tmp == NULL) {
+-			return NT_STATUS_NO_MEMORY;
+-		}
+-		target = tmp;
+-	}
+-
+-	DBG_DEBUG("redirecting to %s\n", target);
+-
+-	absolute = canonicalize_absolute_path(talloc_tos(), target);
+-	TALLOC_FREE(target);
+-
+-	if (absolute == NULL) {
+-		return NT_STATUS_NO_MEMORY;
+-	}
+-
+-	/*
+-	 * We're doing the "below connection_path" here because it's
+-	 * cheap. It might be that we get a symlink out of the share,
+-	 * pointing to yet another symlink getting us back into the
+-	 * share. If we need that, we would have to remove the check
+-	 * here.
+-	 */
+-	ok = subdir_of(
+-		connection_path,
+-		connection_path_len,
+-		absolute,
+-		&relative);
+-	if (!ok) {
+-		DBG_NOTICE("Bad access attempt: %s is a symlink "
+-			   "outside the share path\n"
+-			   "conn_rootdir =%s\n"
+-			   "resolved_name=%s\n",
+-			   symlink_name->base_name,
+-			   connection_path,
+-			   absolute);
+-		TALLOC_FREE(absolute);
+-		return NT_STATUS_OBJECT_NAME_NOT_FOUND;
+-	}
+-
+-	if (relative[0] == '\0') {
++	if (absolute[0] == '\0') {
+ 		/*
+ 		 * special case symlink to share root: "." is our
+ 		 * share root filename
+ 		 */
+-		absolute[0] = '.';
+-		absolute[1] = '\0';
+-	} else {
+-		memmove(absolute, relative, strlen(relative)+1);
++		TALLOC_FREE(absolute);
++		absolute = talloc_strdup(talloc_tos(), ".");
++		if (absolute == NULL) {
++			return NT_STATUS_NO_MEMORY;
++		}
+ 	}
+ 
+ 	*_target = absolute;
+@@ -834,7 +790,6 @@ again:
+ 	status = symlink_target_below_conn(
+ 		talloc_tos(),
+ 		connpath,
+-		connpath_len,
+ 		fsp,
+ 		discard_const_p(files_struct, dirfsp),
+ 		smb_fname_rel,
+-- 
+2.51.0
+
+
+From f2fc99f0c7d441115a486413f345c0226a00b38b Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Mon, 18 Dec 2023 12:35:58 +0100
+Subject: [PATCH 50/63] smbd: use dirfsp and atname in open_directory()
+
+On systems without /proc/fd support this avoid the expensive chdir()
+logic in non_widelink_open(). open_file_ntcreate() already passes
+dirfsp and atname to reopen_from_fsp(), it was just missed in the
+conversion.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15549
+
+Reviewed-by: Volker Lendecke <vl@samba.org>
+Signed-off-by: Ralph Boehme <slow@samba.org>
+
+Autobuild-User(master): Volker Lendecke <vl@samba.org>
+Autobuild-Date(master): Mon Jan 22 12:00:56 UTC 2024 on atb-devel-224
+
+(cherry picked from commit 2713023250f15cf9971d88620cab9dd4afd0dc73)
+
+Autobuild-User(v4-19-test): Jule Anger <janger@samba.org>
+Autobuild-Date(v4-19-test): Mon Jan 29 11:59:41 UTC 2024 on atb-devel-224
+---
+ source3/smbd/open.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index 6582bd60245..b9849f82396 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -4865,8 +4865,8 @@ static NTSTATUS open_directory(connection_struct *conn,
+ 
+ 	if (access_mask & need_fd_access) {
+ 		status = reopen_from_fsp(
+-			fsp->conn->cwd_fsp,
+-			fsp->fsp_name,
++			parent_dir_fname->fsp,
++			smb_fname_atname,
+ 			fsp,
+ 			O_RDONLY | O_DIRECTORY,
+ 			0,
+-- 
+2.51.0
+
+
+From 7d102268ebbebf6fc723a43485a82f72069d00ee Mon Sep 17 00:00:00 2001
+From: Volker Lendecke <vl@samba.org>
+Date: Fri, 16 Dec 2022 16:35:00 +0100
+Subject: [PATCH 51/63] smbd: Return open_symlink_err from
+ filename_convert_dirfsp_nosymlink()
+
+Don't lose information returned from openat_pathref_fsp_nosymlink()
+
+Signed-off-by: Volker Lendecke <vl@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+(backported from commit c81d1d3fe4e3aeb2761dc539e8fb87d2ad862e5f)
+Related to: https://bugzilla.samba.org/show_bug.cgi?id=15549
+---
+ source3/smbd/filename.c | 77 +++++++++++++++++------------------------
+ 1 file changed, 32 insertions(+), 45 deletions(-)
+
+diff --git a/source3/smbd/filename.c b/source3/smbd/filename.c
+index 55a49e0ba93..9fd85af992a 100644
+--- a/source3/smbd/filename.c
++++ b/source3/smbd/filename.c
+@@ -944,37 +944,35 @@ static char *symlink_target_path(
+ 
+ NTSTATUS safe_symlink_target_path(TALLOC_CTX *mem_ctx,
+ 				  const char *connectpath,
+-				  const char *dir,
+-				  const char *target,
++				  const char *name_in,
++				  const char *substitute,
+ 				  size_t unparsed,
+ 				  char **_relative)
+ {
++	char *target = NULL;
+ 	char *abs_target = NULL;
+ 	char *abs_target_canon = NULL;
+ 	const char *relative = NULL;
+ 	bool in_share;
+ 	NTSTATUS status = NT_STATUS_NO_MEMORY;
+ 
++	target = symlink_target_path(mem_ctx,
++				     name_in,
++				     substitute,
++				     unparsed);
++	if (target == NULL) {
++		goto fail;
++	}
++
+ 	DBG_DEBUG("connectpath [%s] target [%s] unparsed [%zu]\n",
+ 		  connectpath, target, unparsed);
+ 
+ 	if (target[0] == '/') {
+-		abs_target = talloc_strdup(mem_ctx, target);
+-	} else if (dir == NULL) {
+-		abs_target = talloc_asprintf(mem_ctx,
+-					     "%s/%s",
+-					     connectpath,
+-					     target);
+-	} else if (dir[0] == '/') {
+-		abs_target = talloc_asprintf(mem_ctx,
+-					     "%s/%s",
+-					     dir,
+-					     target);
++		abs_target = target;
+ 	} else {
+-		abs_target = talloc_asprintf(mem_ctx,
+-					     "%s/%s/%s",
++		abs_target = talloc_asprintf(target,
++					     "%s/%s",
+ 					     connectpath,
+-					     dir,
+ 					     target);
+ 	}
+ 	if (abs_target == NULL) {
+@@ -1019,8 +1017,7 @@ static NTSTATUS filename_convert_dirfsp_nosymlink(
+ 	NTTIME twrp,
+ 	struct files_struct **_dirfsp,
+ 	struct smb_filename **_smb_fname,
+-	char **_substitute,
+-	size_t *_unparsed)
++	struct open_symlink_err **_symlink_err)
+ {
+ 	struct smb_filename *smb_dirname = NULL;
+ 	struct smb_filename *smb_fname_rel = NULL;
+@@ -1142,11 +1139,8 @@ static NTSTATUS filename_convert_dirfsp_nosymlink(
+ 
+ 			SMB_ASSERT(name_in_len >= dirname_len);
+ 
+-			*_substitute = talloc_move(
+-				mem_ctx,
+-				&symlink_err->reparse->substitute_name);
+-			*_unparsed = symlink_err->unparsed +
+-				     (name_in_len - dirname_len);
++			symlink_err->unparsed += (name_in_len - dirname_len);
++			*_symlink_err = symlink_err;
+ 
+ 			goto fail;
+ 		}
+@@ -1435,10 +1429,9 @@ NTSTATUS filename_convert_dirfsp(
+ 	struct files_struct **_dirfsp,
+ 	struct smb_filename **_smb_fname)
+ {
+-	char *substitute = NULL;
+-	size_t unparsed = 0;
++	struct open_symlink_err *symlink_err = NULL;
+ 	NTSTATUS status;
+-	char *target = NULL;
++	char *substitute = NULL;
+ 	char *safe_target = NULL;
+ 	size_t symlink_redirects = 0;
+ 
+@@ -1447,16 +1440,14 @@ next:
+ 		return NT_STATUS_OBJECT_PATH_NOT_FOUND;
+ 	}
+ 
+-	status = filename_convert_dirfsp_nosymlink(
+-		mem_ctx,
+-		conn,
+-		name_in,
+-		ucf_flags,
+-		twrp,
+-		_dirfsp,
+-		_smb_fname,
+-		&substitute,
+-		&unparsed);
++	status = filename_convert_dirfsp_nosymlink(mem_ctx,
++						   conn,
++						   name_in,
++						   ucf_flags,
++						   twrp,
++						   _dirfsp,
++						   _smb_fname,
++						   &symlink_err);
+ 
+ 	if (!NT_STATUS_EQUAL(status, NT_STATUS_STOPPED_ON_SYMLINK)) {
+ 		return status;
+@@ -1477,19 +1468,15 @@ next:
+ 	 * UCF_POSIX_PATHNAMES set to cause the client to
+ 	 * resolve all symlinks locally.
+ 	 */
+-
+-	target = symlink_target_path(mem_ctx, name_in, substitute, unparsed);
+-	if (target == NULL) {
+-		return NT_STATUS_NO_MEMORY;
+-	}
++	substitute = symlink_err->reparse->substitute_name;
+ 
+ 	status = safe_symlink_target_path(mem_ctx,
+ 					  conn->connectpath,
+-					  NULL,
+-					  target,
+-					  unparsed,
++					  name_in,
++					  substitute,
++					  symlink_err->unparsed,
+ 					  &safe_target);
+-	TALLOC_FREE(target);
++	TALLOC_FREE(symlink_err);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		return status;
+ 	}
+-- 
+2.51.0
+
+
+From edaabc3d53fddd9e2fa6168c8bf01ebfbf229657 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Thu, 25 Apr 2024 15:24:57 +0200
+Subject: [PATCH 52/63] s3/lib: add next helper variable in server_id_watch_*
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit d76edcd48437715c7541b5b1e6a56245c25f460b)
+---
+ source3/lib/server_id_watch.c | 14 ++++++++++----
+ 1 file changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/source3/lib/server_id_watch.c b/source3/lib/server_id_watch.c
+index f0189e0e896..50b35f27b3e 100644
+--- a/source3/lib/server_id_watch.c
++++ b/source3/lib/server_id_watch.c
+@@ -27,6 +27,7 @@
+ struct server_id_watch_state {
+ 	struct tevent_context *ev;
+ 	struct server_id pid;
++	struct timeval start;
+ };
+ 
+ static void server_id_watch_waited(struct tevent_req *subreq);
+@@ -37,6 +38,7 @@ struct tevent_req *server_id_watch_send(TALLOC_CTX *mem_ctx,
+ {
+ 	struct tevent_req *req, *subreq;
+ 	struct server_id_watch_state *state;
++	struct timeval next;
+ 
+ 	req = tevent_req_create(mem_ctx, &state, struct server_id_watch_state);
+ 	if (req == NULL) {
+@@ -44,14 +46,15 @@ struct tevent_req *server_id_watch_send(TALLOC_CTX *mem_ctx,
+ 	}
+ 	state->ev = ev;
+ 	state->pid = pid;
++	state->start = tevent_timeval_current();
+ 
+ 	if (!serverid_exists(&state->pid)) {
+ 		tevent_req_done(req);
+ 		return tevent_req_post(req, ev);
+ 	}
+ 
+-	subreq = tevent_wakeup_send(
+-		state, ev, tevent_timeval_current_ofs(0, 500000));
++	next = tevent_timeval_add(&state->start, 0, 500000);
++	subreq = tevent_wakeup_send(state, ev, next);
+ 	if (tevent_req_nomem(subreq, req)) {
+ 		return tevent_req_post(req, ev);
+ 	}
+@@ -66,6 +69,8 @@ static void server_id_watch_waited(struct tevent_req *subreq)
+ 		subreq, struct tevent_req);
+ 	struct server_id_watch_state *state = tevent_req_data(
+ 		req, struct server_id_watch_state);
++	struct timeval now;
++	struct timeval next;
+ 	bool ok;
+ 
+ 	ok = tevent_wakeup_recv(subreq);
+@@ -80,8 +85,9 @@ static void server_id_watch_waited(struct tevent_req *subreq)
+ 		return;
+ 	}
+ 
+-	subreq = tevent_wakeup_send(
+-		state, state->ev, tevent_timeval_current_ofs(0, 500000));
++	now = tevent_timeval_current();
++	next = tevent_timeval_add(&now, 0, 500000);
++	subreq = tevent_wakeup_send(state, state->ev, next);
+ 	if (tevent_req_nomem(subreq, req)) {
+ 		return;
+ 	}
+-- 
+2.51.0
+
+
+From c25f1811c2ccaa2d5cc8005597fb9979aa1102ee Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Thu, 4 Apr 2024 12:31:05 +0200
+Subject: [PATCH 53/63] s3/lib: add option "serverid watch:debug = yes" to
+ print kernel stack of hanging process
+
+We only do if sys_have_proc_fds() returns true, so it's most likely
+linux...
+
+Enabled by default with log level 10...
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 5c57e840527432c4b1a7ec94894939022a9e9622)
+---
+ source3/lib/server_id_watch.c | 62 +++++++++++++++++++++++++++++++++--
+ 1 file changed, 59 insertions(+), 3 deletions(-)
+
+diff --git a/source3/lib/server_id_watch.c b/source3/lib/server_id_watch.c
+index 50b35f27b3e..c372ec8c431 100644
+--- a/source3/lib/server_id_watch.c
++++ b/source3/lib/server_id_watch.c
+@@ -17,17 +17,18 @@
+  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  */
+ 
+-#include "replace.h"
+-#include <tevent.h>
+-#include <talloc.h>
++#include "includes.h"
+ #include "serverid.h"
+ #include "server_id_watch.h"
++#include "lib/util/server_id.h"
+ #include "lib/util/tevent_unix.h"
+ 
+ struct server_id_watch_state {
+ 	struct tevent_context *ev;
+ 	struct server_id pid;
+ 	struct timeval start;
++	struct timeval warn;
++	bool debug;
+ };
+ 
+ static void server_id_watch_waited(struct tevent_req *subreq);
+@@ -47,6 +48,12 @@ struct tevent_req *server_id_watch_send(TALLOC_CTX *mem_ctx,
+ 	state->ev = ev;
+ 	state->pid = pid;
+ 	state->start = tevent_timeval_current();
++	state->warn = tevent_timeval_add(&state->start, 10, 0);
++
++	state->debug = lp_parm_bool(GLOBAL_SECTION_SNUM,
++				    "serverid watch",
++				    "debug",
++				    CHECK_DEBUGLVL(DBGLVL_DEBUG));
+ 
+ 	if (!serverid_exists(&state->pid)) {
+ 		tevent_req_done(req);
+@@ -86,6 +93,55 @@ static void server_id_watch_waited(struct tevent_req *subreq)
+ 	}
+ 
+ 	now = tevent_timeval_current();
++
++	if (!state->debug) {
++		goto next;
++	}
++
++	if (timeval_compare(&state->warn, &now) == -1) {
++		double duration = timeval_elapsed2(&state->start, &now);
++		char proc_path[64] = { 0, };
++		char *kstack = NULL;
++		struct server_id_buf buf;
++		const char *pid = server_id_str_buf(state->pid, &buf);
++		int ret;
++
++		state->warn = tevent_timeval_add(&now, 10, 0);
++
++		if (!procid_is_local(&state->pid) || !sys_have_proc_fds()) {
++			DBG_ERR("Process %s hanging for %f seconds?\n",
++				pid, duration);
++			goto next;
++		}
++
++		ret = snprintf(proc_path,
++			       ARRAY_SIZE(proc_path),
++			       "/proc/%" PRIu64 "/stack",
++			       state->pid.pid);
++		if (ret < 0) {
++			DBG_ERR("Process %s hanging for %f seconds?\n"
++				"snprintf failed\n",
++				pid, duration);
++			goto next;
++		}
++
++		become_root();
++		kstack = file_load(proc_path, NULL, 0, state);
++		unbecome_root();
++		if (kstack == NULL) {
++			DBG_ERR("Process %s hanging for %f seconds?\n"
++				"file_load [%s] failed\n",
++				pid, duration, proc_path);
++			goto next;
++		}
++
++		DBG_ERR("Process %s hanging for %f seconds?\n"
++			"%s:\n%s",
++			pid, duration, proc_path, kstack);
++		TALLOC_FREE(kstack);
++	}
++
++next:
+ 	next = tevent_timeval_add(&now, 0, 500000);
+ 	subreq = tevent_wakeup_send(state, state->ev, next);
+ 	if (tevent_req_nomem(subreq, req)) {
+-- 
+2.51.0
+
+
+From 23dbf8f0317810d65e716a3c9b947c7a6549cb46 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Thu, 25 Apr 2024 15:17:08 +0200
+Subject: [PATCH 54/63] s3/lib: add option "serverid watch:debug script"
+
+This takes just PID and NODE:PID on a cluster.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 7add7dbf1aee13b4d9ab70d1a5312c8ff30d9e00)
+---
+ source3/lib/server_id_watch.c | 52 +++++++++++++++++++++++++++++++++++
+ 1 file changed, 52 insertions(+)
+
+diff --git a/source3/lib/server_id_watch.c b/source3/lib/server_id_watch.c
+index c372ec8c431..8ddf9c6b1c8 100644
+--- a/source3/lib/server_id_watch.c
++++ b/source3/lib/server_id_watch.c
+@@ -100,6 +100,7 @@ static void server_id_watch_waited(struct tevent_req *subreq)
+ 
+ 	if (timeval_compare(&state->warn, &now) == -1) {
+ 		double duration = timeval_elapsed2(&state->start, &now);
++		const char *cmd = NULL;
+ 		char proc_path[64] = { 0, };
+ 		char *kstack = NULL;
+ 		struct server_id_buf buf;
+@@ -108,6 +109,57 @@ static void server_id_watch_waited(struct tevent_req *subreq)
+ 
+ 		state->warn = tevent_timeval_add(&now, 10, 0);
+ 
++		cmd = lp_parm_const_string(GLOBAL_SECTION_SNUM,
++					   "serverid watch",
++					   "debug script",
++					   NULL);
++		if (cmd != NULL) {
++			char *cmdstr = NULL;
++			char *output = NULL;
++			int fd;
++
++			/*
++			 * Note in a cluster setup pid will be
++			 * a NOTE:PID like '1:3978365'
++			 *
++			 * Without clustering it is just '3978365'
++			 */
++			cmdstr = talloc_asprintf(state, "%s %s", cmd, pid);
++			if (cmdstr == NULL) {
++				DBG_ERR("Process %s hanging for %f seconds?\n"
++					"talloc_asprintf failed\n",
++					pid, duration);
++				goto next;
++			}
++
++			become_root();
++			ret = smbrun(cmdstr, &fd, NULL);
++			unbecome_root();
++			if (ret != 0) {
++				DBG_ERR("Process %s hanging for %f seconds?\n"
++					"smbrun('%s') failed\n",
++					pid, duration, cmdstr);
++				TALLOC_FREE(cmdstr);
++				goto next;
++			}
++
++			output = fd_load(fd, NULL, 0, state);
++			close(fd);
++			if (output == NULL) {
++				DBG_ERR("Process %s hanging for %f seconds?\n"
++					"fd_load() of smbrun('%s') failed\n",
++					pid, duration, cmdstr);
++				TALLOC_FREE(cmdstr);
++				goto next;
++			}
++			DBG_ERR("Process %s hanging for %f seconds?\n"
++				"%s returned:\n%s",
++				pid, duration, cmdstr, output);
++			TALLOC_FREE(cmdstr);
++			TALLOC_FREE(output);
++			goto next;
++		}
++
+ 		if (!procid_is_local(&state->pid) || !sys_have_proc_fds()) {
+ 			DBG_ERR("Process %s hanging for %f seconds?\n",
+ 				pid, duration);
+-- 
+2.51.0
+
+
+From 59975168627e4bfbd2e75a611cb8cb13019a7df3 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Fri, 5 Apr 2024 12:15:28 +0200
+Subject: [PATCH 55/63] smbd: log share_mode_watch_recv() errors as errors
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit b45e78871aadca6ae33475bee890736838f44219)
+---
+ source3/smbd/open.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index b9849f82396..da129119c7f 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -2969,8 +2969,9 @@ static void defer_open_done(struct tevent_req *req)
+ 	status = share_mode_watch_recv(req, NULL, NULL);
+ 	TALLOC_FREE(req);
+ 	if (!NT_STATUS_IS_OK(status)) {
+-		DEBUG(5, ("dbwrap_watched_watch_recv returned %s\n",
+-			  nt_errstr(status)));
++		DBG_ERR("share_mode_watch_recv() returned %s, "
++			"rescheduling mid %" PRIu64 "\n",
++			nt_errstr(status), state->mid);
+ 		/*
+ 		 * Even if it failed, retry anyway. TODO: We need a way to
+ 		 * tell a re-scheduled open about that error.
+-- 
+2.51.0
+
+
+From e619b72fe1b9c36963c452c1d102009b28e8e289 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Thu, 4 Apr 2024 19:18:19 +0200
+Subject: [PATCH 56/63] smbd: add option "smbd lease break:debug hung procs"
+
+By enabling this a process sending a lease break message to another process
+holding a lease will start watching that process and if that process didn't
+process the lease break within 10 seconds (cf server_id_watch_waited()), we log
+a kernel stack backtrace of that process.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit d8613d7ee23c4e990285a387eb9ac2eeefff9749)
+---
+ source3/smbd/open.c | 110 ++++++++++++++++++++++++++++++++++++++++----
+ 1 file changed, 102 insertions(+), 8 deletions(-)
+
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index da129119c7f..4cc5190f690 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -38,6 +38,7 @@
+ #include "serverid.h"
+ #include "messages.h"
+ #include "source3/lib/dbwrap/dbwrap_watch.h"
++#include "source3/lib/server_id_watch.h"
+ #include "locking/leases_db.h"
+ #include "librpc/gen_ndr/ndr_leases_db.h"
+ #include "lib/util/time_basic.h"
+@@ -2472,6 +2473,10 @@ static int map_lease_type_to_oplock(uint32_t lease_type)
+ 	return result;
+ }
+ 
++struct blocker_debug_state {
++	size_t num_blockers;
++};
++
+ struct delay_for_oplock_state {
+ 	struct files_struct *fsp;
+ 	const struct smb2_lease *lease;
+@@ -2483,8 +2488,22 @@ struct delay_for_oplock_state {
+ 	bool have_other_lease;
+ 	uint32_t total_lease_types;
+ 	bool delay;
++	struct blocker_debug_state *blocker_debug_state;
+ };
+ 
++static int blocker_debug_state_destructor(struct blocker_debug_state *state)
++{
++	if (state->num_blockers == 0) {
++		return 0;
++	}
++
++	DBG_DEBUG("blocker_debug_state [%p] num_blockers [%zu]\n",
++		  state, state->num_blockers);
++	return 0;
++}
++
++static void delay_for_oplock_fn_watch_done(struct tevent_req *subreq);
++
+ static bool delay_for_oplock_fn(
+ 	struct share_mode_entry *e,
+ 	bool *modified,
+@@ -2497,6 +2516,8 @@ static bool delay_for_oplock_fn(
+ 	uint32_t e_lease_type = SMB2_LEASE_NONE;
+ 	uint32_t break_to;
+ 	bool lease_is_breaking = false;
++	struct tevent_req *subreq = NULL;
++	struct server_id_buf idbuf = {};
+ 
+ 	if (e_is_lease) {
+ 		NTSTATUS status;
+@@ -2636,9 +2657,56 @@ static bool delay_for_oplock_fn(
+ 		state->delay = true;
+ 	}
+ 
++	if (!state->delay) {
++		return false;
++	}
++
++	if (state->blocker_debug_state == NULL) {
++		return false;
++	}
++
++	subreq = server_id_watch_send(state->blocker_debug_state,
++				      fsp->conn->sconn->ev_ctx,
++				      e->pid);
++	if (subreq == NULL) {
++		DBG_ERR("server_id_watch_send(%s) returned NULL\n",
++			server_id_str_buf(e->pid, &idbuf));
++		return false;
++	}
++
++	tevent_req_set_callback(subreq,
++				delay_for_oplock_fn_watch_done,
++				state->blocker_debug_state);
++
++	state->blocker_debug_state->num_blockers++;
++
++	DBG_DEBUG("Starting to watch pid [%s] state [%p] num_blockers [%zu]\n",
++		  server_id_str_buf(e->pid, &idbuf),
++		  state->blocker_debug_state,
++		  state->blocker_debug_state->num_blockers);
++
+ 	return false;
+ };
+ 
++static void delay_for_oplock_fn_watch_done(struct tevent_req *subreq)
++{
++	struct blocker_debug_state *blocker_debug_state = tevent_req_callback_data(
++		subreq, struct blocker_debug_state);
++	struct server_id pid = {};
++	struct server_id_buf idbuf = {};
++	int ret;
++
++	ret = server_id_watch_recv(subreq, &pid);
++	if (ret != 0) {
++		DBG_ERR("server_id_watch_recv failed %s\n", strerror(ret));
++		return;
++	}
++
++	DBG_DEBUG("state [%p] server_id_watch_recv() returned pid [%s] exited\n",
++		  blocker_debug_state,
++		  server_id_str_buf(pid, &idbuf));
++}
++
+ static NTSTATUS delay_for_oplock(files_struct *fsp,
+ 				 int oplock_request,
+ 				 const struct smb2_lease *lease,
+@@ -2647,7 +2715,8 @@ static NTSTATUS delay_for_oplock(files_struct *fsp,
+ 				 uint32_t create_disposition,
+ 				 bool first_open_attempt,
+ 				 int *poplock_type,
+-				 uint32_t *pgranted)
++				 uint32_t *pgranted,
++				 struct blocker_debug_state **blocker_debug_state)
+ {
+ 	struct delay_for_oplock_state state = {
+ 		.fsp = fsp,
+@@ -2693,6 +2762,22 @@ static NTSTATUS delay_for_oplock(files_struct *fsp,
+ 		goto grant;
+ 	}
+ 
++	if (lp_parm_bool(GLOBAL_SECTION_SNUM,
++			 "smbd lease break",
++			 "debug hung procs",
++			 false))
++	{
++		state.blocker_debug_state = talloc_zero(fsp,
++						struct blocker_debug_state);
++		if (state.blocker_debug_state == NULL) {
++			return NT_STATUS_NO_MEMORY;
++		}
++		talloc_steal(talloc_tos(), state.blocker_debug_state);
++
++		talloc_set_destructor(state.blocker_debug_state,
++				      blocker_debug_state_destructor);
++	}
++
+ 	state.delay_mask = have_sharing_violation ?
+ 		SMB2_LEASE_HANDLE : SMB2_LEASE_WRITE;
+ 
+@@ -2714,6 +2799,7 @@ static NTSTATUS delay_for_oplock(files_struct *fsp,
+ 	}
+ 
+ 	if (state.delay) {
++		*blocker_debug_state = state.blocker_debug_state;
+ 		return NT_STATUS_RETRY;
+ 	}
+ 
+@@ -2827,7 +2913,8 @@ static NTSTATUS handle_share_mode_lease(
+ 	const struct smb2_lease *lease,
+ 	bool first_open_attempt,
+ 	int *poplock_type,
+-	uint32_t *pgranted)
++	uint32_t *pgranted,
++	struct blocker_debug_state **blocker_debug_state)
+ {
+ 	bool sharing_violation = false;
+ 	NTSTATUS status;
+@@ -2868,7 +2955,8 @@ static NTSTATUS handle_share_mode_lease(
+ 		create_disposition,
+ 		first_open_attempt,
+ 		poplock_type,
+-		pgranted);
++		pgranted,
++		blocker_debug_state);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		return status;
+ 	}
+@@ -2903,7 +2991,8 @@ static void defer_open_done(struct tevent_req *req);
+ static void defer_open(struct share_mode_lock *lck,
+ 		       struct timeval timeout,
+ 		       struct smb_request *req,
+-		       struct file_id id)
++		       struct file_id id,
++		       struct blocker_debug_state **blocker_debug_state)
+ {
+ 	struct deferred_open_record *open_rec = NULL;
+ 	struct timeval abs_timeout;
+@@ -2947,6 +3036,8 @@ static void defer_open(struct share_mode_lock *lck,
+ 	}
+ 	tevent_req_set_callback(watch_req, defer_open_done, watch_state);
+ 
++	talloc_move(watch_req, blocker_debug_state);
++
+ 	ok = tevent_req_set_endtime(watch_req, req->sconn->ev_ctx, abs_timeout);
+ 	if (!ok) {
+ 		exit_server("tevent_req_set_endtime failed");
+@@ -3229,7 +3320,8 @@ static bool open_match_attributes(connection_struct *conn,
+ 
+ static void schedule_defer_open(struct share_mode_lock *lck,
+ 				struct file_id id,
+-				struct smb_request *req)
++				struct smb_request *req,
++				struct blocker_debug_state **blocker_debug_state)
+ {
+ 	/* This is a relative time, added to the absolute
+ 	   request_time value to get the absolute timeout time.
+@@ -3253,7 +3345,7 @@ static void schedule_defer_open(struct share_mode_lock *lck,
+ 		return;
+ 	}
+ 
+-	defer_open(lck, timeout, req, id);
++	defer_open(lck, timeout, req, id, blocker_debug_state);
+ }
+ 
+ /****************************************************************************
+@@ -3315,6 +3407,7 @@ static NTSTATUS check_and_store_share_mode(
+ 	int oplock_type = NO_OPLOCK;
+ 	uint32_t granted_lease = 0;
+ 	const struct smb2_lease_key *lease_key = NULL;
++	struct blocker_debug_state *blocker_debug_state = NULL;
+ 	bool delete_on_close;
+ 	bool ok;
+ 
+@@ -3337,9 +3430,10 @@ static NTSTATUS check_and_store_share_mode(
+ 					 lease,
+ 					 first_open_attempt,
+ 					 &oplock_type,
+-					 &granted_lease);
++					 &granted_lease,
++					 &blocker_debug_state);
+ 	if (NT_STATUS_EQUAL(status, NT_STATUS_RETRY)) {
+-		schedule_defer_open(lck, fsp->file_id, req);
++		schedule_defer_open(lck, fsp->file_id, req, &blocker_debug_state);
+ 		return NT_STATUS_SHARING_VIOLATION;
+ 	}
+ 	if (!NT_STATUS_IS_OK(status)) {
+-- 
+2.51.0
+
+
+From e6a0d821ba28839728371ca94bb364dd6865b5dd Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Wed, 20 Mar 2024 14:27:27 +0100
+Subject: [PATCH 57/63] smbd: move trace_state variable behind tv variable
+
+Next commit adds timestamp variables to trace_state that want to be initialized
+with the current time, so moving behind tv we can then just reuse tv for that.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 679e12aee2f0c283a6f9b9c6008c549a6ca9633e)
+---
+ source3/smbd/smb2_process.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/source3/smbd/smb2_process.c b/source3/smbd/smb2_process.c
+index fbbe4ef3992..188eaa14839 100644
+--- a/source3/smbd/smb2_process.c
++++ b/source3/smbd/smb2_process.c
+@@ -1783,10 +1783,6 @@ void smbd_process(struct tevent_context *ev_ctx,
+ 		  int sock_fd,
+ 		  bool interactive)
+ {
+-	struct smbd_tevent_trace_state trace_state = {
+-		.ev = ev_ctx,
+-		.frame = talloc_stackframe(),
+-	};
+ 	const struct loadparm_substitution *lp_sub =
+ 		loadparm_s3_global_substitution();
+ 	struct smbXsrv_client *client = NULL;
+@@ -1797,6 +1793,10 @@ void smbd_process(struct tevent_context *ev_ctx,
+ 	int ret;
+ 	NTSTATUS status;
+ 	struct timeval tv = timeval_current();
++	struct smbd_tevent_trace_state trace_state = {
++		.ev = ev_ctx,
++		.frame = talloc_stackframe(),
++	};
+ 	NTTIME now = timeval_to_nttime(&tv);
+ 	char *chroot_dir = NULL;
+ 	int rc;
+-- 
+2.51.0
+
+
+From 15276d7645255ddddf2a3bf6b7a429e3d40ec9b7 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Wed, 20 Mar 2024 14:28:43 +0100
+Subject: [PATCH 58/63] smbd: add option "smbd:debug events" for tevent
+ handling duration threshold warnings
+
+Can be used to enable printing an error message if tevent event handlers ran
+longer then three seconds. Also logs a message with a loglevel of 3 if there
+were no events at hall.
+
+Enabled by default with 'log level = 10' or
+'smbd profiling level = on'...
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 90d776cb18395ed804f0ab4fd13ef571fc0ad827)
+---
+ source3/smbd/smb2_process.c | 64 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 64 insertions(+)
+
+diff --git a/source3/smbd/smb2_process.c b/source3/smbd/smb2_process.c
+index 188eaa14839..dbe91132f7f 100644
+--- a/source3/smbd/smb2_process.c
++++ b/source3/smbd/smb2_process.c
+@@ -1692,8 +1692,36 @@ struct smbd_tevent_trace_state {
+ 	struct tevent_context *ev;
+ 	TALLOC_CTX *frame;
+ 	SMBPROFILE_BASIC_ASYNC_STATE(profile_idle);
++	struct timeval before_wait_tv;
++	struct timeval after_wait_tv;
+ };
+ 
++static inline void smbd_tevent_trace_callback_before_wait(
++	struct smbd_tevent_trace_state *state)
++{
++	struct timeval now = timeval_current();
++	struct timeval diff;
++
++	diff = tevent_timeval_until(&state->after_wait_tv, &now);
++	if (diff.tv_sec > 3) {
++		DBG_ERR("Handling event took %ld seconds!\n", (long)diff.tv_sec);
++	}
++	state->before_wait_tv = now;
++}
++
++static inline void smbd_tevent_trace_callback_after_wait(
++	struct smbd_tevent_trace_state *state)
++{
++	struct timeval now = timeval_current();
++	struct timeval diff;
++
++	diff = tevent_timeval_until(&state->before_wait_tv, &now);
++	if (diff.tv_sec > 30) {
++		DBG_NOTICE("No event for %ld seconds!\n", (long)diff.tv_sec);
++	}
++	state->after_wait_tv = now;
++}
++
+ static inline void smbd_tevent_trace_callback_before_loop_once(
+ 	struct smbd_tevent_trace_state *state)
+ {
+@@ -1729,6 +1757,30 @@ static void smbd_tevent_trace_callback(enum tevent_trace_point point,
+ 	errno = 0;
+ }
+ 
++static void smbd_tevent_trace_callback_debug(enum tevent_trace_point point,
++					     void *private_data)
++{
++	struct smbd_tevent_trace_state *state =
++		(struct smbd_tevent_trace_state *)private_data;
++
++	switch (point) {
++	case TEVENT_TRACE_BEFORE_WAIT:
++		smbd_tevent_trace_callback_before_wait(state);
++		break;
++	case TEVENT_TRACE_AFTER_WAIT:
++		smbd_tevent_trace_callback_after_wait(state);
++		break;
++	case TEVENT_TRACE_BEFORE_LOOP_ONCE:
++		smbd_tevent_trace_callback_before_loop_once(state);
++		break;
++	case TEVENT_TRACE_AFTER_LOOP_ONCE:
++		smbd_tevent_trace_callback_after_loop_once(state);
++		break;
++	}
++
++	errno = 0;
++}
++
+ static void smbd_tevent_trace_callback_profile(enum tevent_trace_point point,
+ 					       void *private_data)
+ {
+@@ -1737,6 +1789,7 @@ static void smbd_tevent_trace_callback_profile(enum tevent_trace_point point,
+ 
+ 	switch (point) {
+ 	case TEVENT_TRACE_BEFORE_WAIT:
++		smbd_tevent_trace_callback_before_wait(state);
+ 		if (!smbprofile_dump_pending()) {
+ 			/*
+ 			 * If there's no dump pending
+@@ -1749,6 +1802,7 @@ static void smbd_tevent_trace_callback_profile(enum tevent_trace_point point,
+ 		SMBPROFILE_BASIC_ASYNC_START(idle, profile_p, state->profile_idle);
+ 		break;
+ 	case TEVENT_TRACE_AFTER_WAIT:
++		smbd_tevent_trace_callback_after_wait(state);
+ 		SMBPROFILE_BASIC_ASYNC_END(state->profile_idle);
+ 		if (!smbprofile_dump_pending()) {
+ 			/*
+@@ -1796,7 +1850,13 @@ void smbd_process(struct tevent_context *ev_ctx,
+ 	struct smbd_tevent_trace_state trace_state = {
+ 		.ev = ev_ctx,
+ 		.frame = talloc_stackframe(),
++		.before_wait_tv = tv,
++		.after_wait_tv = tv,
+ 	};
++	bool debug = lp_parm_bool(GLOBAL_SECTION_SNUM,
++				  "smbd",
++				  "debug events",
++				  CHECK_DEBUGLVL(DBGLVL_DEBUG));
+ 	NTTIME now = timeval_to_nttime(&tv);
+ 	char *chroot_dir = NULL;
+ 	int rc;
+@@ -2041,6 +2101,10 @@ void smbd_process(struct tevent_context *ev_ctx,
+ 		tevent_set_trace_callback(ev_ctx,
+ 					  smbd_tevent_trace_callback_profile,
+ 					  &trace_state);
++	} else if (debug) {
++		tevent_set_trace_callback(ev_ctx,
++					  smbd_tevent_trace_callback_debug,
++					  &trace_state);
+ 	} else {
+ 		tevent_set_trace_callback(ev_ctx,
+ 					  smbd_tevent_trace_callback,
+-- 
+2.51.0
+
+
+From 4631b9d60a874db10dbdd52406d0094a7dbd1356 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 26 Aug 2024 14:11:02 +0200
+Subject: [PATCH 59/63] vfs_error_inject: add 'error_inject:durable_reconnect =
+ st_ex_nlink'
+
+This allows to simulate durable reconnect failures because the stat
+information of the file changed.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 692ed832dfff61ad1c9b646b5c8d6f85f25efb99)
+---
+ source3/modules/vfs_error_inject.c | 76 ++++++++++++++++++++++++++++++
+ 1 file changed, 76 insertions(+)
+
+diff --git a/source3/modules/vfs_error_inject.c b/source3/modules/vfs_error_inject.c
+index 529504fd8d5..dcf0de0a2d9 100644
+--- a/source3/modules/vfs_error_inject.c
++++ b/source3/modules/vfs_error_inject.c
+@@ -19,6 +19,7 @@
+ 
+ #include "includes.h"
+ #include "smbd/smbd.h"
++#include "librpc/gen_ndr/ndr_open_files.h"
+ 
+ #undef DBGC_CLASS
+ #define DBGC_CLASS DBGC_VFS
+@@ -204,11 +205,86 @@ static int vfs_error_inject_unlinkat(struct vfs_handle_struct *handle,
+ 	return -1;
+ }
+ 
++static NTSTATUS vfs_error_inject_durable_reconnect(struct vfs_handle_struct *handle,
++						   struct smb_request *smb1req,
++						   struct smbXsrv_open *op,
++						   const DATA_BLOB old_cookie,
++						   TALLOC_CTX *mem_ctx,
++						   struct files_struct **fsp,
++						   DATA_BLOB *new_cookie)
++{
++	const char *vfs_func = "durable_reconnect";
++	const char *err_str = NULL;
++	NTSTATUS status;
++	enum ndr_err_code ndr_err;
++	struct vfs_default_durable_cookie cookie;
++	DATA_BLOB modified_cookie = data_blob_null;
++
++	err_str = lp_parm_const_string(SNUM(handle->conn),
++				       "error_inject",
++				       vfs_func,
++				       NULL);
++	if (err_str == NULL) {
++		return SMB_VFS_NEXT_DURABLE_RECONNECT(handle,
++						      smb1req,
++						      op,
++						      old_cookie,
++						      mem_ctx,
++						      fsp,
++						      new_cookie);
++	}
++
++	ndr_err = ndr_pull_struct_blob(&old_cookie, talloc_tos(), &cookie,
++			(ndr_pull_flags_fn_t)ndr_pull_vfs_default_durable_cookie);
++	if (!NDR_ERR_CODE_IS_SUCCESS(ndr_err)) {
++		status = ndr_map_error2ntstatus(ndr_err);
++		return status;
++	}
++
++	if (strcmp(cookie.magic, VFS_DEFAULT_DURABLE_COOKIE_MAGIC) != 0) {
++		return NT_STATUS_INVALID_PARAMETER;
++	}
++
++	if (cookie.version != VFS_DEFAULT_DURABLE_COOKIE_VERSION) {
++		return NT_STATUS_INVALID_PARAMETER;
++	}
++
++	if (strequal(err_str, "st_ex_nlink")) {
++		cookie.stat_info.st_ex_nlink += 1;
++	} else {
++		DBG_ERR("Unknown error inject %s requested "
++			"for vfs function %s\n", err_str, vfs_func);
++		return SMB_VFS_NEXT_DURABLE_RECONNECT(handle,
++						      smb1req,
++						      op,
++						      old_cookie,
++						      mem_ctx,
++						      fsp,
++						      new_cookie);
++	}
++
++	ndr_err = ndr_push_struct_blob(&modified_cookie, talloc_tos(), &cookie,
++			(ndr_push_flags_fn_t)ndr_push_vfs_default_durable_cookie);
++	if (!NDR_ERR_CODE_IS_SUCCESS(ndr_err)) {
++		status = ndr_map_error2ntstatus(ndr_err);
++		return status;
++	}
++
++	return SMB_VFS_NEXT_DURABLE_RECONNECT(handle,
++					      smb1req,
++					      op,
++					      modified_cookie,
++					      mem_ctx,
++					      fsp,
++					      new_cookie);
++}
++
+ static struct vfs_fn_pointers vfs_error_inject_fns = {
+ 	.chdir_fn = vfs_error_inject_chdir,
+ 	.pwrite_fn = vfs_error_inject_pwrite,
+ 	.openat_fn = vfs_error_inject_openat,
+ 	.unlinkat_fn = vfs_error_inject_unlinkat,
++	.durable_reconnect_fn = vfs_error_inject_durable_reconnect,
+ };
+ 
+ static_decl_vfs;
+-- 
+2.51.0
+
+
+From c8e88652163cc56b1f9fb0926a140c81e6b7ec94 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 26 Aug 2024 14:42:02 +0200
+Subject: [PATCH 60/63] s4:torture/smb2: add
+ smb2.durable-v2-regressions.durable_v2_reconnect_bug15624
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit ef4ef04e7f83b1029446ff8b5fc5fdf4ab33edbd)
+---
+ selftest/skip                          |   1 +
+ source4/torture/smb2/durable_v2_open.c | 118 +++++++++++++++++++++++++
+ source4/torture/smb2/smb2.c            |   2 +
+ 3 files changed, 121 insertions(+)
+
+diff --git a/selftest/skip b/selftest/skip
+index e808367c00d..056c54ea287 100644
+--- a/selftest/skip
++++ b/selftest/skip
+@@ -149,3 +149,4 @@ bench # don't run benchmarks in our selftest
+ ^samba.tests.reparsepoints.*
+ ^samba.tests.smb2symlink.*
+ ^samba3.blackbox.open-eintr.*
++smb2.durable-v2-regressions # Only used in blackbox tests
+diff --git a/source4/torture/smb2/durable_v2_open.c b/source4/torture/smb2/durable_v2_open.c
+index 9b9af11124c..7447dd287a4 100644
+--- a/source4/torture/smb2/durable_v2_open.c
++++ b/source4/torture/smb2/durable_v2_open.c
+@@ -2355,6 +2355,112 @@ done:
+ 	return ret;
+ }
+ 
++/**
++ * basic test for doing a durable open
++ * tcp disconnect, reconnect, do a durable reopen (succeeds)
++ */
++static bool test_durable_v2_reconnect_bug15624(struct torture_context *tctx,
++					       struct smb2_tree *tree,
++					       struct smb2_tree *tree2)
++{
++	NTSTATUS status;
++	TALLOC_CTX *mem_ctx = talloc_new(tctx);
++	char fname[256];
++	struct smb2_handle _h;
++	struct smb2_handle *h = NULL;
++	struct smb2_create io;
++	struct GUID create_guid = GUID_random();
++	struct smbcli_options options;
++	uint64_t previous_session_id;
++	uint8_t b = 0;
++	bool ret = true;
++	bool ok;
++
++	if (!torture_setting_bool(tctx, "bug15624", false)) {
++		torture_comment(tctx,
++				"share requires:\n"
++				"'vfs objects = error_inject'\n"
++				"'error_inject:durable_reconnect=st_ex_nlink'\n"
++				"test requires:\n"
++				"'--option=torture:bug15624=yes'\n");
++		torture_skip(tctx, "'--option=torture:bug15624=yes' missing");
++	}
++
++	options = tree->session->transport->options;
++	previous_session_id = smb2cli_session_current_id(tree->session->smbXcli);
++
++	/* Choose a random name in case the state is left a little funky. */
++	snprintf(fname,
++		 sizeof(fname),
++		 "durable_v2_reconnect_bug15624_%s.dat",
++		 generate_random_str(tctx, 8));
++
++	smb2_util_unlink(tree, fname);
++
++	smb2_oplock_create_share(&io, fname,
++				 smb2_util_share_access(""),
++				 smb2_util_oplock_level("b"));
++	io.in.durable_open = false;
++	io.in.durable_open_v2 = true;
++	io.in.persistent_open = false;
++	io.in.create_guid = create_guid;
++	io.in.timeout = 0;
++
++	status = smb2_create(tree, mem_ctx, &io);
++	CHECK_STATUS(status, NT_STATUS_OK);
++
++	_h = io.out.file.handle;
++	h = &_h;
++	CHECK_VAL(io.out.oplock_level, smb2_util_oplock_level("b"));
++	CHECK_VAL(io.out.durable_open_v2, true);
++
++	status = smb2_util_write(tree, *h, &b, 0, 1);
++	CHECK_STATUS(status, NT_STATUS_OK);
++
++	/* disconnect, leaving the durable open */
++	TALLOC_FREE(tree);
++	h = NULL;
++
++	ok = torture_smb2_connection_ext(tctx, previous_session_id,
++					 &options, &tree);
++	torture_assert_goto(tctx, ok, ret, done, "couldn't reconnect, bailing\n");
++
++	ZERO_STRUCT(io);
++	io.in.fname = fname;
++	io.in.durable_open_v2 = false;
++	io.in.durable_handle_v2 = &_h;
++	io.in.create_guid = create_guid;
++
++	/*
++	 * This assumes 'error_inject:durable_reconnect = st_ex_nlink'
++	 * will cause the durable reconnect to fail...
++	 * in order to have a regression test for the dead lock.
++	 */
++	status = smb2_create(tree, mem_ctx, &io);
++	CHECK_STATUS(status, NT_STATUS_OBJECT_NAME_NOT_FOUND);
++
++	/*
++	 * With the regression this will fail with
++	 * a timeout...
++	 */
++	status = smb2_util_unlink(tree2, fname);
++	CHECK_STATUS(status, NT_STATUS_OK);
++
++done:
++	if (h != NULL) {
++		smb2_util_close(tree, *h);
++	}
++	TALLOC_FREE(tree);
++
++	smb2_util_unlink(tree2, fname);
++
++	TALLOC_FREE(tree2);
++
++	talloc_free(mem_ctx);
++
++	return ret;
++}
++
+ struct torture_suite *torture_smb2_durable_v2_delay_init(TALLOC_CTX *ctx)
+ {
+ 	struct torture_suite *suite =
+@@ -2369,3 +2475,15 @@ struct torture_suite *torture_smb2_durable_v2_delay_init(TALLOC_CTX *ctx)
+ 
+ 	return suite;
+ }
++
++struct torture_suite *torture_smb2_durable_v2_regressions_init(TALLOC_CTX *ctx)
++{
++	struct torture_suite *suite =
++	    torture_suite_create(ctx, "durable-v2-regressions");
++
++	torture_suite_add_2smb2_test(suite,
++				     "durable_v2_reconnect_bug15624",
++				     test_durable_v2_reconnect_bug15624);
++
++	return suite;
++}
+diff --git a/source4/torture/smb2/smb2.c b/source4/torture/smb2/smb2.c
+index 5b6477e47bc..9cf7f5da78b 100644
+--- a/source4/torture/smb2/smb2.c
++++ b/source4/torture/smb2/smb2.c
+@@ -170,6 +170,8 @@ NTSTATUS torture_smb2_init(TALLOC_CTX *ctx)
+ 		torture_smb2_durable_v2_open_init(suite));
+ 	torture_suite_add_suite(suite,
+ 		torture_smb2_durable_v2_delay_init(suite));
++	torture_suite_add_suite(suite,
++		torture_smb2_durable_v2_regressions_init(suite));
+ 	torture_suite_add_suite(suite, torture_smb2_dir_init(suite));
+ 	torture_suite_add_suite(suite, torture_smb2_lease_init(suite));
+ 	torture_suite_add_suite(suite, torture_smb2_compound_init(suite));
+-- 
+2.51.0
+
+
+From 56a3aaf95c44052b19b61115686c71d5b7dbab4a Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Mon, 26 Aug 2024 14:42:12 +0200
+Subject: [PATCH 61/63] s3:tests: let test_durable_handle_reconnect.sh run
+ smb2.durable-v2-regressions.durable_v2_reconnect_bug15624
+
+This demonstrates the dead lock after a durable reconnect failed
+because the stat info changed, the file can't be accessed anymore
+as we leak the incomplete share mode entry in a still running
+process.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit 14875448ca06a3a28800343a3a326f1a66bccec0)
+---
+ .../samba3.blackbox.durable_v2_delay           |  1 +
+ .../tests/test_durable_handle_reconnect.sh     | 18 ++++++++++++++++++
+ 2 files changed, 19 insertions(+)
+ create mode 100644 selftest/knownfail.d/samba3.blackbox.durable_v2_delay
+
+diff --git a/selftest/knownfail.d/samba3.blackbox.durable_v2_delay b/selftest/knownfail.d/samba3.blackbox.durable_v2_delay
+new file mode 100644
+index 00000000000..88e29960797
+--- /dev/null
++++ b/selftest/knownfail.d/samba3.blackbox.durable_v2_delay
+@@ -0,0 +1 @@
++^samba3.blackbox.durable_v2_delay.durable-v2-regressions.durable_v2_reconnect_bug15624
+diff --git a/source3/script/tests/test_durable_handle_reconnect.sh b/source3/script/tests/test_durable_handle_reconnect.sh
+index 0ab32974824..fd5c156956f 100755
+--- a/source3/script/tests/test_durable_handle_reconnect.sh
++++ b/source3/script/tests/test_durable_handle_reconnect.sh
+@@ -33,4 +33,22 @@ testit "durable_v2_delay.durable_v2_reconnect_delay_msec" $VALGRIND \
+ 
+ rm $delay_inject_conf
+ 
++error_inject_conf=$(dirname $SMB_CONF_PATH)/error_inject.conf
++
++cat > $error_inject_conf << _EOF
++	kernel share modes = no
++	kernel oplocks = no
++	posix locking = no
++	error_inject:durable_reconnect = st_ex_nlink
++_EOF
++
++testit "durable-v2-regressions.durable_v2_reconnect_bug15624" \
++	$VALGRIND $BINDIR/smbtorture //$SERVER_IP/error_inject \
++	-U$USERNAME%$PASSWORD \
++	--option=torture:bug15624=yes \
++	smb2.durable-v2-regressions.durable_v2_reconnect_bug15624 ||
++	failed=$(expr $failed + 1)
++
++rm $error_inject_conf
++
+ testok $0 $failed
+-- 
+2.51.0
+
+
+From d8f01885145ecfce15f2507fdcc625442db1738c Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 9 Apr 2024 14:52:44 +0200
+Subject: [PATCH 62/63] smbd: consolidate DH reconnect failure code
+
+No change in behaviour, except that we now
+also call fd_close() if vfs_default_durable_cookie()
+failed.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+(cherry picked from commit a91457f97c98fcec1ed062514c364271af1df669)
+---
+ source3/smbd/durable.c | 142 ++++++++++++++---------------------------
+ 1 file changed, 47 insertions(+), 95 deletions(-)
+
+diff --git a/source3/smbd/durable.c b/source3/smbd/durable.c
+index b21c223b2e4..50075ddd3f7 100644
+--- a/source3/smbd/durable.c
++++ b/source3/smbd/durable.c
+@@ -624,22 +624,22 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 	ok = share_mode_forall_entries(lck, durable_reconnect_fn, &e);
+ 	if (!ok) {
+ 		DBG_WARNING("share_mode_forall_entries failed\n");
+-		TALLOC_FREE(lck);
+-		return NT_STATUS_INTERNAL_DB_ERROR;
++		status = NT_STATUS_INTERNAL_DB_ERROR;
++		goto fail;
+ 	}
+ 
+ 	if (e.pid.pid == 0) {
+ 		DBG_WARNING("Did not find a unique valid share mode entry\n");
+-		TALLOC_FREE(lck);
+-		return NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		status = NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		goto fail;
+ 	}
+ 
+ 	if (!server_id_is_disconnected(&e.pid)) {
+ 		DEBUG(5, ("vfs_default_durable_reconnect: denying durable "
+ 			  "reconnect for handle that was not marked "
+ 			  "disconnected (e.g. smbd or cluster node died)\n"));
+-		TALLOC_FREE(lck);
+-		return NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		status = NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		goto fail;
+ 	}
+ 
+ 	if (e.share_file_id != op->global->open_persistent_id) {
+@@ -648,8 +648,8 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 			 "(e.g. another client had opened the file)\n",
+ 			 e.share_file_id,
+ 			 op->global->open_persistent_id);
+-		TALLOC_FREE(lck);
+-		return NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		status = NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		goto fail;
+ 	}
+ 
+ 	if ((e.access_mask & (FILE_WRITE_DATA|FILE_APPEND_DATA)) &&
+@@ -658,8 +658,8 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 		DEBUG(5, ("vfs_default_durable_reconnect: denying durable "
+ 			  "share[%s] is not writeable anymore\n",
+ 			  lp_servicename(talloc_tos(), lp_sub, SNUM(conn))));
+-		TALLOC_FREE(lck);
+-		return NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		status = NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		goto fail;
+ 	}
+ 
+ 	/*
+@@ -670,8 +670,7 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		DEBUG(0, ("vfs_default_durable_reconnect: failed to create "
+ 			  "new fsp: %s\n", nt_errstr(status)));
+-		TALLOC_FREE(lck);
+-		return status;
++		goto fail;
+ 	}
+ 
+ 	fh_set_private_options(fsp->fh, e.private_options);
+@@ -714,9 +713,8 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 		 */
+ 		if (!GUID_equal(fsp_client_guid(fsp),
+ 				&e.client_guid)) {
+-			TALLOC_FREE(lck);
+-			file_free(smb1req, fsp);
+-			return NT_STATUS_OBJECT_NAME_NOT_FOUND;
++			status = NT_STATUS_OBJECT_NAME_NOT_FOUND;
++			goto fail;
+ 		}
+ 
+ 		status = leases_db_get(
+@@ -730,9 +728,7 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 			&lease_version, /* lease_version */
+ 			&epoch); /* epoch */
+ 		if (!NT_STATUS_IS_OK(status)) {
+-			TALLOC_FREE(lck);
+-			file_free(smb1req, fsp);
+-			return status;
++			goto fail;
+ 		}
+ 
+ 		fsp->lease = find_fsp_lease(
+@@ -742,9 +738,8 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 			lease_version,
+ 			epoch);
+ 		if (fsp->lease == NULL) {
+-			TALLOC_FREE(lck);
+-			file_free(smb1req, fsp);
+-			return NT_STATUS_NO_MEMORY;
++			status = NT_STATUS_NO_MEMORY;
++			goto fail;
+ 		}
+ 	}
+ 
+@@ -760,12 +755,10 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 
+ 	status = fsp_set_smb_fname(fsp, smb_fname);
+ 	if (!NT_STATUS_IS_OK(status)) {
+-		TALLOC_FREE(lck);
+-		file_free(smb1req, fsp);
+ 		DEBUG(0, ("vfs_default_durable_reconnect: "
+ 			  "fsp_set_smb_fname failed: %s\n",
+ 			  nt_errstr(status)));
+-		return status;
++		goto fail;
+ 	}
+ 
+ 	op->compat = fsp;
+@@ -780,11 +773,8 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 		fh_get_gen_id(fsp->fh));
+ 	if (!ok) {
+ 		DBG_DEBUG("Could not set new share_mode_entry values\n");
+-		TALLOC_FREE(lck);
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return NT_STATUS_INTERNAL_ERROR;
++		status = NT_STATUS_INTERNAL_ERROR;
++		goto fail;
+ 	}
+ 
+ 	ok = brl_reconnect_disconnected(fsp);
+@@ -793,11 +783,7 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 		DEBUG(1, ("vfs_default_durable_reconnect: "
+ 			  "failed to reopen brlocks: %s\n",
+ 			  nt_errstr(status)));
+-		TALLOC_FREE(lck);
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return status;
++		goto fail;
+ 	}
+ 
+ 	/*
+@@ -813,13 +799,9 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 
+ 	status = fd_openat(conn->cwd_fsp, fsp->fsp_name, fsp, &how);
+ 	if (!NT_STATUS_IS_OK(status)) {
+-		TALLOC_FREE(lck);
+ 		DEBUG(1, ("vfs_default_durable_reconnect: failed to open "
+ 			  "file: %s\n", nt_errstr(status)));
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return status;
++		goto fail;
+ 	}
+ 
+ 	/*
+@@ -833,48 +815,22 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 
+ 	ret = SMB_VFS_FSTAT(fsp, &fsp->fsp_name->st);
+ 	if (ret == -1) {
+-		NTSTATUS close_status;
+ 		status = map_nt_error_from_unix_common(errno);
+ 		DEBUG(1, ("Unable to fstat stream: %s => %s\n",
+ 			  smb_fname_str_dbg(smb_fname),
+ 			  nt_errstr(status)));
+-		close_status = fd_close(fsp);
+-		if (!NT_STATUS_IS_OK(close_status)) {
+-			DBG_ERR("fd_close failed (%s) - leaking file "
+-				"descriptor\n", nt_errstr(close_status));
+-		}
+-		TALLOC_FREE(lck);
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return status;
++		goto fail;
+ 	}
+ 
+ 	if (!S_ISREG(fsp->fsp_name->st.st_ex_mode)) {
+-		NTSTATUS close_status = fd_close(fsp);
+-		if (!NT_STATUS_IS_OK(close_status)) {
+-			DBG_ERR("fd_close failed (%s) - leaking file "
+-				"descriptor\n", nt_errstr(close_status));
+-		}
+-		TALLOC_FREE(lck);
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		status = NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		goto fail;
+ 	}
+ 
+ 	file_id = vfs_file_id_from_sbuf(conn, &fsp->fsp_name->st);
+ 	if (!file_id_equal(&cookie.id, &file_id)) {
+-		NTSTATUS close_status = fd_close(fsp);
+-		if (!NT_STATUS_IS_OK(close_status)) {
+-			DBG_ERR("fd_close failed (%s) - leaking file "
+-				"descriptor\n", nt_errstr(close_status));
+-		}
+-		TALLOC_FREE(lck);
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		status = NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		goto fail;
+ 	}
+ 
+ 	(void)fdos_mode(fsp);
+@@ -883,42 +839,21 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 						      &fsp->fsp_name->st,
+ 						      fsp_str_dbg(fsp));
+ 	if (!ok) {
+-		NTSTATUS close_status = fd_close(fsp);
+-		if (!NT_STATUS_IS_OK(close_status)) {
+-			DBG_ERR("fd_close failed (%s) - leaking file "
+-				"descriptor\n", nt_errstr(close_status));
+-		}
+-		TALLOC_FREE(lck);
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		status = NT_STATUS_OBJECT_NAME_NOT_FOUND;
++		goto fail;
+ 	}
+ 
+ 	status = set_file_oplock(fsp);
+ 	if (!NT_STATUS_IS_OK(status)) {
+-		NTSTATUS close_status = fd_close(fsp);
+-		if (!NT_STATUS_IS_OK(close_status)) {
+-			DBG_ERR("fd_close failed (%s) - leaking file "
+-				"descriptor\n", nt_errstr(close_status));
+-		}
+-		TALLOC_FREE(lck);
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return status;
++		goto fail;
+ 	}
+ 
+ 	status = vfs_default_durable_cookie(fsp, mem_ctx, &new_cookie_blob);
+ 	if (!NT_STATUS_IS_OK(status)) {
+-		TALLOC_FREE(lck);
+ 		DEBUG(1, ("vfs_default_durable_reconnect: "
+ 			  "vfs_default_durable_cookie - %s\n",
+ 			  nt_errstr(status)));
+-		op->compat = NULL;
+-		fsp->op = NULL;
+-		file_free(smb1req, fsp);
+-		return status;
++		goto fail;
+ 	}
+ 
+ 	smb1req->chain_fsp = fsp;
+@@ -935,4 +870,21 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 	*new_cookie = new_cookie_blob;
+ 
+ 	return NT_STATUS_OK;
++
++fail:
++	if (fsp != NULL && fsp_get_pathref_fd(fsp) != -1) {
++		NTSTATUS close_status;
++		close_status = fd_close(fsp);
++		if (!NT_STATUS_IS_OK(close_status)) {
++			DBG_ERR("fd_close failed (%s), leaking fd\n",
++				nt_errstr(close_status));
++		}
++	}
++	TALLOC_FREE(lck);
++	if (fsp != NULL) {
++		op->compat = NULL;
++		fsp->op = NULL;
++		file_free(smb1req, fsp);
++	}
++	return status;
+ }
+-- 
+2.51.0
+
+
+From b248ddd3dd7193ba44c9ad86488dd180a25e3774 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Tue, 9 Apr 2024 14:53:32 +0200
+Subject: [PATCH 63/63] smbd: remove just created sharemode entry in the error
+ codepaths
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Without this we leave stale sharemode entries around that can lead to all sorts
+of havoc.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Guenther Deschner <gd@samba.org>
+
+Autobuild-User(master): Günther Deschner <gd@samba.org>
+Autobuild-Date(master): Thu Sep 19 19:36:19 UTC 2024 on atb-devel-224
+
+(cherry picked from commit 2ff3b9bc0d254a63a913ff9084de3d794fee27d0)
+---
+ selftest/knownfail.d/samba3.blackbox.durable_v2_delay | 1 -
+ source3/smbd/durable.c                                | 8 ++++++++
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+ delete mode 100644 selftest/knownfail.d/samba3.blackbox.durable_v2_delay
+
+diff --git a/selftest/knownfail.d/samba3.blackbox.durable_v2_delay b/selftest/knownfail.d/samba3.blackbox.durable_v2_delay
+deleted file mode 100644
+index 88e29960797..00000000000
+--- a/selftest/knownfail.d/samba3.blackbox.durable_v2_delay
++++ /dev/null
+@@ -1 +0,0 @@
+-^samba3.blackbox.durable_v2_delay.durable-v2-regressions.durable_v2_reconnect_bug15624
+diff --git a/source3/smbd/durable.c b/source3/smbd/durable.c
+index 50075ddd3f7..98d0d403e30 100644
+--- a/source3/smbd/durable.c
++++ b/source3/smbd/durable.c
+@@ -538,6 +538,7 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 	enum ndr_err_code ndr_err;
+ 	struct vfs_default_durable_cookie cookie;
+ 	DATA_BLOB new_cookie_blob = data_blob_null;
++	bool have_share_mode_entry = false;
+ 
+ 	*result = NULL;
+ 	*new_cookie = data_blob_null;
+@@ -776,6 +777,7 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 		status = NT_STATUS_INTERNAL_ERROR;
+ 		goto fail;
+ 	}
++	have_share_mode_entry = true;
+ 
+ 	ok = brl_reconnect_disconnected(fsp);
+ 	if (!ok) {
+@@ -872,6 +874,12 @@ NTSTATUS vfs_default_durable_reconnect(struct connection_struct *conn,
+ 	return NT_STATUS_OK;
+ 
+ fail:
++	if (fsp != NULL && have_share_mode_entry) {
++		/*
++		 * Something is screwed up, delete the sharemode entry.
++		 */
++		del_share_mode(lck, fsp);
++	}
+ 	if (fsp != NULL && fsp_get_pathref_fd(fsp) != -1) {
+ 		NTSTATUS close_status;
+ 		close_status = fd_close(fsp);
 -- 
 2.51.0
 

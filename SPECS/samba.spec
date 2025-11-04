@@ -147,7 +147,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.19.4
-%global baserelease 10
+%global baserelease 12
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -4479,6 +4479,12 @@ fi
 %endif
 
 %changelog
+* Thu Oct 09 2025 Andreas Schneider <asn@redhat.com> - 4.19.4-12
+- resolves: RHEL-119843 - Fix stale sharemode entries which can cause deadlocks
+
+* Thu Sep 25 2025 Andreas Schneider <asn@redhat.com> - 4.19.4-11
+- resolves: RHEL-115067 - Fix regression with symlinks inside shares
+
 * Wed Aug 27 2025 Pavel Filipenský <pfilipen@redhat.com> -  4.19.4-10
 - resolves: RHEL-101902 - Fix DC discovery after Windows netlogon hardening - follow-up
 - resolves: RHEL-111318 - Fix winbind fork bomb in 'IPA with AD trust' environment
