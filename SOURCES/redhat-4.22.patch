@@ -1,0 +1,492 @@
+From b0ff8644c06b01252bdbac6a31c77c5781d4b5a0 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Tue, 29 Jul 2025 11:19:07 +0200
+Subject: [PATCH 1/3] selftest: Add the short name for localvampiredc to hosts
+ file
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15905
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+(cherry picked from commit 5d2f60ae5aa96751b74901ae5384291ef338b152)
+---
+ selftest/target/Samba4.pm | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/selftest/target/Samba4.pm b/selftest/target/Samba4.pm
+index 9da339f6239..af0434a8e6b 100755
+--- a/selftest/target/Samba4.pm
++++ b/selftest/target/Samba4.pm
+@@ -878,7 +878,7 @@ nogroup:x:65534:nobody
+ 
+ 	my $hostname = lc($ctx->{hostname});
+ 	open(HOSTS, ">>$ctx->{nsswrap_hosts}");
+-	if ($hostname eq "localdc") {
++	if ($hostname eq "localdc" || $hostname eq "localvampiredc") {
+ 		print HOSTS "$ctx->{ipv4} ${hostname}.$ctx->{dnsname} $ctx->{dnsname} ${hostname}\n";
+ 		print HOSTS "$ctx->{ipv6} ${hostname}.$ctx->{dnsname} $ctx->{dnsname} ${hostname}\n";
+ 	} else {
+-- 
+2.51.0
+
+
+From 03431792b4707e50afc8f9e356f08a91f4fb67c3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 4 Aug 2025 11:20:54 +0200
+Subject: [PATCH 2/3] tests: Add test for 'net ads join' to a preferred DC
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15905
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+(cherry picked from commit 36f6ac547c09f492d1dcab11570e8bcbd377cf26)
+---
+ selftest/knownfail                            |  1 +
+ source4/selftest/tests.py                     |  1 +
+ .../test_net_ads_join_to_preferred_dc.sh      | 61 +++++++++++++++++++
+ 3 files changed, 63 insertions(+)
+ create mode 100755 testprogs/blackbox/test_net_ads_join_to_preferred_dc.sh
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index ab2d79d7114..7c0e9dd00e7 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -335,6 +335,7 @@
+ ^samba.tests.dcerpc.dnsserver.samba.tests.dcerpc.dnsserver.DnsserverTests.test_security_descriptor.*
+ ^samba4.blackbox.dbcheck-links.release-4-5-0-pre1.dbcheck_dangling_multi_valued_clean
+ ^samba4.blackbox.dbcheck-links.release-4-5-0-pre1.dangling_multi_valued_check_missing
++^samba4.blackbox.net_ads_join.join
+ 
+ # We currently don't send referrals for LDAP modify of non-replicated attrs
+ ^samba4.ldap.rodc.python\(rodc\).__main__.RodcTests.test_modify_nonreplicated.*
+diff --git a/source4/selftest/tests.py b/source4/selftest/tests.py
+index 9c5e85e428a..14a41ba77ed 100755
+--- a/source4/selftest/tests.py
++++ b/source4/selftest/tests.py
+@@ -902,6 +902,7 @@ plantestsuite("samba4.blackbox.rfc2307_mapping",
+ plantestsuite("samba4.blackbox.chgdcpass", "chgdcpass", [os.path.join(bbdir, "test_chgdcpass.sh"), '$SERVER', r"CHGDCPASS\$", '$REALM', '$DOMAIN', '$PREFIX/chgdcpass', "aes256-cts-hmac-sha1-96", '$PREFIX/chgdcpass', smbclient3])
+ plantestsuite("samba4.blackbox.samba_upgradedns(chgdcpass:local)", "chgdcpass:local", [os.path.join(bbdir, "test_samba_upgradedns.sh"), '$SERVER', '$REALM', '$PREFIX', '$SELFTEST_PREFIX/chgdcpass'])
+ plantestsuite("samba4.blackbox.net_ads", "ad_dc:client", [os.path.join(bbdir, "test_net_ads.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX_ABS'])
++plantestsuite("samba4.blackbox.net_ads_join", "vampire_dc:client", [os.path.join(bbdir, "test_net_ads_join_to_preferred_dc.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX'])
+ plantestsuite("samba4.blackbox.net_offlinejoin", "ad_dc:client", [os.path.join(bbdir, "test_net_offline.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX_ABS'])
+ plantestsuite("samba4.blackbox.client_etypes_all(ad_dc:client)", "ad_dc:client", [os.path.join(bbdir, "test_client_etypes.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX_ABS', 'all', '17_18_23'])
+ plantestsuite("samba4.blackbox.client_etypes_legacy(ad_dc:client)", "ad_dc:client", [os.path.join(bbdir, "test_client_etypes.sh"), '$DC_SERVER', '$DC_USERNAME', '$DC_PASSWORD', '$PREFIX_ABS', 'legacy', '23'])
+diff --git a/testprogs/blackbox/test_net_ads_join_to_preferred_dc.sh b/testprogs/blackbox/test_net_ads_join_to_preferred_dc.sh
+new file mode 100755
+index 00000000000..1bebc2f4dbe
+--- /dev/null
++++ b/testprogs/blackbox/test_net_ads_join_to_preferred_dc.sh
+@@ -0,0 +1,61 @@
++if [ $# -lt 4 ]; then
++	cat <<EOF
++Usage: test_net_ads.sh DC_SERVER DC_USERNAME DC_PASSWORD BASEDIR
++EOF
++	exit 1
++fi
++
++DC_SERVER=$1
++DC_USERNAME=$2
++DC_PASSWORD=$3
++BASEDIR=$4
++
++HOSTNAME=$(dd if=/dev/urandom bs=1 count=32 2>/dev/null | sha1sum | cut -b 1-10)
++
++RUNDIR=$(pwd)
++cd $BASEDIR
++WORKDIR=$(mktemp -d -p .)
++WORKDIR=$(basename $WORKDIR)
++cp -a client/* $WORKDIR/
++sed -ri "s@(dir|directory) = (.*)/client/@\1 = \2/$WORKDIR/@" $WORKDIR/client.conf
++sed -ri "s/netbios name = .*/netbios name = $HOSTNAME/" $WORKDIR/client.conf
++rm -f $WORKDIR/private/secrets.tdb
++cd $RUNDIR
++
++failed=0
++
++net_tool="$BINDIR/net --configfile=$BASEDIR/$WORKDIR/client.conf --option=security=ads"
++
++# Load test functions
++. $(dirname $0)/subunit.sh
++. "$(dirname "${0}")/common_test_fns.inc"
++
++# This test is run in environment with two DCs ('localdc' and 'localvampiredc')
++# The 'net ads join' has these two steps:
++#   1. create machine account at DC ('-S' points to 'localvampiredc')
++#   2. create keytab and sync the KVNO from a DC
++#
++# It must be ensured that in step #2 the keytab code contacts the same DC
++# ('localvampiredc'). The configuration below tries to break it.
++# We disable [SAF/DOMAIN/...] and [SAFJOIN/DOMAIN/...] by setting TTL to '-1'
++# And via setting 'password server' to 'localdc' we manage that
++# get_dc_list() returns 'localdc' instead of 'localvampiredc'
++#
++# As long as the keytab code is not explicitly told to use the same DC as join,
++# we get failure:
++# gensec_gse_client_prepare_ccache: Kinit for F0D26C71F6$@SAMBA.EXAMPLE.COM to access ldap/localdc.samba.example.com failed: Client not found in Kerberos database: NT_STATUS_LOGON_FAILURE
++
++cat <<EOF >>$BASEDIR/$WORKDIR/client.conf
++sync machine password to keytab = $BASEDIR/keytab:account_name:machine_password:sync_kvno
++password server = $DC_SERVER
++saf: join ttl = -1
++saf: ttl = -1
++EOF
++
++testit "join" $VALGRIND $net_tool ads join -S$SERVER -U$DC_USERNAME%$DC_PASSWORD || failed=$(expr $failed + 1)
++
++testit "leave" $VALGRIND $net_tool ads leave -U$DC_USERNAME%$DC_PASSWORD || failed=$(expr $failed + 1)
++
++rm -rf $BASEDIR/$WORKDIR
++
++exit $failed
+-- 
+2.51.0
+
+
+From 5cff37091161976a979752351003c9c1deb0d39f Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Mon, 28 Jul 2025 10:43:36 +0200
+Subject: [PATCH 3/3] s3:net: Pass down the server from cmdline to
+ sync_pw2keytabs()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This makes sure that during 'net ads join' the keytab create code
+- sync_pw2keytabs() talks to the same DC at what the machine account
+was created.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15905
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Pair-Programmed-With: Pavel Filipenský <pfilipensky@samba.org>
+
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Fri Sep  5 13:38:33 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 5d1d3a8b568b5a07ed1ed537d20aa93820cecc14)
+---
+ selftest/knownfail                       |  1 -
+ source3/include/secrets.h                | 25 ++++++++++++++----------
+ source3/libads/ads_proto.h               |  2 +-
+ source3/libads/kerberos_keytab.c         | 24 ++++++++++++++++++++---
+ source3/libads/trusts_util.c             | 15 ++++++++------
+ source3/libads/util.c                    | 10 ++++++----
+ source3/libnet/libnet_join.c             |  2 +-
+ source3/passdb/machine_account_secrets.c | 10 ++++++----
+ source3/utils/net.c                      | 10 ++++++----
+ source3/utils/net_ads.c                  |  2 +-
+ 10 files changed, 66 insertions(+), 35 deletions(-)
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index 7c0e9dd00e7..ab2d79d7114 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -335,7 +335,6 @@
+ ^samba.tests.dcerpc.dnsserver.samba.tests.dcerpc.dnsserver.DnsserverTests.test_security_descriptor.*
+ ^samba4.blackbox.dbcheck-links.release-4-5-0-pre1.dbcheck_dangling_multi_valued_clean
+ ^samba4.blackbox.dbcheck-links.release-4-5-0-pre1.dangling_multi_valued_check_missing
+-^samba4.blackbox.net_ads_join.join
+ 
+ # We currently don't send referrals for LDAP modify of non-replicated attrs
+ ^samba4.ldap.rodc.python\(rodc\).__main__.RodcTests.test_modify_nonreplicated.*
+diff --git a/source3/include/secrets.h b/source3/include/secrets.h
+index a454c8bb8ff..061b9c6ef34 100644
+--- a/source3/include/secrets.h
++++ b/source3/include/secrets.h
+@@ -125,12 +125,15 @@ char *secrets_domain_info_string(TALLOC_CTX *mem_ctx, const struct secrets_domai
+ NTSTATUS secrets_fetch_or_upgrade_domain_info(const char *domain,
+ 					TALLOC_CTX *mem_ctx,
+ 					struct secrets_domain_info1 **pinfo);
+-NTSTATUS secrets_prepare_password_change(const char *domain, const char *dcname,
+-					 const char *cleartext_unix,
+-					 TALLOC_CTX *mem_ctx,
+-					 struct secrets_domain_info1 **pinfo,
+-					 struct secrets_domain_info1_change **pprev,
+-					 NTSTATUS (*sync_pw2keytabs_fn)(void));
++NTSTATUS secrets_prepare_password_change(
++	const char *domain,
++	const char *dcname,
++	const char *cleartext_unix,
++	TALLOC_CTX *mem_ctx,
++	struct secrets_domain_info1 **pinfo,
++	struct secrets_domain_info1_change **pprev,
++	NTSTATUS (*sync_pw2keytabs_fn)(const char *),
++	const char *opt_host);
+ NTSTATUS secrets_failed_password_change(const char *change_server,
+ 					NTSTATUS local_status,
+ 					NTSTATUS remote_status,
+@@ -139,10 +142,12 @@ NTSTATUS secrets_defer_password_change(const char *change_server,
+ 				       NTSTATUS local_status,
+ 				       NTSTATUS remote_status,
+ 				       const struct secrets_domain_info1 *info);
+-NTSTATUS secrets_finish_password_change(const char *change_server,
+-					NTTIME change_time,
+-					const struct secrets_domain_info1 *info,
+-					NTSTATUS (*sync_pw2keytabs_fn)(void));
++NTSTATUS secrets_finish_password_change(
++	const char *change_server,
++	NTTIME change_time,
++	const struct secrets_domain_info1 *info,
++	NTSTATUS (*sync_pw2keytabs_fn)(const char *),
++	const char *prefer_dc);
+ bool secrets_delete_machine_password_ex(const char *domain, const char *realm);
+ bool secrets_delete_domain_sid(const char *domain);
+ char *secrets_fetch_prev_machine_password(const char *domain);
+diff --git a/source3/libads/ads_proto.h b/source3/libads/ads_proto.h
+index 8440c35e46d..2e67eef155c 100644
+--- a/source3/libads/ads_proto.h
++++ b/source3/libads/ads_proto.h
+@@ -230,6 +230,6 @@ struct spn_struct {
+ /* parse a windows style SPN, returns NULL if parsing fails */
+ struct spn_struct *parse_spn(TALLOC_CTX *ctx, const char *srvprinc);
+ 
+-NTSTATUS sync_pw2keytabs(void);
++NTSTATUS sync_pw2keytabs(const char *prefer_dc);
+ 
+ #endif /* _LIBADS_ADS_PROTO_H_ */
+diff --git a/source3/libads/kerberos_keytab.c b/source3/libads/kerberos_keytab.c
+index 49a892e5a55..1d4f9c12e1d 100644
+--- a/source3/libads/kerberos_keytab.c
++++ b/source3/libads/kerberos_keytab.c
+@@ -84,6 +84,7 @@ struct pw2kt_global_state {
+ 	char *ad_upn;
+ 	char *ad_sam_account;
+ 	char **ad_spn_array;
++	const char *prefer_dc;
+ 	size_t ad_num_spns;
+ 	/* This is from secrets.db */
+ 	struct secrets_domain_info1 *info;
+@@ -869,8 +870,11 @@ static ADS_STATUS pw2kt_get_dc_info(struct pw2kt_global_state *state)
+ 	int count;
+ 	bool ok;
+ 	TALLOC_CTX *tmp_ctx = talloc_stackframe();
+-	ADS_STRUCT *ads = ads_init(
+-		tmp_ctx, lp_realm(), lp_workgroup(), NULL, ADS_SASL_SIGN);
++	ADS_STRUCT *ads = ads_init(tmp_ctx,
++				   lp_realm(),
++				   lp_workgroup(),
++				   state->prefer_dc,
++				   ADS_SASL_SIGN);
+ 
+ 	if (ads == NULL) {
+ 		DBG_ERR("ads_init() failed\n");
+@@ -1029,7 +1033,20 @@ static bool pw2kt_default_keytab_name(char *name_str, size_t name_size)
+ 	return true;
+ }
+ 
+-NTSTATUS sync_pw2keytabs(void)
++/**
++ * @internal
++ *
++ * @brief Sync machine password from secrets to keytab
++ *
++ * @param prefer_dc  The DC we should talk to. This is especially important
++ *                   during domain join. Pass NULL if we should pick a random
++ *                   one.
++ *
++ * @return An NTSTATUS error code.
++ *
++ * @see NT_STATUS_IS_OK()
++ */
++NTSTATUS sync_pw2keytabs(const char *prefer_dc)
+ {
+ 	TALLOC_CTX *frame = talloc_stackframe();
+ 	const struct loadparm_substitution *lp_sub =
+@@ -1055,6 +1072,7 @@ NTSTATUS sync_pw2keytabs(void)
+ 		TALLOC_FREE(frame);
+ 		return NT_STATUS_NO_MEMORY;
+ 	}
++	state->prefer_dc = prefer_dc;
+ 
+ 	lp_ptr = lp_sync_machine_password_to_keytab();
+ 	if (lp_ptr == NULL) {
+diff --git a/source3/libads/trusts_util.c b/source3/libads/trusts_util.c
+index 6a39f32f350..c51c556e86b 100644
+--- a/source3/libads/trusts_util.c
++++ b/source3/libads/trusts_util.c
+@@ -360,10 +360,11 @@ NTSTATUS trust_pw_change(struct netlogon_creds_cli_context *context,
+ 							 &info,
+ 							 &prev,
+ #ifdef HAVE_ADS
+-							 sync_pw2keytabs);
++							 sync_pw2keytabs,
+ #else
+-							 NULL);
++							 NULL,
+ #endif
++							 NULL /* opt_host */);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DEBUG(0, ("secrets_prepare_password_change() failed for domain %s!\n",
+ 				  domain));
+@@ -610,10 +611,11 @@ NTSTATUS trust_pw_change(struct netlogon_creds_cli_context *context,
+ 			prev->password->change_time,
+ 			info,
+ #ifdef HAVE_ADS
+-			sync_pw2keytabs);
++			sync_pw2keytabs,
+ #else
+-			NULL);
++			NULL,
+ #endif
++			prev->password->change_server);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DEBUG(0, ("secrets_prepare_password_change() failed for domain %s!\n",
+ 				  domain));
+@@ -759,10 +761,11 @@ NTSTATUS trust_pw_change(struct netlogon_creds_cli_context *context,
+ 			info->next_change->change_time,
+ 			info,
+ #ifdef HAVE_ADS
+-			sync_pw2keytabs);
++			sync_pw2keytabs,
+ #else
+-			NULL);
++			NULL,
+ #endif
++			info->next_change->change_server);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DEBUG(0, ("secrets_finish_password_change() failed for domain %s!\n",
+ 				  domain));
+diff --git a/source3/libads/util.c b/source3/libads/util.c
+index 243dd09f3d0..360e556ab9b 100644
+--- a/source3/libads/util.c
++++ b/source3/libads/util.c
+@@ -59,10 +59,11 @@ ADS_STATUS ads_change_trust_account_password(ADS_STRUCT *ads, char *host_princip
+ 						 &info,
+ 						 &prev,
+ #ifdef HAVE_ADS
+-						 sync_pw2keytabs);
++						 sync_pw2keytabs,
+ #else
+-						 NULL);
++						 NULL,
+ #endif
++						 ads->auth.kdc_server);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		return ADS_ERROR_NT(status);
+ 	}
+@@ -138,10 +139,11 @@ ADS_STATUS ads_change_trust_account_password(ADS_STRUCT *ads, char *host_princip
+ 						now,
+ 						info,
+ #ifdef HAVE_ADS
+-						sync_pw2keytabs);
++						sync_pw2keytabs,
+ #else
+-						NULL);
++						NULL,
+ #endif
++						ads->auth.kdc_server);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		DEBUG(1,("Failed to save machine password\n"));
+ 		return ADS_ERROR_NT(status);
+diff --git a/source3/libnet/libnet_join.c b/source3/libnet/libnet_join.c
+index 5796c68e2e0..cb997dcbe23 100644
+--- a/source3/libnet/libnet_join.c
++++ b/source3/libnet/libnet_join.c
+@@ -867,7 +867,7 @@ static ADS_STATUS libnet_join_set_etypes(TALLOC_CTX *mem_ctx,
+ static bool libnet_join_create_keytab(TALLOC_CTX *mem_ctx,
+ 				      struct libnet_JoinCtx *r)
+ {
+-	NTSTATUS ntstatus = sync_pw2keytabs();
++	NTSTATUS ntstatus = sync_pw2keytabs(r->in.dc_name);
+ 
+ 	return NT_STATUS_IS_OK(ntstatus);
+ }
+diff --git a/source3/passdb/machine_account_secrets.c b/source3/passdb/machine_account_secrets.c
+index 0679535f026..568d77a3892 100644
+--- a/source3/passdb/machine_account_secrets.c
++++ b/source3/passdb/machine_account_secrets.c
+@@ -1674,7 +1674,8 @@ NTSTATUS secrets_prepare_password_change(const char *domain, const char *dcname,
+ 					 TALLOC_CTX *mem_ctx,
+ 					 struct secrets_domain_info1 **pinfo,
+ 					 struct secrets_domain_info1_change **pprev,
+-					 NTSTATUS (*sync_pw2keytabs_fn)(void))
++					 NTSTATUS (*sync_pw2keytabs_fn)(const char *),
++					 const char *opt_host)
+ {
+ 	TALLOC_CTX *frame = talloc_stackframe();
+ 	struct db_context *db = NULL;
+@@ -1770,7 +1771,7 @@ NTSTATUS secrets_prepare_password_change(const char *domain, const char *dcname,
+ 	}
+ 
+ 	if (prev == NULL && sync_pw2keytabs_fn != NULL) {
+-		status = sync_pw2keytabs_fn();
++		status = sync_pw2keytabs_fn(opt_host);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DBG_ERR("Sync of machine password failed.\n");
+ 			dbwrap_transaction_cancel(db);
+@@ -2023,7 +2024,8 @@ NTSTATUS secrets_defer_password_change(const char *change_server,
+ NTSTATUS secrets_finish_password_change(const char *change_server,
+ 					NTTIME change_time,
+ 					const struct secrets_domain_info1 *cookie,
+-					NTSTATUS (*sync_pw2keytabs_fn)(void))
++					NTSTATUS (*sync_pw2keytabs_fn)(const char *),
++					const char *prefer_dc)
+ {
+ 	const char *domain = cookie->domain_info.name.string;
+ 	TALLOC_CTX *frame = talloc_stackframe();
+@@ -2102,7 +2104,7 @@ NTSTATUS secrets_finish_password_change(const char *change_server,
+ 	}
+ 
+ 	if (sync_pw2keytabs_fn != NULL) {
+-		status = sync_pw2keytabs_fn();
++		status = sync_pw2keytabs_fn(prefer_dc);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			DBG_ERR("Sync of machine password failed.\n");
+ 			TALLOC_FREE(frame);
+diff --git a/source3/utils/net.c b/source3/utils/net.c
+index 7ce93ced79e..ecabd980d0c 100644
+--- a/source3/utils/net.c
++++ b/source3/utils/net.c
+@@ -235,10 +235,11 @@ static int net_changesecretpw(struct net_context *c, int argc,
+ 							 &info,
+ 							 &prev,
+ #ifdef HAVE_ADS
+-							 sync_pw2keytabs);
++							 sync_pw2keytabs,
+ #else
+-							 NULL);
++							 NULL,
+ #endif
++							 c->opt_host);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			d_fprintf(stderr,
+ 			        _("Unable to write the machine account password in the secrets database"));
+@@ -261,10 +262,11 @@ static int net_changesecretpw(struct net_context *c, int argc,
+ 							now,
+ 							info,
+ #ifdef HAVE_ADS
+-							sync_pw2keytabs);
++							sync_pw2keytabs,
+ #else
+-							NULL);
++							NULL,
+ #endif
++							c->opt_host);
+ 		if (!NT_STATUS_IS_OK(status)) {
+ 			d_fprintf(stderr,
+ 			        _("Unable to write the machine account password in the secrets database"));
+diff --git a/source3/utils/net_ads.c b/source3/utils/net_ads.c
+index 46531210411..753b957e43f 100644
+--- a/source3/utils/net_ads.c
++++ b/source3/utils/net_ads.c
+@@ -2965,7 +2965,7 @@ static int net_ads_keytab_create(struct net_context *c, int argc, const char **a
+ 		net_use_krb_machine_account(c);
+ 	}
+ 
+-	ntstatus = sync_pw2keytabs();
++	ntstatus = sync_pw2keytabs(c->opt_host);
+ 	ret = NT_STATUS_IS_OK(ntstatus) ? 0 : 1;
+ 	return ret;
+ }
+-- 
+2.51.0
+
