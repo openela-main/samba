@@ -1,8 +1,8 @@
 From b0ff8644c06b01252bdbac6a31c77c5781d4b5a0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 29 Jul 2025 11:19:07 +0200
-Subject: [PATCH 1/3] selftest: Add the short name for localvampiredc to hosts
- file
+Subject: [PATCH 01/16] selftest: Add the short name for localvampiredc to
+ hosts file
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -30,13 +30,13 @@ index 9da339f6239..af0434a8e6b 100755
  		print HOSTS "$ctx->{ipv6} ${hostname}.$ctx->{dnsname} $ctx->{dnsname} ${hostname}\n";
  	} else {
 -- 
-2.51.0
+2.52.0
 
 
 From 03431792b4707e50afc8f9e356f08a91f4fb67c3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 11:20:54 +0200
-Subject: [PATCH 2/3] tests: Add test for 'net ads join' to a preferred DC
+Subject: [PATCH 02/16] tests: Add test for 'net ads join' to a preferred DC
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -145,13 +145,13 @@ index 00000000000..1bebc2f4dbe
 +
 +exit $failed
 -- 
-2.51.0
+2.52.0
 
 
 From 5cff37091161976a979752351003c9c1deb0d39f Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 28 Jul 2025 10:43:36 +0200
-Subject: [PATCH 3/3] s3:net: Pass down the server from cmdline to
+Subject: [PATCH 03/16] s3:net: Pass down the server from cmdline to
  sync_pw2keytabs()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -488,5 +488,1204 @@ index 46531210411..753b957e43f 100644
  	return ret;
  }
 -- 
-2.51.0
+2.52.0
+
+
+From 5b23ab3845597dcfcf33e2c0a7d7af820d3167a5 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Wed, 13 Aug 2025 17:02:16 +0200
+Subject: [PATCH 04/16] smbtorture: fix locking offset in
+ test_fruit_locking_conflict()
+
+AD_FILELOCK_RSRC_DENY_WR = AD_FILELOCK_BASE + 6
+ = (0x7FFFFFFFFFFFFFFF - 9) + 6
+ = 0x7FFFFFFFFFFFFFFC
+
+No change in behaviour though, just stumpled across it.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit 3052839636f185307edb8832de9bdba4b2e2c83c)
+---
+ source4/torture/vfs/fruit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source4/torture/vfs/fruit.c b/source4/torture/vfs/fruit.c
+index 6bad4e409c6..e9ff4a57e66 100644
+--- a/source4/torture/vfs/fruit.c
++++ b/source4/torture/vfs/fruit.c
+@@ -8002,7 +8002,7 @@ static bool test_fruit_locking_conflict(struct torture_context *tctx,
+ 
+ 	/* Add AD_FILELOCK_RSRC_DENY_WR lock. */
+ 	el = (struct smb2_lock_element) {
+-		.offset = 0xfffffffffffffffc,
++		.offset = 0x7ffffffffffffffc,
+ 		.length = 1,
+ 		.flags = SMB2_LOCK_FLAG_EXCLUSIVE,
+ 	};
+-- 
+2.52.0
+
+
+From 9c7228f46c3955b0e1a3c91fd42da6f2ea864cb8 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Fri, 1 Aug 2025 17:28:04 +0200
+Subject: [PATCH 05/16] smbd: don't use sticky write times on POSIX handles
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit 795a8c0e84f2bf2b70c8070737183e33f4254a54)
+---
+ source3/smbd/dosmode.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/source3/smbd/dosmode.c b/source3/smbd/dosmode.c
+index 9a8ecf6e0a7..ab45f9edbb9 100644
+--- a/source3/smbd/dosmode.c
++++ b/source3/smbd/dosmode.c
+@@ -1279,6 +1279,10 @@ bool set_sticky_write_time_fsp(struct files_struct *fsp, struct timespec mtime)
+ {
+ 	bool ok;
+ 
++	if (fsp->fsp_flags.posix_open) {
++		return true;
++	}
++
+ 	if (is_omit_timespec(&mtime)) {
+ 		return true;
+ 	}
+-- 
+2.52.0
+
+
+From ec9f60e4eda3162aec63ada4ec49574e99362989 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Fri, 19 Sep 2025 00:20:43 +0200
+Subject: [PATCH 06/16] smbtorture: add test vfs.fruit.readonly-exclusive-lock
+
+Verify macOS clients get Windows byterange lock behavour by trying to set an
+exclusive lock on a file opened in read-only mode.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit 777db5b50689d28c53d6b0116818601fd8e52aa8)
+---
+ source4/torture/vfs/fruit.c | 92 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 92 insertions(+)
+
+diff --git a/source4/torture/vfs/fruit.c b/source4/torture/vfs/fruit.c
+index e9ff4a57e66..02f7acd0fea 100644
+--- a/source4/torture/vfs/fruit.c
++++ b/source4/torture/vfs/fruit.c
+@@ -7839,6 +7839,97 @@ done:
+ 	return ret;
+ }
+ 
++/*
++  test exclusive byte range lock on read-only file
++*/
++static bool test_readonly_exclusive_lock(struct torture_context *tctx,
++					 struct smb2_tree *tree)
++{
++	NTSTATUS status;
++	bool ret = true;
++	struct smb2_handle h;
++	struct smb2_create create;
++	struct smb2_lock lock;
++	struct smb2_lock_element lock_element;
++	const char *fname = "readonly_lock_test.txt";
++
++	torture_comment(tctx, "Testing exclusive lock on read-only opened file\n");
++
++	ret = enable_aapl(tctx, tree);
++	torture_assert_goto(tctx, ret == true, ret, done, "enable_aapl failed");
++
++	/* Clean up any existing file */
++	smb2_util_unlink(tree, fname);
++
++	/* Create the file first with write access to ensure it exists */
++	ZERO_STRUCT(create);
++	create.in.desired_access = SEC_RIGHTS_FILE_ALL;
++	create.in.file_attributes = FILE_ATTRIBUTE_NORMAL;
++	create.in.share_access = NTCREATEX_SHARE_ACCESS_READ |
++				 NTCREATEX_SHARE_ACCESS_WRITE |
++				 NTCREATEX_SHARE_ACCESS_DELETE;
++	create.in.create_disposition = NTCREATEX_DISP_CREATE;
++	create.in.impersonation_level = SMB2_IMPERSONATION_ANONYMOUS;
++	create.in.security_flags = 0;
++	create.in.fname = fname;
++
++	status = smb2_create(tree, tctx, &create);
++	CHECK_STATUS(status, NT_STATUS_OK);
++
++	/* Write some data to the file */
++	status = smb2_util_write(tree, create.out.file.handle, "test data", 0, 9);
++	CHECK_STATUS(status, NT_STATUS_OK);
++
++	/* Close the file */
++	status = smb2_util_close(tree, create.out.file.handle);
++	CHECK_STATUS(status, NT_STATUS_OK);
++
++	/* Now open the file read-only */
++	ZERO_STRUCT(create);
++	create.in.desired_access = SEC_FILE_READ_DATA | SEC_FILE_READ_ATTRIBUTE;
++	create.in.file_attributes = FILE_ATTRIBUTE_NORMAL;
++	create.in.share_access = NTCREATEX_SHARE_ACCESS_READ |
++				 NTCREATEX_SHARE_ACCESS_WRITE |
++				 NTCREATEX_SHARE_ACCESS_DELETE;
++	create.in.create_disposition = NTCREATEX_DISP_OPEN;
++	create.in.impersonation_level = SMB2_IMPERSONATION_ANONYMOUS;
++	create.in.security_flags = 0;
++	create.in.fname = fname;
++
++	status = smb2_create(tree, tctx, &create);
++	CHECK_STATUS(status, NT_STATUS_OK);
++	h = create.out.file.handle;
++
++	torture_comment(tctx, "File opened read-only successfully\n");
++
++	/* Attempt to set an exclusive byte-range lock */
++	ZERO_STRUCT(lock);
++	ZERO_STRUCT(lock_element);
++
++	lock.in.lock_count = 1;
++	lock.in.lock_sequence = 0;
++	lock.in.file.handle = h;
++	lock.in.locks = &lock_element;
++
++	lock_element.offset = 0;
++	lock_element.length = 100;
++	lock_element.flags = SMB2_LOCK_FLAG_EXCLUSIVE | SMB2_LOCK_FLAG_FAIL_IMMEDIATELY;
++
++	torture_comment(tctx, "Attempting to set exclusive lock on read-only file\n");
++
++	status = smb2_lock(tree, &lock);
++	CHECK_STATUS(status, NT_STATUS_OK);
++
++done:
++	/* Close the file */
++	smb2_util_close(tree, h);
++
++	/* Clean up */
++	smb2_util_unlink(tree, fname);
++
++	return ret;
++}
++
+ /*
+  * Note: This test depends on "vfs objects = catia fruit streams_xattr".  For
+  * some tests torture must be run on the host it tests and takes an additional
+@@ -7885,6 +7976,7 @@ struct torture_suite *torture_vfs_fruit(TALLOC_CTX *ctx)
+ 	torture_suite_add_1smb2_test(suite, "empty_stream", test_empty_stream);
+ 	torture_suite_add_1smb2_test(suite, "writing_afpinfo", test_writing_afpinfo);
+ 	torture_suite_add_1smb2_test(suite, "delete_trigger_convert_sharing_violation", test_delete_trigger_convert_sharing_violation);
++	torture_suite_add_1smb2_test(suite, "readonly-exclusive-lock", test_readonly_exclusive_lock);
+ 
+ 	return suite;
+ }
+-- 
+2.52.0
+
+
+From 87e6e2d0cdb78cfe9b372732439706d94a5ea7a2 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Fri, 19 Sep 2025 06:43:57 +0200
+Subject: [PATCH 07/16] smbtorture: add test vfs.fruit.case_insensitive_find
+
+Verifies case insensitive directory scanning works.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit 68ed6279335cfac13a624ae8a7738dac3d9b0d1a)
+---
+ source4/torture/vfs/fruit.c | 85 ++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 84 insertions(+), 1 deletion(-)
+
+diff --git a/source4/torture/vfs/fruit.c b/source4/torture/vfs/fruit.c
+index 02f7acd0fea..a6f86cd5edf 100644
+--- a/source4/torture/vfs/fruit.c
++++ b/source4/torture/vfs/fruit.c
+@@ -7930,6 +7930,89 @@ done:
+ 	return ret;
+ }
+ 
++/*
++ * Test case-insensitive file finding with AAPL extensions
++ * Add this function to source4/torture/vfs/fruit.c
++ */
++
++static bool test_case_insensitive_find(struct torture_context *tctx,
++				       struct smb2_tree *tree)
++{
++	NTSTATUS status;
++	bool ret = true;
++	const char *fname = "TestFile.txt";
++	const char *fname_upper = "TESTFILE.TXT";
++	struct smb2_handle testdirh;
++	struct smb2_handle h1;
++	struct smb2_create create;
++	struct smb2_find f;
++	union smb_search_data *d;
++	uint_t count;
++
++	smb2_deltree(tree, BASEDIR);
++
++	status = torture_smb2_testdir(tree, BASEDIR, &testdirh);
++	torture_assert_ntstatus_ok_goto(tctx, status, ret, done,
++					"torture_smb2_testdir failed");
++
++	/* Enable AAPL extensions */
++	ret = enable_aapl(tctx, tree);
++	torture_assert_goto(tctx, ret, ret, done,
++			    "enable_aapl failed");
++
++	/* Create test file */
++	ZERO_STRUCT(create);
++	create.in.desired_access = SEC_RIGHTS_FILE_ALL;
++	create.in.file_attributes = FILE_ATTRIBUTE_NORMAL;
++	create.in.share_access = NTCREATEX_SHARE_ACCESS_READ |
++		NTCREATEX_SHARE_ACCESS_WRITE |
++		NTCREATEX_SHARE_ACCESS_DELETE;
++	create.in.create_disposition = NTCREATEX_DISP_CREATE;
++	create.in.impersonation_level = SMB2_IMPERSONATION_ANONYMOUS;
++	create.in.fname = talloc_asprintf(tctx, "%s\\%s", BASEDIR, fname);
++
++	status = smb2_create(tree, tctx, &create);
++	torture_assert_ntstatus_ok_goto(tctx, status, ret, done,
++					talloc_asprintf(tctx, "failed to create %s", fname));
++	h1 = create.out.file.handle;
++
++	/* Close the file */
++	status = smb2_util_close(tree, h1);
++	torture_assert_ntstatus_ok_goto(tctx, status, ret, done,
++					"failed to close test file");
++
++	/* Search for file using different case */
++	f = (struct smb2_find) {
++		.in.file.handle = testdirh,
++		.in.pattern = fname_upper,
++		.in.max_response_size = 0x1000,
++		.in.level = SMB2_FIND_ID_BOTH_DIRECTORY_INFO,
++	};
++
++	status = smb2_find_level(tree, tctx, &f, &count, &d);
++	torture_assert_ntstatus_ok_goto(tctx, status, ret, done,
++					talloc_asprintf(tctx, "smb2_find_level failed searching for %s", fname_upper));
++
++	/* Verify we found exactly one file */
++	torture_assert_int_equal_goto(tctx, count, 1, ret, done,
++				      talloc_asprintf(tctx, "Expected 1 file, got %u", count));
++
++	/* Verify the filename matches our original file (case may differ) */
++	torture_assert_str_equal_goto(tctx,
++				      d[0].id_both_directory_info.name.s, fname, ret, done,
++				      talloc_asprintf(tctx, "Found file name '%s' doesn't match expected '%s'",
++						      d[0].directory_info.name.s, fname));
++
++	torture_comment(tctx, "Case-insensitive find test passed: "
++			"searched for '%s', found '%s'\n",
++			fname_upper, d[0].id_both_directory_info.name.s);
++
++done:
++	smb2_util_close(tree, testdirh);
++	smb2_deltree(tree, BASEDIR);
++	return ret;
++}
++
+ /*
+  * Note: This test depends on "vfs objects = catia fruit streams_xattr".  For
+  * some tests torture must be run on the host it tests and takes an additional
+@@ -7977,7 +8060,7 @@ struct torture_suite *torture_vfs_fruit(TALLOC_CTX *ctx)
+ 	torture_suite_add_1smb2_test(suite, "writing_afpinfo", test_writing_afpinfo);
+ 	torture_suite_add_1smb2_test(suite, "delete_trigger_convert_sharing_violation", test_delete_trigger_convert_sharing_violation);
+ 	torture_suite_add_1smb2_test(suite, "readonly-exclusive-lock", test_readonly_exclusive_lock);
+-
++	torture_suite_add_1smb2_test(suite, "case_insensitive_find", test_case_insensitive_find);
+ 	return suite;
+ }
+ 
+-- 
+2.52.0
+
+
+From 98e1a3b39cb3e4fa03ac8340338179cd85df18f3 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Mon, 10 Mar 2025 15:01:42 +0100
+Subject: [PATCH 08/16] vfs_fruit: add option "fruit:posix_opens = yes|no"
+ (default: yes)
+
+Tags alls opens as POSIX by setting fsp_flags.posix_open to true.
+
+POSIX handles have different behaviour compared to Windows:
+
+Behaviour                          | POSIX      | Windows    | macOS     |fruit:posix_opens = yes
+-----------------------------------+------------+----------------------------------------
+Deleting files with open handles   | yes        | no         | yes       | yes
+Moving directories with open files | yes        | no         | yes       | yes
+Byterange locks behaviour          | POSIX-ish  | Window-ish | POSIX-ish | POSIX-ish
+Sticky writetime                   | no         | yes        | no        | no
+Case sensitive                     | no         | yes        | yes       | yes
+Streams allowed                    | no         | yes        | yes       | yes
+
+macOS follows POSIX for the first four, but needs case insensitive behaviour
+and needs streams.
+
+By carefully setting fsp_flags.posix_open to true *after* going through the path
+resolution logic, but before opens are added to locking.tdb, with
+"fruit:posix_opens = yes" we get closest to macOS semantics.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(backported from commit e86f0c2de80e2409bfe3fc12df24e94470988e3c)
+[slow@samba.org: conflict due to optino veto_localized only present in master]
+---
+ docs-xml/manpages/vfs_fruit.8.xml     | 15 +++++++++++++
+ selftest/knownfail.d/samba3.vfs.fruit |  2 ++
+ source3/include/vfs.h                 | 18 ++++++++++++++++
+ source3/modules/vfs_fruit.c           | 31 ++++++++++++++++++++++-----
+ 4 files changed, 61 insertions(+), 5 deletions(-)
+
+diff --git a/docs-xml/manpages/vfs_fruit.8.xml b/docs-xml/manpages/vfs_fruit.8.xml
+index 9e27030b660..21c2e76de8d 100644
+--- a/docs-xml/manpages/vfs_fruit.8.xml
++++ b/docs-xml/manpages/vfs_fruit.8.xml
+@@ -426,6 +426,21 @@
+ 	    </listitem>
+ 	  </varlistentry>
+ 
++	  <varlistentry>
++	    <term>fruit:posix_opens = yes | no</term>
++	    <listitem>
++
++	      <para>When <parameter>fruit:posix_opens</parameter> is set to
++	      <parameter>yes</parameter>, vfs_fruit will internally translate
++	      all filesystem semantics to use POSIX behaviour instead of Windows
++	      behaviour. As Macs are closer to POSIX than Windows with regard
++	      to filesystem semantics, this improves access semantics for
++	      a lot of corner cases.</para>
++	      <para>The default is <emphasis>yes</emphasis>.</para>
++
++            </listitem>
++	  </varlistentry>
++
+ 	</variablelist>
+ </refsect1>
+ 
+diff --git a/selftest/knownfail.d/samba3.vfs.fruit b/selftest/knownfail.d/samba3.vfs.fruit
+index 6307e2b3404..b774b0503e7 100644
+--- a/selftest/knownfail.d/samba3.vfs.fruit
++++ b/selftest/knownfail.d/samba3.vfs.fruit
+@@ -1,2 +1,4 @@
+ ^samba3.vfs.fruit streams_depot.OS X AppleDouble file conversion\(nt4_dc\)
+ ^samba3.vfs.fruit streams_depot.OS X AppleDouble file conversion without embedded xattr\(nt4_dc\)
++^samba3.vfs.fruit.*readonly-exclusive-lock\(.*\)
++^samba3.vfs.fruit.*case_insensitive_find\(.*\)
+diff --git a/source3/include/vfs.h b/source3/include/vfs.h
+index 581148fa053..cab809de5d3 100644
+--- a/source3/include/vfs.h
++++ b/source3/include/vfs.h
+@@ -462,6 +462,15 @@ typedef struct files_struct {
+ 		bool lock_failure_seen : 1;
+ 		bool encryption_required : 1;
+ 		bool fstat_before_close : 1;
++		/*
++		 * For POSIX clients struct files_struct.fsp_flags.posix_open
++		 * and struct smb_filename.flags SMB_FILENAME_POSIX_PATH will
++		 * always be set to the same value.
++		 *
++		 * For macOS clients vfs_fruit with fruit:posix_open=yes, we
++		 * deliberately set both flags to fsp_flags.posix_open=true
++		 * while SMB_FILENAME_POSIX_PATH will not be set.
++		 */
+ 		bool posix_open : 1;
+ 		bool posix_append : 1;
+ 	} fsp_flags;
+@@ -886,6 +895,15 @@ struct smb_filename {
+ 	struct fsp_smb_fname_link *fsp_link;
+ };
+ 
++/*
++ * For POSIX clients struct files_struct.fsp_flags.posix_open
++ * and struct smb_filename.flags SMB_FILENAME_POSIX_PATH will
++ * always be set to the same value.
++ *
++ * For macOS clients vfs_fruit with fruit:posix_open=yes, we
++ * deliberately set both flags to fsp_flags.posix_open=true
++ * while SMB_FILENAME_POSIX_PATH will not be set.
++ */
+ #define SMB_FILENAME_POSIX_PATH		0x01
+ 
+ enum vfs_translate_direction {
+diff --git a/source3/modules/vfs_fruit.c b/source3/modules/vfs_fruit.c
+index ba744e52a96..ce9cba2525c 100644
+--- a/source3/modules/vfs_fruit.c
++++ b/source3/modules/vfs_fruit.c
+@@ -125,6 +125,7 @@ struct fruit_config_data {
+ 	bool use_aapl;		/* config from smb.conf */
+ 	bool use_copyfile;
+ 	bool readdir_attr_enabled;
++	bool posix_opens;
+ 	bool unix_info_enabled;
+ 	bool copyfile_enabled;
+ 	bool veto_appledouble;
+@@ -339,6 +340,9 @@ static int init_fruit_config(vfs_handle_struct *handle)
+ 	config->use_copyfile = lp_parm_bool(-1, FRUIT_PARAM_TYPE_NAME,
+ 					   "copyfile", false);
+ 
++	config->posix_opens = lp_parm_bool(
++		SNUM(handle->conn), FRUIT_PARAM_TYPE_NAME, "posix_opens", true);
++
+ 	config->aapl_zero_file_id =
+ 	    lp_parm_bool(SNUM(handle->conn), FRUIT_PARAM_TYPE_NAME,
+ 			 "zero_file_id", true);
+@@ -1754,16 +1758,27 @@ static int fruit_openat(vfs_handle_struct *handle,
+ 			files_struct *fsp,
+ 			const struct vfs_open_how *how)
+ {
++	struct fruit_config_data *config = NULL;
+ 	int fd;
+ 
++	SMB_VFS_HANDLE_GET_DATA(handle, config,
++				struct fruit_config_data, return -1);
++
+ 	DBG_DEBUG("Path [%s]\n", smb_fname_str_dbg(smb_fname));
+ 
+ 	if (!is_named_stream(smb_fname)) {
+-		return SMB_VFS_NEXT_OPENAT(handle,
+-					   dirfsp,
+-					   smb_fname,
+-					   fsp,
+-					   how);
++		fd = SMB_VFS_NEXT_OPENAT(handle,
++					 dirfsp,
++					 smb_fname,
++					 fsp,
++					 how);
++		if (fd == -1) {
++			return -1;
++		}
++		if (config->posix_opens && global_fruit_config.nego_aapl) {
++			fsp->fsp_flags.posix_open = true;
++		}
++		return fd;
+ 	}
+ 
+ 	if (how->resolve != 0) {
+@@ -1798,7 +1813,13 @@ static int fruit_openat(vfs_handle_struct *handle,
+ 	DBG_DEBUG("Path [%s] fd [%d]\n", smb_fname_str_dbg(smb_fname), fd);
+ 
+ 	/* Prevent reopen optimisation */
++	if (fd == -1) {
++		return -1;
++	}
+ 	fsp->fsp_flags.have_proc_fds = false;
++	if (config->posix_opens && global_fruit_config.nego_aapl) {
++		fsp->fsp_flags.posix_open = true;
++	}
+ 	return fd;
+ }
+ 
+-- 
+2.52.0
+
+
+From 1549f90eccfe838fe984cebe0c02f768b50666f2 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Thu, 18 Sep 2025 23:44:34 +0200
+Subject: [PATCH 09/16] smbd: hang posix brl per-handle check on the pathname
+
+For the SMB3 POSIX client both posix_open=true and (fsp->fsp_name->flags &
+SMB_FILENAME_POSIX_PATH) will always be the case, so this is no change in
+behaviour for that case.
+
+However, for the macOS client fruit will carefully setup both flags as
+posix_open=true but SMB_FILENAME_POSIX_PATH will not be set.
+
+This is a deliberate hack to give the macOS client POSIX behaviour for some
+operations, but not for others, while also allowing the POSIX-ified macOS client
+to continue to get case insensitive behavour.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit 75fa416f911f1f30aae8bdf14b423140874acaa0)
+---
+ selftest/knownfail.d/samba3.vfs.fruit |  1 -
+ source3/smbd/smb2_lock.c              | 16 +++++++++++++++-
+ 2 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/selftest/knownfail.d/samba3.vfs.fruit b/selftest/knownfail.d/samba3.vfs.fruit
+index b774b0503e7..b51c887c212 100644
+--- a/selftest/knownfail.d/samba3.vfs.fruit
++++ b/selftest/knownfail.d/samba3.vfs.fruit
+@@ -1,4 +1,3 @@
+ ^samba3.vfs.fruit streams_depot.OS X AppleDouble file conversion\(nt4_dc\)
+ ^samba3.vfs.fruit streams_depot.OS X AppleDouble file conversion without embedded xattr\(nt4_dc\)
+-^samba3.vfs.fruit.*readonly-exclusive-lock\(.*\)
+ ^samba3.vfs.fruit.*case_insensitive_find\(.*\)
+diff --git a/source3/smbd/smb2_lock.c b/source3/smbd/smb2_lock.c
+index 8591b2fbd2c..73a341eff79 100644
+--- a/source3/smbd/smb2_lock.c
++++ b/source3/smbd/smb2_lock.c
+@@ -381,8 +381,22 @@ static struct tevent_req *smbd_smb2_lock_send(TALLOC_CTX *mem_ctx,
+ 
+ 	for (i=0; i<in_lock_count; i++) {
+ 		bool invalid = false;
+-		bool posix_handle = fsp->fsp_flags.posix_open;
++		bool posix_handle = fsp->fsp_name->flags &
++			SMB_FILENAME_POSIX_PATH;
+ 
++		/*
++		 * For POSIX clients struct files_struct.fsp_flags.posix_open
++		 * and struct smb_filename.flags SMB_FILENAME_POSIX_PATH will
++		 * always be set to the same value.
++		 *
++		 * For macOS clients vfs_fruit with fruit:posix_open=yes, we
++		 * deliberately set both flags to fsp_flags.posix_open=true
++		 * while SMB_FILENAME_POSIX_PATH will not be set.
++		 *
++		 * By deliberately checking the fsp_name flag here instead of
++		 * the fsp flag, Byterange Lock processing uses Windows
++		 * behaviour for macOS clients which is what we want.
++		 */
+ 		switch (in_locks[i].flags) {
+ 		case SMB2_LOCK_FLAG_SHARED:
+ 		case SMB2_LOCK_FLAG_EXCLUSIVE:
+-- 
+2.52.0
+
+
+From fe490422b79c74fc789358c191d157d31761be68 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Thu, 18 Sep 2025 20:35:22 +0200
+Subject: [PATCH 10/16] smbd: hang directory pattern matching case sensitivity
+ on the pathname
+
+For the SMB3 POSIX client both posix_open=true and (fsp->fsp_name->flags &
+SMB_FILENAME_POSIX_PATH) will always be the case, so this is no change in
+behaviour for that case.
+
+However, for the macOS client fruit will carefully setup both flags as
+posix_open=true but SMB_FILENAME_POSIX_PATH will not be set.
+
+This is a deliberate hack to give the macOS client POSIX behaviour for some
+operations, but not for others, while also allowing the POSIX-ified macOS client
+to continue to get case insensitive behavour.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(cherry picked from commit b3132202cf787cc9fb061e39eaf1509157f53953)
+---
+ selftest/knownfail.d/samba3.vfs.fruit | 1 -
+ source3/smbd/dir.c                    | 2 +-
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/selftest/knownfail.d/samba3.vfs.fruit b/selftest/knownfail.d/samba3.vfs.fruit
+index b51c887c212..6307e2b3404 100644
+--- a/selftest/knownfail.d/samba3.vfs.fruit
++++ b/selftest/knownfail.d/samba3.vfs.fruit
+@@ -1,3 +1,2 @@
+ ^samba3.vfs.fruit streams_depot.OS X AppleDouble file conversion\(nt4_dc\)
+ ^samba3.vfs.fruit streams_depot.OS X AppleDouble file conversion without embedded xattr\(nt4_dc\)
+-^samba3.vfs.fruit.*case_insensitive_find\(.*\)
+diff --git a/source3/smbd/dir.c b/source3/smbd/dir.c
+index afc9c74dfdd..c72fd4349d2 100644
+--- a/source3/smbd/dir.c
++++ b/source3/smbd/dir.c
+@@ -1171,7 +1171,7 @@ static NTSTATUS OpenDir_fsp(
+ 		goto fail;
+ 	}
+ 	dir_hnd->fsp = fsp;
+-	if (fsp->fsp_flags.posix_open) {
++	if (fsp->fsp_name->flags & SMB_FILENAME_POSIX_PATH) {
+ 		dir_hnd->case_sensitive = true;
+ 	} else {
+ 		dir_hnd->case_sensitive = conn->case_sensitive;
+-- 
+2.52.0
+
+
+From 68d6be8e2c68385797b9c9f51d87b601a9eace33 Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Sat, 6 Sep 2025 08:48:44 +0200
+Subject: [PATCH 11/16] vfs_fruit: ignore Set-ACL requests with zero ACEs
+
+Workaround for a new behaviour in latest macOS versions.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+(backported from commit a112978ed1240c399eb90e4472d5c43d867c49d9)
+[slow@samba.org: conflict due to option veto_localized present only in master]
+---
+ docs-xml/manpages/vfs_fruit.8.xml | 18 ++++++++++++++++++
+ source3/modules/vfs_fruit.c       | 18 ++++++++++++++++++
+ 2 files changed, 36 insertions(+)
+
+diff --git a/docs-xml/manpages/vfs_fruit.8.xml b/docs-xml/manpages/vfs_fruit.8.xml
+index 21c2e76de8d..13748c110fb 100644
+--- a/docs-xml/manpages/vfs_fruit.8.xml
++++ b/docs-xml/manpages/vfs_fruit.8.xml
+@@ -441,6 +441,24 @@
+             </listitem>
+ 	  </varlistentry>
+ 
++	  <varlistentry>
++	    <term>fruit:ignore_zero_aces = yes | no</term>
++	    <listitem>
++
++	      <para>When <parameter>fruit:ignore_zero_aces</parameter> is
++	      enabled, attempts to modify filesystem permissions fail if the ACL
++	      sent over the wire contains no ACEs. This is completely valid
++	      client behaviour, but it means subsequently no further access is
++	      possible to the file, unless permissions get fixed by an
++	      administrator.</para>
++	      <para>This problematic behaviour has been reported for latest
++	      macOS versions and this new option allows to work around
++	      it.</para>
++	      <para>The default is <emphasis>yes</emphasis>.</para>
++
++            </listitem>
++	  </varlistentry>
++
+ 	</variablelist>
+ </refsect1>
+ 
+diff --git a/source3/modules/vfs_fruit.c b/source3/modules/vfs_fruit.c
+index ce9cba2525c..213d4cc3eeb 100644
+--- a/source3/modules/vfs_fruit.c
++++ b/source3/modules/vfs_fruit.c
+@@ -137,6 +137,7 @@ struct fruit_config_data {
+ 	bool wipe_intentionally_left_blank_rfork;
+ 	bool delete_empty_adfiles;
+ 	bool validate_afpinfo;
++	bool ignore_zero_aces;
+ 
+ 	/*
+ 	 * Additional options, all enabled by default,
+@@ -343,6 +344,11 @@ static int init_fruit_config(vfs_handle_struct *handle)
+ 	config->posix_opens = lp_parm_bool(
+ 		SNUM(handle->conn), FRUIT_PARAM_TYPE_NAME, "posix_opens", true);
+ 
++	config->ignore_zero_aces = lp_parm_bool(SNUM(handle->conn),
++						FRUIT_PARAM_TYPE_NAME,
++						"ignore_zero_aces",
++						true);
++
+ 	config->aapl_zero_file_id =
+ 	    lp_parm_bool(SNUM(handle->conn), FRUIT_PARAM_TYPE_NAME,
+ 			 "zero_file_id", true);
+@@ -4626,6 +4632,7 @@ static NTSTATUS fruit_fset_nt_acl(vfs_handle_struct *handle,
+ 				  uint32_t security_info_sent,
+ 				  const struct security_descriptor *orig_psd)
+ {
++	struct fruit_config_data *config = NULL;
+ 	NTSTATUS status;
+ 	bool do_chmod;
+ 	mode_t ms_nfs_mode = 0;
+@@ -4633,6 +4640,10 @@ static NTSTATUS fruit_fset_nt_acl(vfs_handle_struct *handle,
+ 	struct security_descriptor *psd = NULL;
+ 	uint32_t orig_num_aces = 0;
+ 
++	SMB_VFS_HANDLE_GET_DATA(handle, config,
++				struct fruit_config_data,
++				return NT_STATUS_UNSUCCESSFUL);
++
+ 	if (orig_psd->dacl != NULL) {
+ 		orig_num_aces = orig_psd->dacl->num_aces;
+ 	}
+@@ -4644,6 +4655,13 @@ static NTSTATUS fruit_fset_nt_acl(vfs_handle_struct *handle,
+ 
+ 	DBG_DEBUG("%s\n", fsp_str_dbg(fsp));
+ 
++	if (config->ignore_zero_aces && (psd->dacl->num_aces == 0)) {
++		/*
++		 * Just ignore Set-ACL requests with zero ACEs.
++		 */
++		return NT_STATUS_OK;
++	}
++
+ 	status = check_ms_nfs(handle, fsp, psd, &ms_nfs_mode, &do_chmod);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		DEBUG(1, ("fruit_fset_nt_acl: check_ms_nfs failed%s\n", fsp_str_dbg(fsp)));
+-- 
+2.52.0
+
+
+From 73d2494edfc58bd8c8806c7ca6aeb38bb2310cee Mon Sep 17 00:00:00 2001
+From: Ralph Boehme <slow@samba.org>
+Date: Fri, 14 Nov 2025 14:55:12 +0100
+Subject: [PATCH 12/16] vfs_fruit: psd->dacl can be NULL, use orig_num_aces
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
+
+Signed-off-by: Ralph Boehme <slow@samba.org>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+
+Autobuild-User(master): Volker Lendecke <vl@samba.org>
+Autobuild-Date(master): Tue Nov 18 10:13:44 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 0de67cf0748139920006a4dd65cb77c874c3595f)
+
+Autobuild-User(v4-23-test): Jule Anger <janger@samba.org>
+Autobuild-Date(v4-23-test): Wed Nov 26 11:26:55 UTC 2025 on atb-devel-224
+
+(cherry picked from commit b3f2445aef48e855f689de864d770fc2130f0ecc)
+---
+ source3/modules/vfs_fruit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_fruit.c b/source3/modules/vfs_fruit.c
+index 213d4cc3eeb..795f79ce09c 100644
+--- a/source3/modules/vfs_fruit.c
++++ b/source3/modules/vfs_fruit.c
+@@ -4655,7 +4655,7 @@ static NTSTATUS fruit_fset_nt_acl(vfs_handle_struct *handle,
+ 
+ 	DBG_DEBUG("%s\n", fsp_str_dbg(fsp));
+ 
+-	if (config->ignore_zero_aces && (psd->dacl->num_aces == 0)) {
++	if (config->ignore_zero_aces && (orig_num_aces == 0)) {
+ 		/*
+ 		 * Just ignore Set-ACL requests with zero ACEs.
+ 		 */
+-- 
+2.52.0
+
+
+From 0b0e342500042b80dedda6c5bd1d9d2598f710ca Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Tue, 2 Dec 2025 14:02:08 +0100
+Subject: [PATCH 13/16] Revert "ldb: User hexchars_upper from replace.h"
+
+This reverts commit 542cf01bfe530a83dfbc8a606d182c0a5a622059.
+
+We shouldn't put a hard requirement for libreplace in libldb! We do not need
+libreplace on Linux until we start using hexbytes_upper.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15961
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
+(cherry picked from commit 1bb25c0e01d35b1adb3137cb193de27f5c5a65f0)
+
+Autobuild-User(v4-23-test): Jule Anger <janger@samba.org>
+Autobuild-Date(v4-23-test): Thu Dec 11 17:00:21 UTC 2025 on atb-devel-224
+---
+ lib/ldb/common/ldb_dn.c | 11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
+
+diff --git a/lib/ldb/common/ldb_dn.c b/lib/ldb/common/ldb_dn.c
+index 5b8c0f4f580..389da444904 100644
+--- a/lib/ldb/common/ldb_dn.c
++++ b/lib/ldb/common/ldb_dn.c
+@@ -232,10 +232,15 @@ static int ldb_dn_escape_internal(char *dst, const char *src, int len)
+ 		case '\0': {
+ 			/* any others get \XX form */
+ 			unsigned char v;
++			/*
++			 * Do not use libreplace for this. We don't want to have
++			 * a hard requirement for it.
++			 */
++			const char *hexbytes = "0123456789ABCDEF";
+ 			v = (const unsigned char)c;
+ 			*d++ = '\\';
+-			*d++ = hexchars_upper[v>>4];
+-			*d++ = hexchars_upper[v&0xF];
++			*d++ = hexbytes[v>>4];
++			*d++ = hexbytes[v&0xF];
+ 			break;
+ 		}
+ 		default:
+@@ -2100,7 +2105,7 @@ int ldb_dn_set_extended_component(struct ldb_dn *dn,
+ 	unsigned int i;
+ 	struct ldb_val v2;
+ 	const struct ldb_dn_extended_syntax *ext_syntax;
+-	
++
+ 	if ( ! ldb_dn_validate(dn)) {
+ 		return LDB_ERR_OTHER;
+ 	}
+-- 
+2.52.0
+
+
+From d8558ac294e7c622e6bb1239635e4e17f5f6e8cf Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 19 Jan 2026 14:33:52 +0100
+Subject: [PATCH 14/16] s3:libads: Reset ads->config.flags in ads_disconnect()
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This is doing the same thing in ads_disconnect() as commit
+a26f535 Clear previous CLDAP ping flags when reusing the ADS_STRUCT
+did in ads_current_time()
+
+In this case we:
+
+1) found cached ADS_STRUCT which already has ads->config.flags set:
+
+  lookup_groupmem()
+    ads_cached_connection()
+      ads_cached_connection_reuse()
+
+2) started search which immediately timeouts (the cached conn. was dead)
+
+  ads_do_search_retry_internal()
+    ldap_search_with_timeout() - IO_TIMEOUT
+
+3) Retry loop finds a new DC and tries to connect
+
+  ads_do_search_retry_internal()
+    ads_disconnect()
+    ads_find_dc()
+    ads_try_connect()
+      netlogon_pings()
+        check_cldap_reply_required_flags()
+
+4) check_cldap_reply_required_flags() fails since ads->config.flags
+   (stored possibly long time ago) contain:
+
+   NBT_SERVER_CLOSEST  0x00000080
+     which is misinterpreted as:
+   DS_PDC_REQUIRED     0x00000080
+
+   the newly found DC is not PDC (we asked for DS_ONLY_LDAP_NEEDED)
+   and since previous DC had NBT_SERVER_CLOSEST we want DS_PDC_REQUIRED
+   and fail.
+
+We should anyway avoid mixing independent namespaces  NBT_* and DS_*
+in the same flag.
+Next commit will do that.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15972
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 9f3a35991feb01a8d2c2b69fa0b914bbc637a809)
+---
+ source3/libads/ldap.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/source3/libads/ldap.c b/source3/libads/ldap.c
+index 49fa1d47298..8dde09e3551 100644
+--- a/source3/libads/ldap.c
++++ b/source3/libads/ldap.c
+@@ -1261,6 +1261,7 @@ void ads_disconnect(ADS_STRUCT *ads)
+ 	if (ads->ldap_wrap_data.mem_ctx) {
+ 		talloc_free(ads->ldap_wrap_data.mem_ctx);
+ 	}
++	ads->config.flags = 0;
+ 	ads_zero_ldap(ads);
+ 	ZERO_STRUCT(ads->ldap_tls_data);
+ 	ZERO_STRUCT(ads->ldap_wrap_data);
+-- 
+2.52.0
+
+
+From 37cbf09ec9b9bacd2c9e8fd50bd4b80046388d9a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Sun, 18 Jan 2026 01:04:11 +0100
+Subject: [PATCH 15/16] s3:libads: Separate use of ads->config.flags for NBT_*
+ and DS_* values
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Use of ads->config.flags is overloaded.
+
+It is used to:
+
+- pass DS_* flags down to cldap_netlogon()
+- store the server_type from NETLOGON_SAM_LOGON_RESPONSE
+
+Both cases use different values and cannot be combined.
+E.g. flags mess up with value 0x00000080
+
+NBT_SERVER_CLOSEST  0x00000080
+DS_PDC_REQUIRED     0x00000080
+
+Let's create two separate flags
+
+nbt_server_type server_flags; /* NBT_* cldap flags identifying the services. */
+uint32 required_flags; /* DS_* - Netlogon flags */
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15972
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Thu Jan 22 09:14:25 UTC 2026 on atb-devel-224
+
+(cherry picked from commit 7483903575eab97773a992149d64511d5ec6f256)
+---
+ source3/libads/ldap.c          | 46 ++++++++++++++++++----------------
+ source3/librpc/idl/ads.idl     |  4 ++-
+ source3/libsmb/namequery_dc.c  |  4 ++-
+ source3/winbindd/winbindd_cm.c |  6 ++---
+ 4 files changed, 33 insertions(+), 27 deletions(-)
+
+diff --git a/source3/libads/ldap.c b/source3/libads/ldap.c
+index 8dde09e3551..ac57489d1eb 100644
+--- a/source3/libads/ldap.c
++++ b/source3/libads/ldap.c
+@@ -237,7 +237,7 @@ bool ads_sitename_match(ADS_STRUCT *ads)
+ 
+ bool ads_closest_dc(ADS_STRUCT *ads)
+ {
+-	if (ads->config.flags & NBT_SERVER_CLOSEST) {
++	if (ads->config.server_flags & NBT_SERVER_CLOSEST) {
+ 		DEBUG(10,("ads_closest_dc: NBT_SERVER_CLOSEST flag set\n"));
+ 		return True;
+ 	}
+@@ -344,7 +344,7 @@ static bool ads_fill_cldap_reply(ADS_STRUCT *ads,
+ 	sitename_store(cldap_reply->dns_domain, cldap_reply->client_site);
+ 
+ 	/* Leave this until last so that the flags are not clobbered */
+-	ads->config.flags = cldap_reply->server_type;
++	ads->config.server_flags = cldap_reply->server_type;
+ 
+ 	ret = true;
+ 
+@@ -379,7 +379,8 @@ static bool ads_try_connect(ADS_STRUCT *ads, bool gc,
+ 	ok = ads_cldap_netlogon_5(frame,
+ 				  ss,
+ 				  ads->server.realm,
+-				  ads->config.flags | DS_ONLY_LDAP_NEEDED,
++				  ads->config.required_flags |
++					  DS_ONLY_LDAP_NEEDED,
+ 				  &cldap_reply);
+ 	if (!ok) {
+ 		DBG_NOTICE("ads_cldap_netlogon_5(%s, %s) failed.\n",
+@@ -490,20 +491,21 @@ again:
+ 		return status;
+ 	}
+ 
+-	status = netlogon_pings(frame, /* mem_ctx */
+-				lp_client_netlogon_ping_protocol(), /* proto */
+-				ts_list,      /* servers */
+-				num_requests, /* num_servers */
+-				(struct netlogon_ping_filter){
+-					.ntversion = nt_version,
+-					.domain = ads->server.realm,
+-					.acct_ctrl = -1,
+-					.required_flags = ads->config.flags |
+-							  DS_ONLY_LDAP_NEEDED,
+-				},
+-				1,	 /* wanted_servers */
+-				endtime, /* timeout */
+-				&responses);
++	status = netlogon_pings(
++		frame,				    /* mem_ctx */
++		lp_client_netlogon_ping_protocol(), /* proto */
++		ts_list,			    /* servers */
++		num_requests,			    /* num_servers */
++		(struct netlogon_ping_filter){
++			.ntversion = nt_version,
++			.domain = ads->server.realm,
++			.acct_ctrl = -1,
++			.required_flags = ads->config.required_flags |
++					  DS_ONLY_LDAP_NEEDED,
++		},
++		1,	 /* wanted_servers */
++		endtime, /* timeout */
++		&responses);
+ 	if (!NT_STATUS_IS_OK(status)) {
+ 		DBG_WARNING("netlogon_pings(realm=%s, num_requests=%zu) "
+ 			    "for count[%zu] - %s\n",
+@@ -1261,7 +1263,7 @@ void ads_disconnect(ADS_STRUCT *ads)
+ 	if (ads->ldap_wrap_data.mem_ctx) {
+ 		talloc_free(ads->ldap_wrap_data.mem_ctx);
+ 	}
+-	ads->config.flags = 0;
++	ads->config.server_flags = 0;
+ 	ads_zero_ldap(ads);
+ 	ZERO_STRUCT(ads->ldap_tls_data);
+ 	ZERO_STRUCT(ads->ldap_wrap_data);
+@@ -3726,10 +3728,10 @@ ADS_STATUS ads_current_time(ADS_STRUCT *ads)
+ 		}
+ 
+ 		/*
+-		 * Reset ads->config.flags as it can contain the flags
++		 * Reset flags as it can contain the flags
+ 		 * returned by the previous CLDAP ping when reusing the struct.
+ 		 */
+-		ads_s->config.flags = 0;
++		ads_s->config.server_flags = 0;
+ 
+ 		status = ads_connect_simple_anon(ads_s);
+ 		if ( !ADS_ERR_OK(status))
+@@ -3815,10 +3817,10 @@ ADS_STATUS ads_domain_func_level(ADS_STRUCT *ads, uint32_t *val)
+ 		}
+ 
+ 		/*
+-		 * Reset ads->config.flags as it can contain the flags
++		 * Reset flags as it can contain the flags
+ 		 * returned by the previous CLDAP ping when reusing the struct.
+ 		 */
+-		ads_s->config.flags = 0;
++		ads_s->config.server_flags = 0;
+ 
+ 		status = ads_connect_simple_anon(ads_s);
+ 		if ( !ADS_ERR_OK(status))
+diff --git a/source3/librpc/idl/ads.idl b/source3/librpc/idl/ads.idl
+index 381447a1a29..20941e90346 100644
+--- a/source3/librpc/idl/ads.idl
++++ b/source3/librpc/idl/ads.idl
+@@ -6,6 +6,7 @@
+ */
+ 
+ import "nbt.idl";
++import "netlogon.idl";
+ 
+ cpp_quote("#include <system/network.h>")
+ 
+@@ -51,7 +52,8 @@ interface ads
+ 	} ads_auth;
+ 
+ 	typedef [nopull,nopush] struct {
+-		nbt_server_type flags; /* cldap flags identifying the services. */
++		nbt_server_type server_flags; /* NBT_* cldap flags identifying the services. */
++		netr_DsRGetDCName_flags required_flags; /* DS_* - Netlogon flags */
+ 		string workgroup;
+ 		string realm;
+ 		string bind_path;
+diff --git a/source3/libsmb/namequery_dc.c b/source3/libsmb/namequery_dc.c
+index 3a2f22129b8..3d771d77b8d 100644
+--- a/source3/libsmb/namequery_dc.c
++++ b/source3/libsmb/namequery_dc.c
+@@ -109,7 +109,9 @@ static bool ads_dc_name(const char *domain,
+ 		}
+ 
+ #ifdef HAVE_ADS
+-		if (is_our_primary_domain(domain) && (ads->config.flags & NBT_SERVER_KDC)) {
++		if (is_our_primary_domain(domain) &&
++		    (ads->config.server_flags & NBT_SERVER_KDC))
++		{
+ 			if (ads_closest_dc(ads)) {
+ 				/* We're going to use this KDC for this realm/domain.
+ 				   If we are using sites, then force the krb5 libs
+diff --git a/source3/winbindd/winbindd_cm.c b/source3/winbindd/winbindd_cm.c
+index 2c18aeba060..45b68ebe561 100644
+--- a/source3/winbindd/winbindd_cm.c
++++ b/source3/winbindd/winbindd_cm.c
+@@ -1061,7 +1061,7 @@ static bool dcip_check_name_ads(const struct winbindd_domain *domain,
+ 		ads_status = ADS_ERROR_NT(NT_STATUS_NO_MEMORY);
+ 		goto out;
+ 	}
+-	ads->config.flags |= request_flags;
++	ads->config.required_flags |= request_flags;
+ 	ads->server.no_fallback = true;
+ 
+ 	ads_status = ads_connect_cldap_only(ads);
+@@ -1077,9 +1077,9 @@ static bool dcip_check_name_ads(const struct winbindd_domain *domain,
+ 	}
+ 	namecache_store(name, 0x20, 1, sa);
+ 
+-	DBG_DEBUG("CLDAP flags = 0x%"PRIx32"\n", ads->config.flags);
++	DBG_DEBUG("CLDAP flags = 0x%" PRIx32 "\n", ads->config.server_flags);
+ 
+-	if (domain->primary && (ads->config.flags & NBT_SERVER_KDC)) {
++	if (domain->primary && (ads->config.server_flags & NBT_SERVER_KDC)) {
+ 		if (ads_closest_dc(ads)) {
+ 			char *sitename = sitename_fetch(tmp_ctx,
+ 							ads->config.realm);
+-- 
+2.52.0
+
+
+From e02f1dca11cbee015923d9e8c141a727dc1c02d3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Thu, 22 Jan 2026 14:27:09 +0100
+Subject: [PATCH 16/16] s3:libads: Allocate cli_credentials on a stackframe
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This fixes:
+ERROR: talloc_free with references at ../../source3/libads/ldap_utils.c:158
+
+What happens:
+
+* `struct cli_credentials *creds` is allocated on `ads` talloc context
+* gensec_set_credentials() creates a talloc_reference to `creds`
+* TALLOC_FREE(creds) sees two parents and complains
+
+All other code is using temporary talloc_stackframe() for `creds`.
+Do it here as well.
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+
+Autobuild-User(master): Stefan Metzmacher <metze@samba.org>
+Autobuild-Date(master): Fri Jan 23 11:20:28 UTC 2026 on atb-devel-224
+---
+ source3/libads/ldap_utils.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/source3/libads/ldap_utils.c b/source3/libads/ldap_utils.c
+index 9d6d962a2bc..d01afa69697 100644
+--- a/source3/libads/ldap_utils.c
++++ b/source3/libads/ldap_utils.c
+@@ -99,6 +99,7 @@ static ADS_STATUS ads_do_search_retry_internal(ADS_STRUCT *ads, const char *bind
+ 		struct cli_credentials *creds = NULL;
+ 		char *cred_name = NULL;
+ 		NTSTATUS ntstatus;
++		TALLOC_CTX *frame = talloc_stackframe();
+ 
+ 		if (NT_STATUS_EQUAL(ads_ntstatus(status), NT_STATUS_IO_TIMEOUT) &&
+ 		    ads->config.ldap_page_size >= (lp_ldap_page_size() / 4) &&
+@@ -119,18 +120,20 @@ static ADS_STATUS ads_do_search_retry_internal(ADS_STRUCT *ads, const char *bind
+ 			DBG_NOTICE("Search for %s in <%s> failed: %s\n",
+ 				   expr, bp, ads_errstr(status));
+ 			SAFE_FREE(bp);
++			TALLOC_FREE(frame);
+ 			return status;
+ 		}
+ 
+ 		ntstatus = ads->auth.reconnect_state->fn(ads,
+ 				ads->auth.reconnect_state->private_data,
+-				ads, &creds);
++				frame, &creds);
+ 		if (!NT_STATUS_IS_OK(ntstatus)) {
+ 			DBG_WARNING("Failed to get creds for realm(%s): %s\n",
+ 				    ads->server.realm, nt_errstr(ntstatus));
+ 			DBG_WARNING("Search for %s in <%s> failed: %s\n",
+ 				   expr, bp, ads_errstr(status));
+ 			SAFE_FREE(bp);
++			TALLOC_FREE(frame);
+ 			return status;
+ 		}
+ 
+@@ -151,11 +154,11 @@ static ADS_STATUS ads_do_search_retry_internal(ADS_STRUCT *ads, const char *bind
+ 			 * callers depend on it being around.
+ 			 */
+ 			ads_disconnect(ads);
+-			TALLOC_FREE(creds);
++			TALLOC_FREE(frame);
+ 			SAFE_FREE(bp);
+ 			return status;
+ 		}
+-		TALLOC_FREE(creds);
++		TALLOC_FREE(frame);
+ 
+ 		*res = NULL;
+ 
+-- 
+2.52.0
 
