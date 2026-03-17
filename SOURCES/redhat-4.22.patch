@@ -1,7 +1,7 @@
 From b0ff8644c06b01252bdbac6a31c77c5781d4b5a0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 29 Jul 2025 11:19:07 +0200
-Subject: [PATCH 01/16] selftest: Add the short name for localvampiredc to
+Subject: [PATCH 01/38] selftest: Add the short name for localvampiredc to
  hosts file
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -30,13 +30,13 @@ index 9da339f6239..af0434a8e6b 100755
  		print HOSTS "$ctx->{ipv6} ${hostname}.$ctx->{dnsname} $ctx->{dnsname} ${hostname}\n";
  	} else {
 -- 
-2.52.0
+2.53.0
 
 
 From 03431792b4707e50afc8f9e356f08a91f4fb67c3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 11:20:54 +0200
-Subject: [PATCH 02/16] tests: Add test for 'net ads join' to a preferred DC
+Subject: [PATCH 02/38] tests: Add test for 'net ads join' to a preferred DC
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -145,13 +145,13 @@ index 00000000000..1bebc2f4dbe
 +
 +exit $failed
 -- 
-2.52.0
+2.53.0
 
 
 From 5cff37091161976a979752351003c9c1deb0d39f Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 28 Jul 2025 10:43:36 +0200
-Subject: [PATCH 03/16] s3:net: Pass down the server from cmdline to
+Subject: [PATCH 03/38] s3:net: Pass down the server from cmdline to
  sync_pw2keytabs()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -488,13 +488,13 @@ index 46531210411..753b957e43f 100644
  	return ret;
  }
 -- 
-2.52.0
+2.53.0
 
 
 From 5b23ab3845597dcfcf33e2c0a7d7af820d3167a5 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 13 Aug 2025 17:02:16 +0200
-Subject: [PATCH 04/16] smbtorture: fix locking offset in
+Subject: [PATCH 04/38] smbtorture: fix locking offset in
  test_fruit_locking_conflict()
 
 AD_FILELOCK_RSRC_DENY_WR = AD_FILELOCK_BASE + 6
@@ -526,13 +526,13 @@ index 6bad4e409c6..e9ff4a57e66 100644
  		.flags = SMB2_LOCK_FLAG_EXCLUSIVE,
  	};
 -- 
-2.52.0
+2.53.0
 
 
 From 9c7228f46c3955b0e1a3c91fd42da6f2ea864cb8 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 1 Aug 2025 17:28:04 +0200
-Subject: [PATCH 05/16] smbd: don't use sticky write times on POSIX handles
+Subject: [PATCH 05/38] smbd: don't use sticky write times on POSIX handles
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
 
@@ -559,13 +559,13 @@ index 9a8ecf6e0a7..ab45f9edbb9 100644
  		return true;
  	}
 -- 
-2.52.0
+2.53.0
 
 
 From ec9f60e4eda3162aec63ada4ec49574e99362989 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 19 Sep 2025 00:20:43 +0200
-Subject: [PATCH 06/16] smbtorture: add test vfs.fruit.readonly-exclusive-lock
+Subject: [PATCH 06/38] smbtorture: add test vfs.fruit.readonly-exclusive-lock
 
 Verify macOS clients get Windows byterange lock behavour by trying to set an
 exclusive lock on a file opened in read-only mode.
@@ -690,13 +690,13 @@ index e9ff4a57e66..02f7acd0fea 100644
  	return suite;
  }
 -- 
-2.52.0
+2.53.0
 
 
 From 87e6e2d0cdb78cfe9b372732439706d94a5ea7a2 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 19 Sep 2025 06:43:57 +0200
-Subject: [PATCH 07/16] smbtorture: add test vfs.fruit.case_insensitive_find
+Subject: [PATCH 07/38] smbtorture: add test vfs.fruit.case_insensitive_find
 
 Verifies case insensitive directory scanning works.
 
@@ -813,13 +813,13 @@ index 02f7acd0fea..a6f86cd5edf 100644
  }
  
 -- 
-2.52.0
+2.53.0
 
 
 From 98e1a3b39cb3e4fa03ac8340338179cd85df18f3 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 10 Mar 2025 15:01:42 +0100
-Subject: [PATCH 08/16] vfs_fruit: add option "fruit:posix_opens = yes|no"
+Subject: [PATCH 08/38] vfs_fruit: add option "fruit:posix_opens = yes|no"
  (default: yes)
 
 Tags alls opens as POSIX by setting fsp_flags.posix_open to true.
@@ -996,13 +996,13 @@ index ba744e52a96..ce9cba2525c 100644
  }
  
 -- 
-2.52.0
+2.53.0
 
 
 From 1549f90eccfe838fe984cebe0c02f768b50666f2 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 18 Sep 2025 23:44:34 +0200
-Subject: [PATCH 09/16] smbd: hang posix brl per-handle check on the pathname
+Subject: [PATCH 09/38] smbd: hang posix brl per-handle check on the pathname
 
 For the SMB3 POSIX client both posix_open=true and (fsp->fsp_name->flags &
 SMB_FILENAME_POSIX_PATH) will always be the case, so this is no change in
@@ -1063,13 +1063,13 @@ index 8591b2fbd2c..73a341eff79 100644
  		case SMB2_LOCK_FLAG_SHARED:
  		case SMB2_LOCK_FLAG_EXCLUSIVE:
 -- 
-2.52.0
+2.53.0
 
 
 From fe490422b79c74fc789358c191d157d31761be68 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 18 Sep 2025 20:35:22 +0200
-Subject: [PATCH 10/16] smbd: hang directory pattern matching case sensitivity
+Subject: [PATCH 10/38] smbd: hang directory pattern matching case sensitivity
  on the pathname
 
 For the SMB3 POSIX client both posix_open=true and (fsp->fsp_name->flags &
@@ -1115,13 +1115,13 @@ index afc9c74dfdd..c72fd4349d2 100644
  	} else {
  		dir_hnd->case_sensitive = conn->case_sensitive;
 -- 
-2.52.0
+2.53.0
 
 
 From 68d6be8e2c68385797b9c9f51d87b601a9eace33 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Sat, 6 Sep 2025 08:48:44 +0200
-Subject: [PATCH 11/16] vfs_fruit: ignore Set-ACL requests with zero ACEs
+Subject: [PATCH 11/38] vfs_fruit: ignore Set-ACL requests with zero ACEs
 
 Workaround for a new behaviour in latest macOS versions.
 
@@ -1223,13 +1223,13 @@ index ce9cba2525c..213d4cc3eeb 100644
  	if (!NT_STATUS_IS_OK(status)) {
  		DEBUG(1, ("fruit_fset_nt_acl: check_ms_nfs failed%s\n", fsp_str_dbg(fsp)));
 -- 
-2.52.0
+2.53.0
 
 
 From 73d2494edfc58bd8c8806c7ca6aeb38bb2310cee Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 14 Nov 2025 14:55:12 +0100
-Subject: [PATCH 12/16] vfs_fruit: psd->dacl can be NULL, use orig_num_aces
+Subject: [PATCH 12/38] vfs_fruit: psd->dacl can be NULL, use orig_num_aces
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
 
@@ -1263,13 +1263,13 @@ index 213d4cc3eeb..795f79ce09c 100644
  		 * Just ignore Set-ACL requests with zero ACEs.
  		 */
 -- 
-2.52.0
+2.53.0
 
 
 From 0b0e342500042b80dedda6c5bd1d9d2598f710ca Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 2 Dec 2025 14:02:08 +0100
-Subject: [PATCH 13/16] Revert "ldb: User hexchars_upper from replace.h"
+Subject: [PATCH 13/38] Revert "ldb: User hexchars_upper from replace.h"
 
 This reverts commit 542cf01bfe530a83dfbc8a606d182c0a5a622059.
 
@@ -1320,13 +1320,13 @@ index 5b8c0f4f580..389da444904 100644
  		return LDB_ERR_OTHER;
  	}
 -- 
-2.52.0
+2.53.0
 
 
 From d8558ac294e7c622e6bb1239635e4e17f5f6e8cf Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 19 Jan 2026 14:33:52 +0100
-Subject: [PATCH 14/16] s3:libads: Reset ads->config.flags in ads_disconnect()
+Subject: [PATCH 14/38] s3:libads: Reset ads->config.flags in ads_disconnect()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1394,13 +1394,13 @@ index 49fa1d47298..8dde09e3551 100644
  	ZERO_STRUCT(ads->ldap_tls_data);
  	ZERO_STRUCT(ads->ldap_wrap_data);
 -- 
-2.52.0
+2.53.0
 
 
 From 37cbf09ec9b9bacd2c9e8fd50bd4b80046388d9a Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Sun, 18 Jan 2026 01:04:11 +0100
-Subject: [PATCH 15/16] s3:libads: Separate use of ads->config.flags for NBT_*
+Subject: [PATCH 15/38] s3:libads: Separate use of ads->config.flags for NBT_*
  and DS_* values
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1606,13 +1606,13 @@ index 2c18aeba060..45b68ebe561 100644
  			char *sitename = sitename_fetch(tmp_ctx,
  							ads->config.realm);
 -- 
-2.52.0
+2.53.0
 
 
 From e02f1dca11cbee015923d9e8c141a727dc1c02d3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 22 Jan 2026 14:27:09 +0100
-Subject: [PATCH 16/16] s3:libads: Allocate cli_credentials on a stackframe
+Subject: [PATCH 16/38] s3:libads: Allocate cli_credentials on a stackframe
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1687,5 +1687,1648 @@ index 9d6d962a2bc..d01afa69697 100644
  		*res = NULL;
  
 -- 
-2.52.0
+2.53.0
+
+
+From 2bdf2b96a818a64d7c420f0fb675530959602188 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Mon, 26 Jan 2026 13:36:02 +0100
+Subject: [PATCH 17/38] s3:rpc_client: Fix memory leak opening local named pipe
+
+If no local server name was passed to rpc_pipe_open_local_np() then
+get_myname() was called with NULL talloc context instead of the
+current stackframe.
+
+This was causing an increase of memory usage on busy servers with long-living
+rpcd_* workers.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15979
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Noel Power <noel.power@suse.com>
+Reviewed-by: Volker Lendecke <vl@samba.org>
+
+Autobuild-User(master): Volker Lendecke <vl@samba.org>
+Autobuild-Date(master): Tue Jan 27 10:13:40 UTC 2026 on atb-devel-224
+
+(cherry picked from commit 24dc455362fb49ef81c99d95880e106a234ce29a)
+---
+ source3/rpc_client/cli_pipe.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source3/rpc_client/cli_pipe.c b/source3/rpc_client/cli_pipe.c
+index 23adbbc62fa..91afccd7fb2 100644
+--- a/source3/rpc_client/cli_pipe.c
++++ b/source3/rpc_client/cli_pipe.c
+@@ -3624,7 +3624,7 @@ NTSTATUS rpc_pipe_open_local_np(
+ 	}
+ 
+ 	if (local_server_name == NULL) {
+-		local_server_name = get_myname(result);
++		local_server_name = get_myname(frame);
+ 	}
+ 
+ 	if (local_server_addr != NULL) {
+-- 
+2.53.0
+
+
+From 17c104ea4171aa002df0e7f69e61312898c7fad5 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Fri, 4 Apr 2025 10:27:50 +0200
+Subject: [PATCH 18/38] lib:cmdline: Make sure --use-krb5-ccache sets the
+ ccache
+
+Pair-Programmed-With: Alexander Bokovoy <ab@samba.org>
+Signed-off-by: Alexander Bokovoy <ab@samba.org>
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+---
+ lib/cmdline/cmdline.c | 79 ++++++++++++++++++++++++++++++-------------
+ 1 file changed, 55 insertions(+), 24 deletions(-)
+
+diff --git a/lib/cmdline/cmdline.c b/lib/cmdline/cmdline.c
+index 161ba8874bf..5902628cc15 100644
+--- a/lib/cmdline/cmdline.c
++++ b/lib/cmdline/cmdline.c
+@@ -16,6 +16,7 @@
+  */
+ 
+ #include "includes.h"
++#include "auth/credentials/credentials.h"
+ #include "lib/param/param.h"
+ #include "dynconfig/dynconfig.h"
+ #include "auth/gensec/gensec.h"
+@@ -930,6 +931,7 @@ static struct poptOption popt_common_connection[] = {
+ 
+ static bool skip_password_callback;
+ static bool machine_account_pending;
++static char *krb5_ccache = NULL;
+ 
+ static void popt_common_credentials_callback(poptContext popt_ctx,
+ 					     enum poptCallbackReason reason,
+@@ -1004,6 +1006,31 @@ static void popt_common_credentials_callback(poptContext popt_ctx,
+ 						     CRED_SPECIFIED);
+ 		}
+ 
++		/*
++		 * If --use-krb5-ccache was passed on the command line we need
++		 * to overwrite the values set by cli_credentials_guess().
++		 */
++		if (krb5_ccache != NULL) {
++			const char *error_string = NULL;
++			int rc;
++
++			rc = cli_credentials_set_ccache(creds,
++							lp_ctx,
++							krb5_ccache,
++							CRED_SPECIFIED,
++							&error_string);
++			SAFE_FREE(krb5_ccache);
++			if (rc != 0) {
++				fprintf(stderr,
++					"Error setting krb5 credentials cache: "
++					"'%s'"
++					" - %s\n",
++					krb5_ccache,
++					error_string);
++				exit(1);
++			}
++		}
++
+ 		if (cli_credentials_get_kerberos_state(creds) ==
+ 		    CRED_USE_KERBEROS_REQUIRED)
+ 		{
+@@ -1023,10 +1050,10 @@ static void popt_common_credentials_callback(poptContext popt_ctx,
+ 				skip_password_callback = true;
+ 			}
+ 		}
+-		if (!skip_password_callback) {
+-			(void)cli_credentials_get_password_and_obtained(creds,
+-									&password_obtained);
+-		}
++
++		(void)cli_credentials_get_password_and_obtained(
++			creds, &password_obtained);
++
+ 		if (!skip_password_callback &&
+ 		    password_obtained < CRED_CALLBACK) {
+ 			ok = cli_credentials_set_cmdline_callbacks(creds);
+@@ -1038,6 +1065,15 @@ static void popt_common_credentials_callback(poptContext popt_ctx,
+ 			}
+ 		}
+ 
++		/*
++		 * If the user specified a password on the command line always
++		 * do a kinit!
++		 */
++		if (password_obtained == CRED_SPECIFIED) {
++			cli_credentials_invalidate_ccache(creds,
++							  CRED_SPECIFIED);
++		}
++
+ 		return;
+ 	}
+ 
+@@ -1138,9 +1174,6 @@ static void popt_common_credentials_callback(poptContext popt_ctx,
+ 		break;
+ 	}
+ 	case OPT_USE_KERBEROS_CCACHE: {
+-		const char *error_string = NULL;
+-		int rc;
+-
+ 		if (arg == NULL) {
+ 			fprintf(stderr,
+ 				"Failed to parse --use-krb5-ccache=CCACHE: "
+@@ -1148,26 +1181,24 @@ static void popt_common_credentials_callback(poptContext popt_ctx,
+ 			exit(1);
+ 		}
+ 
+-		ok = cli_credentials_set_kerberos_state(creds,
+-							CRED_USE_KERBEROS_REQUIRED,
+-							CRED_SPECIFIED);
+-		if (!ok) {
+-			fprintf(stderr,
+-				"Failed to set Kerberos state to %s!\n", arg);
+-			exit(1);
++		/*
++		 * Remember the value and handle it in
++		 * POPT_CALLBACK_REASON_POST.
++		 */
++		if (arg[0] != '\0') {
++			krb5_ccache = strdup(arg);
++			if (krb5_ccache == NULL) {
++				fprintf(stderr, "Failed allocate memory\n");
++				exit(1);
++			}
+ 		}
+ 
+-		rc = cli_credentials_set_ccache(creds,
+-						lp_ctx,
+-						arg,
+-						CRED_SPECIFIED,
+-						&error_string);
+-		if (rc != 0) {
++		ok = cli_credentials_set_kerberos_state(
++			creds, CRED_USE_KERBEROS_REQUIRED, CRED_SPECIFIED);
++		if (!ok) {
+ 			fprintf(stderr,
+-				"Error reading krb5 credentials cache: '%s'"
+-				" - %s\n",
+-				arg,
+-				error_string);
++				"Failed to set Kerberos state to %s!\n",
++				arg);
+ 			exit(1);
+ 		}
+ 
+-- 
+2.53.0
+
+
+From d36e10471ddbd2175da53c046e3e62b9cdb576fd Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Fri, 11 Apr 2025 10:56:43 +0200
+Subject: [PATCH 19/38] lib:cmdline: POPT_CALLBACK_REASON_POST should handle if
+ we skip the password callback
+
+It is already checking if there is a valid ccache and disabling the callback.
+In case of IAKerb we specify a ccache but might to fill one with a krbtgt.
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+
+Autobuild-User(master): Andreas Schneider <asn@cryptomilk.org>
+Autobuild-Date(master): Tue Apr 15 12:54:57 UTC 2025 on atb-devel-224
+---
+ lib/cmdline/cmdline.c                      | 5 ++++-
+ testprogs/blackbox/test_client_kerberos.sh | 2 +-
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/lib/cmdline/cmdline.c b/lib/cmdline/cmdline.c
+index 5902628cc15..e434d65a2ef 100644
+--- a/lib/cmdline/cmdline.c
++++ b/lib/cmdline/cmdline.c
+@@ -1202,7 +1202,10 @@ static void popt_common_credentials_callback(poptContext popt_ctx,
+ 			exit(1);
+ 		}
+ 
+-		skip_password_callback = true;
++		/*
++		 * The password callback will be skipped, if we have a valid
++		 * ccache. This is handled in POPT_CALLBACK_REASON_POST.
++		 */
+ 		break;
+ 	}
+ 	case OPT_USE_WINBIND_CCACHE:
+diff --git a/testprogs/blackbox/test_client_kerberos.sh b/testprogs/blackbox/test_client_kerberos.sh
+index 54554ea3290..395b5bc989a 100755
+--- a/testprogs/blackbox/test_client_kerberos.sh
++++ b/testprogs/blackbox/test_client_kerberos.sh
+@@ -147,7 +147,7 @@ testit "test rpcclient kerberos" \
+ 	failed=$(expr $failed + 1)
+ 
+ cmd='echo ${PASSWORD} | $samba_rpcclient ncacn_np:${SERVER} -U${USERNAME} --use-krb5-ccache=$KRB5CCNAME --configfile=${CONFIGURATION} -c getusername 2>&1'
+-testit_expect_failure "test rpcclient kerberos interactive (negative test)" \
++testit "test rpcclient kerberos interactive" \
+ 	test_rpc_getusername ||
+ 	failed=$(expr $failed + 1)
+ 
+-- 
+2.53.0
+
+
+From c4369a82dffbc550b8740fca70aba57bc46400d4 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Fri, 25 Apr 2025 11:30:14 +0200
+Subject: [PATCH 20/38] auth:creds: Make sure when parsing username that realm
+ is uppercase
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+---
+ auth/credentials/credentials.c      | 7 +++++++
+ auth/credentials/tests/test_creds.c | 2 +-
+ python/samba/tests/credentials.py   | 4 ++--
+ 3 files changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/auth/credentials/credentials.c b/auth/credentials/credentials.c
+index a88a458f82b..c31470a81d2 100644
+--- a/auth/credentials/credentials.c
++++ b/auth/credentials/credentials.c
+@@ -1030,6 +1030,8 @@ _PUBLIC_ void cli_credentials_parse_string(struct cli_credentials *credentials,
+ 	}
+ 
+ 	if ((p = strchr_m(uname,'@'))) {
++		char *x = NULL;
++
+ 		/*
+ 		 * We also need to set username and domain
+ 		 * in order to undo the effect of
+@@ -1038,6 +1040,11 @@ _PUBLIC_ void cli_credentials_parse_string(struct cli_credentials *credentials,
+ 		cli_credentials_set_username(credentials, uname, obtained);
+ 		cli_credentials_set_domain(credentials, "", obtained);
+ 
++		/* Make sure the realm is uppercase */
++		for (x = p + 1; x[0] != '\0'; x++) {
++			*x = toupper_m(*x);
++		}
++
+ 		cli_credentials_set_principal(credentials, uname, obtained);
+ 		*p = 0;
+ 		cli_credentials_set_realm(credentials, p+1, obtained);
+diff --git a/auth/credentials/tests/test_creds.c b/auth/credentials/tests/test_creds.c
+index fa8755e0a40..4abb7e4b90c 100644
+--- a/auth/credentials/tests/test_creds.c
++++ b/auth/credentials/tests/test_creds.c
+@@ -219,7 +219,7 @@ static void torture_creds_parse_string(void **state)
+ 	usr_obtained = cli_credentials_get_username_obtained(creds);
+ 	assert_int_equal(usr_obtained, CRED_SPECIFIED);
+ 
+-	assert_string_equal(creds->principal, "wurst@brot.realm");
++	assert_string_equal(creds->principal, "wurst@BROT.REALM");
+ 	princ_obtained = cli_credentials_get_principal_obtained(creds);
+ 	assert_int_equal(princ_obtained, CRED_SPECIFIED);
+ 
+diff --git a/python/samba/tests/credentials.py b/python/samba/tests/credentials.py
+index f9781f8ba03..bc132681c48 100644
+--- a/python/samba/tests/credentials.py
++++ b/python/samba/tests/credentials.py
+@@ -403,7 +403,7 @@ class CredentialsTests(samba.tests.TestCaseInTempDir):
+         self.assertEqual(creds.get_username(), "user@samba.org")
+         self.assertEqual(creds.get_domain(), "")
+         self.assertEqual(creds.get_realm(), "SAMBA.ORG")
+-        self.assertEqual(creds.get_principal(), "user@samba.org")
++        self.assertEqual(creds.get_principal(), "user@SAMBA.ORG")
+         self.assertEqual(creds.is_anonymous(), False)
+         self.assertEqual(creds.authentication_requested(), True)
+ 
+@@ -445,7 +445,7 @@ class CredentialsTests(samba.tests.TestCaseInTempDir):
+         self.assertEqual(creds.get_domain(), "")
+         self.assertEqual(creds.get_password(), "pass")
+         self.assertEqual(creds.get_realm(), "SAMBA.ORG")
+-        self.assertEqual(creds.get_principal(), "user@samba.org")
++        self.assertEqual(creds.get_principal(), "user@SAMBA.ORG")
+         self.assertEqual(creds.is_anonymous(), False)
+         self.assertEqual(creds.authentication_requested(), True)
+ 
+-- 
+2.53.0
+
+
+From 0673310878659d01fb250243c427d36b6cda105c Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Fri, 4 Apr 2025 13:32:41 +0200
+Subject: [PATCH 21/38] auth:creds: Always store the ccache name
+
+This will allow us to specify the cache as one to fill with credentials.
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+---
+ auth/credentials/credentials_internal.h | 1 +
+ auth/credentials/credentials_krb5.c     | 8 ++++++++
+ 2 files changed, 9 insertions(+)
+
+diff --git a/auth/credentials/credentials_internal.h b/auth/credentials/credentials_internal.h
+index cda361e1dd0..72ec390ad7e 100644
+--- a/auth/credentials/credentials_internal.h
++++ b/auth/credentials/credentials_internal.h
+@@ -74,6 +74,7 @@ struct cli_credentials {
+ 	DATA_BLOB nt_response;
+ 	DATA_BLOB nt_session_key;
+ 
++	const char *ccache_name;
+ 	struct ccache_container *ccache;
+ 	struct gssapi_creds_container *client_gss_creds;
+ 	struct keytab_container *keytab;
+diff --git a/auth/credentials/credentials_krb5.c b/auth/credentials/credentials_krb5.c
+index ce76b10361d..7d8b744b3e2 100644
+--- a/auth/credentials/credentials_krb5.c
++++ b/auth/credentials/credentials_krb5.c
+@@ -293,6 +293,14 @@ _PUBLIC_ int cli_credentials_set_ccache(struct cli_credentials *cred,
+ 		return 0;
+ 	}
+ 
++	if (name != NULL) {
++		cred->ccache_name = talloc_strdup(cred, name);
++		if (cred->ccache_name == NULL) {
++			(*error_string) = error_message(ENOMEM);
++			return ENOMEM;
++		}
++	}
++
+ 	ccc = talloc(cred, struct ccache_container);
+ 	if (!ccc) {
+ 		(*error_string) = error_message(ENOMEM);
+-- 
+2.53.0
+
+
+From d1ab591115e1d09e89eb2e960ca989a1f14fe62d Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Fri, 4 Apr 2025 13:33:19 +0200
+Subject: [PATCH 22/38] auth:creds: Add cli_credentials_get_out_ccache_name()
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+---
+ auth/credentials/credentials.h      | 1 +
+ auth/credentials/credentials_krb5.c | 5 +++++
+ 2 files changed, 6 insertions(+)
+
+diff --git a/auth/credentials/credentials.h b/auth/credentials/credentials.h
+index cae6a94b450..9f945726440 100644
+--- a/auth/credentials/credentials.h
++++ b/auth/credentials/credentials.h
+@@ -262,6 +262,7 @@ int cli_credentials_set_ccache(struct cli_credentials *cred,
+ 			       const char *name,
+ 			       enum credentials_obtained obtained,
+ 			       const char **error_string);
++const char *cli_credentials_get_out_ccache_name(struct cli_credentials *cred);
+ bool cli_credentials_parse_password_file(struct cli_credentials *credentials, const char *file, enum credentials_obtained obtained);
+ bool cli_credentials_parse_password_fd(struct cli_credentials *credentials,
+ 				       int fd, enum credentials_obtained obtained);
+diff --git a/auth/credentials/credentials_krb5.c b/auth/credentials/credentials_krb5.c
+index 7d8b744b3e2..6c61eca7b4b 100644
+--- a/auth/credentials/credentials_krb5.c
++++ b/auth/credentials/credentials_krb5.c
+@@ -280,6 +280,11 @@ static int cli_credentials_set_from_ccache(struct cli_credentials *cred,
+ 	return 0;
+ }
+ 
++_PUBLIC_ const char *cli_credentials_get_out_ccache_name(struct cli_credentials *cred)
++{
++	return cred->ccache_name;
++}
++
+ _PUBLIC_ int cli_credentials_set_ccache(struct cli_credentials *cred,
+ 					struct loadparm_context *lp_ctx,
+ 					const char *name,
+-- 
+2.53.0
+
+
+From 843a279c4fd93bf312ab242f7dc9569e65ffdcd5 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Fri, 4 Apr 2025 13:37:21 +0200
+Subject: [PATCH 23/38] librpc:gse: Implement storing tickets into an emtpy
+ ccache
+
+smbclient //server/share --krb5-use-ccache=/tmp/foo
+
+Will write the ticket to the specified ccache.
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+---
+ source3/librpc/crypto/gse.c        | 65 ++++++++++++++++++++++++++++++
+ wscript_configure_embedded_heimdal |  1 +
+ wscript_configure_system_heimdal   |  9 +++++
+ wscript_configure_system_mitkrb5   |  7 ++++
+ 4 files changed, 82 insertions(+)
+
+diff --git a/source3/librpc/crypto/gse.c b/source3/librpc/crypto/gse.c
+index e6f96d2464e..d29122c9ce6 100644
+--- a/source3/librpc/crypto/gse.c
++++ b/source3/librpc/crypto/gse.c
+@@ -632,6 +632,71 @@ init_sec_context_done:
+ 		goto done;
+ 	}
+ 
++	/*
++	 * In case we have a ccache specified on the command line we probably
++	 * want to use it to store credentials we got it.
++	 */
++#ifdef HAVE_GSS_KEY_VALUE_SET_DESC
++	if (NT_STATUS_IS_OK(status)) {
++		struct cli_credentials *creds = gensec_get_credentials(
++			gensec_security);
++		bool ccache_valid = false;
++		enum credentials_obtained ccache_obtained = CRED_UNINITIALISED;
++
++		ccache_valid = cli_credentials_get_ccache_name_obtained(
++			creds, gse_ctx, NULL, &ccache_obtained);
++		/*
++		 * In case we don't have a valid ccache yet, try to create it if
++		 * one has been specified.
++		 */
++		if (!ccache_valid) {
++			gss_key_value_set_desc store;
++			const char *ccache_name =
++				cli_credentials_get_out_ccache_name(creds);
++
++			if (ccache_name == NULL) {
++				goto done;
++			}
++
++			store.elements = talloc_zero_array(
++				mem_ctx,
++				struct gss_key_value_element_struct,
++				1);
++			if (store.elements == NULL) {
++				status = NT_STATUS_NO_MEMORY;
++				goto done;
++			}
++
++			store.count = 1;
++			store.elements[0] =
++				(struct gss_key_value_element_struct){
++					.key = "ccache",
++					.value = ccache_name,
++				};
++
++			/*
++			 * We attempt to store the cred into the ccache. It
++			 * might fail but we don't need to act on it for the
++			 * purpose of the authentication.
++			 */
++			gss_maj = gss_store_cred_into(&gss_min,
++						      gse_ctx->creds,
++						      GSS_C_INITIATE,
++						      GSS_C_NO_OID,
++						      /* overwrite_cred = */ 1,
++						      /* default_cred = */ 1,
++						      &store,
++						      NULL,
++						      NULL);
++			if (gss_maj != 0) {
++				DBG_ERR("Failed to store Kerberos credentials "
++					"into ccache: %s\n",
++					ccache_name);
++			}
++		}
++	}
++#endif /* HAVE_GSS_KEY_VALUE_SET_DESC */
++
+ 	/* we may be told to return nothing */
+ 	if (out_data.length) {
+ 		blob = data_blob_talloc(mem_ctx, out_data.value, out_data.length);
+diff --git a/wscript_configure_embedded_heimdal b/wscript_configure_embedded_heimdal
+index c1488e5506e..325b1b11d4b 100644
+--- a/wscript_configure_embedded_heimdal
++++ b/wscript_configure_embedded_heimdal
+@@ -15,3 +15,4 @@ conf.RECURSE('third_party/heimdal_build')
+ conf.define('HAVE_CLIENT_GSS_C_CHANNEL_BOUND_FLAG', 1)
+ 
+ conf.define('HAVE_KRB5_INIT_CREDS_STEP', 1)
++conf.define('HAVE_GSS_KEY_VALUE_SET_DESC', 1)
+diff --git a/wscript_configure_system_heimdal b/wscript_configure_system_heimdal
+index c320a76ea17..6256bbac4e6 100644
+--- a/wscript_configure_system_heimdal
++++ b/wscript_configure_system_heimdal
+@@ -66,3 +66,12 @@ conf.CHECK_FUNCS('''
+        ''',
+      lib='krb5',
+      headers='krb5.h')
++
++# gss_key_value_set_desc is not part of system heimdal in the build image. Maybe
++# the distro we use is too old.
++conf.CHECK_CODE(
++    "gss_key_value_set_desc",
++    "HAVE_GSS_KEY_VALUE_SET_DESC",
++    headers="gssapi/gssapi.h",
++    lib="gssapi",
++)
+diff --git a/wscript_configure_system_mitkrb5 b/wscript_configure_system_mitkrb5
+index 58b9fb802d0..87cd6e9a1b8 100644
+--- a/wscript_configure_system_mitkrb5
++++ b/wscript_configure_system_mitkrb5
+@@ -344,6 +344,13 @@ conf.CHECK_CODE('''
+     headers='krb5.h', lib='krb5', execute=False,
+     msg="Checking whether krb5_creds have flags property")
+ 
++conf.CHECK_CODE(
++    "gss_key_value_set_desc",
++    "HAVE_GSS_KEY_VALUE_SET_DESC",
++    headers="gssapi/gssapi_ext.h",
++    lib="gssapi",
++)
++
+ # Check for MIT KDC
+ if conf.CONFIG_SET('AD_DC_BUILD_IS_ENABLED'):
+     Logs.info("Looking for MIT KDC")
+-- 
+2.53.0
+
+
+From cc930a27882a5ad2878ceb5dfd7eac2f164c98b1 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Fri, 25 Apr 2025 17:32:16 +0200
+Subject: [PATCH 24/38] lib:cmdline: Check if we have a valid default ccache
+
+If you don't specify anything, and we have a valid ccache then try to
+use it!
+
+> smbclient -L //samba1.earth.milkyway.site
+Anonymous login successful
+
+        Sharename       Type      Comment
+        ---------       ----      -------
+        print$          Disk      Printer Drivers
+        IPC$            IPC       IPC Service (Samba 4.22.1)
+SMB1 disabled -- no workgroup available
+
+In case the user specifies a principal, it will ask for a password:
+
+> bin/smbclient -L //samba1.earth.milkyway.site -Ualice1@EARTH.MILKYWAY.SITE
+Password for [alice1@EARTH.MILKYWAY.SITE]:
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+---
+ lib/cmdline/cmdline.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/lib/cmdline/cmdline.c b/lib/cmdline/cmdline.c
+index e434d65a2ef..f96ca88f95b 100644
+--- a/lib/cmdline/cmdline.c
++++ b/lib/cmdline/cmdline.c
+@@ -1031,8 +1031,8 @@ static void popt_common_credentials_callback(poptContext popt_ctx,
+ 			}
+ 		}
+ 
+-		if (cli_credentials_get_kerberos_state(creds) ==
+-		    CRED_USE_KERBEROS_REQUIRED)
++		if (cli_credentials_get_kerberos_state(creds) !=
++		    CRED_USE_KERBEROS_DISABLED)
+ 		{
+ 			enum credentials_obtained ccache_obtained =
+ 				CRED_UNINITIALISED;
+-- 
+2.53.0
+
+
+From 5bb7e14a4e23626383467f25b34f5d4d1b01ab91 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Tue, 5 Aug 2025 09:15:43 +0200
+Subject: [PATCH 25/38] docs-xml: Update documentation for --use-kerberos and
+ --use-krb5-ccache
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Alexander Bokovoy <ab@samba.org>
+
+Autobuild-User(master): Andreas Schneider <asn@cryptomilk.org>
+Autobuild-Date(master): Tue Aug  5 11:49:35 UTC 2025 on atb-devel-224
+---
+ docs-xml/build/DTD/samba.entities | 19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
+
+diff --git a/docs-xml/build/DTD/samba.entities b/docs-xml/build/DTD/samba.entities
+index cefddacd9b7..65d597ae8ff 100644
+--- a/docs-xml/build/DTD/samba.entities
++++ b/docs-xml/build/DTD/samba.entities
+@@ -764,10 +764,19 @@
+ 	<term>--use-kerberos=desired|required|off</term>
+ 	<listitem>
+ 		<para>
+-			 This parameter determines whether Samba client tools
+-			 will try to authenticate using Kerberos. For Kerberos
+-			 authentication you need to use dns names instead of IP
+-			 addresses when connecting to a service.
++			This parameter determines whether Samba client tools
++			will try to authenticate using Kerberos. For Kerberos
++			authentication you should use DNS names instead of IP
++			addresses when connecting to a service.
++
++			By default Samba client tools will try to use the
++			default Kerberos credential cache (ccache).
++			In case the ccache does not exist or -U|--user option
++			was specified, clients will ask to enter a password and
++			will obtain a Kerberos ticket (kinit) for you.
++
++			If you want to use an alternative Kerberos credentical
++			cache, use the --use-krb5-ccache option.
+ 		</para>
+ 
+ 		<para>
+@@ -789,7 +798,7 @@
+ 		</para>
+ 
+ 		<para>
+-			This will set --use-kerberos=required too.
++			This will enforce --use-kerberos=required.
+ 		</para>
+ 	</listitem>
+ </varlistentry>
+-- 
+2.53.0
+
+
+From b5cf950c9bdca697bdba6dfbceccabcb18a62a49 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Tue, 2 Dec 2025 17:17:33 +0100
+Subject: [PATCH 26/38] s3-selftest: mention in-memory ccache usage when
+ nothing is provided
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+---
+ source3/script/tests/test_net_ads_kerberos.sh | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/source3/script/tests/test_net_ads_kerberos.sh b/source3/script/tests/test_net_ads_kerberos.sh
+index 8a3c9ef2bc7..92d3996d078 100755
+--- a/source3/script/tests/test_net_ads_kerberos.sh
++++ b/source3/script/tests/test_net_ads_kerberos.sh
+@@ -30,6 +30,7 @@ KRB5CCNAME="FILE:$KRB5CCNAME_PATH"
+ ## Test "net ads kerberos kinit" variants
+ #################################################
+ 
++#simply uses in memory ccache
+ testit "net_ads_kerberos_kinit" \
+ 	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
+ 	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
+@@ -50,6 +51,7 @@ rm -f "$KRB5CCNAME_PATH"
+ #	--use-krb5-ccache=${KRB5CCNAME} \
+ #	|| failed=$((failed + 1))
+ 
++#simply uses in memory ccache
+ testit "net_ads_kerberos_kinit (-P)" \
+ 	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
+ 	-P "$ADDARGS" \
+-- 
+2.53.0
+
+
+From a95b0b800022286db1a8680a5ea98aa0e4253020 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Tue, 2 Dec 2025 17:18:41 +0100
+Subject: [PATCH 27/38] s3-selftest: verify KRB5CCNAME presence after kinit
+ using klist
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+---
+ source3/script/tests/test_net_ads_kerberos.sh | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/source3/script/tests/test_net_ads_kerberos.sh b/source3/script/tests/test_net_ads_kerberos.sh
+index 92d3996d078..c53520cf733 100755
+--- a/source3/script/tests/test_net_ads_kerberos.sh
++++ b/source3/script/tests/test_net_ads_kerberos.sh
+@@ -14,6 +14,12 @@ PREFIX="$4"
+ shift 4
+ ADDARGS="$*"
+ 
++if [ -x $(which klist) ]; then
++	KLIST=$(which klist);
++else
++	KLIST="test -e";
++fi
++
+ incdir=$(dirname "$0")/../../../testprogs/blackbox
+ . "$incdir"/subunit.sh
+ 
+@@ -41,6 +47,9 @@ testit "net_ads_kerberos_kinit (KRB5CCNAME env set)" \
+ 	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
+ 	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
+ 	|| failed=$((failed + 1))
++testit "klist env $KRB5CCNAME" \
++	"$KLIST" "$KRB5CCNAME" \
++	|| failed=$((failed +1))
+ unset KRB5CCNAME
+ rm -f "$KRB5CCNAME_PATH"
+ 
+@@ -62,6 +71,9 @@ testit "net_ads_kerberos_kinit (-P and KRB5CCNAME env set)" \
+ 	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
+ 	-P "$ADDARGS" \
+ 	|| failed=$((failed + 1))
++testit "klist env $KRB5CCNAME" \
++	"$KLIST" "$KRB5CCNAME" \
++	|| failed=$((failed +1))
+ unset KRB5CCNAME
+ rm -f "$KRB5CCNAME_PATH"
+ 
+-- 
+2.53.0
+
+
+From 9743315e50823c1e8d884ba62167c5e8d62a3a40 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Tue, 2 Dec 2025 17:01:31 +0100
+Subject: [PATCH 28/38] s3-selftest: Activate "net ads kerberos kinit" tests
+ with --use-krb5-ccache
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+---
+ selftest/knownfail                            |  2 ++
+ source3/script/tests/test_net_ads_kerberos.sh | 30 +++++++++++--------
+ 2 files changed, 20 insertions(+), 12 deletions(-)
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index ab2d79d7114..76f1dae605d 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -338,3 +338,5 @@
+ 
+ # We currently don't send referrals for LDAP modify of non-replicated attrs
+ ^samba4.ldap.rodc.python\(rodc\).__main__.RodcTests.test_modify_nonreplicated.*
++
++^samba3.blackbox.net_ads_kerberos.*.klist.*--use-krb5-ccache.*
+diff --git a/source3/script/tests/test_net_ads_kerberos.sh b/source3/script/tests/test_net_ads_kerberos.sh
+index c53520cf733..b7933bab6a6 100755
+--- a/source3/script/tests/test_net_ads_kerberos.sh
++++ b/source3/script/tests/test_net_ads_kerberos.sh
+@@ -53,12 +53,15 @@ testit "klist env $KRB5CCNAME" \
+ unset KRB5CCNAME
+ rm -f "$KRB5CCNAME_PATH"
+ 
+-# --use-krb5-ccache is not working
+-#testit "net_ads_kerberos_kinit (with --use-krb5-ccache)" \
+-#	$VALGRIND $BINDIR/net ads kerberos kinit \
+-#	-U$USERNAME%$PASSWORD $ADDARGS \
+-#	--use-krb5-ccache=${KRB5CCNAME} \
+-#	|| failed=$((failed + 1))
++testit "net_ads_kerberos_kinit (with --use-krb5-ccache)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
++	-U"$USERNAME"%"$PASSWORD" "$ADDARGS" \
++	--use-krb5-ccache="${KRB5CCNAME_PATH}" \
++	|| failed=$((failed + 1))
++testit "klist --use-krb5-ccache $KRB5CCNAME_PATH" \
++	"$KLIST" "$KRB5CCNAME_PATH" \
++	|| failed=$((failed +1))
++rm -f "$KRB5CCNAME_PATH"
+ 
+ #simply uses in memory ccache
+ testit "net_ads_kerberos_kinit (-P)" \
+@@ -77,12 +80,15 @@ testit "klist env $KRB5CCNAME" \
+ unset KRB5CCNAME
+ rm -f "$KRB5CCNAME_PATH"
+ 
+-# --use-krb5-ccache is not working
+-#testit "net_ads_kerberos_kinit (-P with --use-krb5-ccache)" \
+-#	$VALGRIND $BINDIR/net ads kerberos kinit \
+-#	-P $ADDARGS \
+-#	--use-krb5-ccache=${KRB5CCNAME} \
+-#	|| failed=$((failed + 1))
++testit "net_ads_kerberos_kinit (-P with --use-krb5-ccache)" \
++	"$VALGRIND" "$BINDIR"/net ads kerberos kinit \
++	-P "$ADDARGS" \
++	--use-krb5-ccache="${KRB5CCNAME_PATH}" \
++	|| failed=$((failed + 1))
++testit "klist --use-krb5-ccache $KRB5CCNAME_PATH" \
++	"$KLIST" "$KRB5CCNAME_PATH" \
++	|| failed=$((failed +1))
++rm -f "$KRB5CCNAME_PATH"
+ 
+ 
+ #################################################
+-- 
+2.53.0
+
+
+From a90df88fbce5e9ead92093edfe51e5f6014216b7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Tue, 2 Dec 2025 16:56:44 +0100
+Subject: [PATCH 29/38] s3-net: properly setup krb5 ccache name via
+ --use-krb5-ccache
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+---
+ selftest/knownfail      |  2 --
+ source3/utils/net.c     | 19 ++++++++++++-------
+ source3/utils/net_ads.c |  4 ++++
+ 3 files changed, 16 insertions(+), 9 deletions(-)
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index 76f1dae605d..ab2d79d7114 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -338,5 +338,3 @@
+ 
+ # We currently don't send referrals for LDAP modify of non-replicated attrs
+ ^samba4.ldap.rodc.python\(rodc\).__main__.RodcTests.test_modify_nonreplicated.*
+-
+-^samba3.blackbox.net_ads_kerberos.*.klist.*--use-krb5-ccache.*
+diff --git a/source3/utils/net.c b/source3/utils/net.c
+index ecabd980d0c..271c96cf804 100644
+--- a/source3/utils/net.c
++++ b/source3/utils/net.c
+@@ -1396,7 +1396,7 @@ static struct functable net_func[] = {
+ 			cli_credentials_get_principal_obtained(c->creds);
+ 		enum credentials_obtained password_obtained =
+ 			cli_credentials_get_password_obtained(c->creds);
+-		char *krb5ccname = NULL;
++		const char *krb5ccname = NULL;
+ 
+ 		if (principal_obtained == CRED_SPECIFIED) {
+ 			c->explicit_credentials = true;
+@@ -1415,15 +1415,20 @@ static struct functable net_func[] = {
+ 		}
+ 
+ 		/* cli_credentials_get_ccache_name_obtained() would not work
+-		 * here, we also cannot get the content of --use-krb5-ccache= so
+-		 * for now at least honour the KRB5CCNAME environment variable
+-		 * to get 'net ads kerberos' functions to work at all - gd */
+-
+-		krb5ccname = getenv("KRB5CCNAME");
+-		if (krb5ccname == NULL) {
++		 * here but we can now access the content of the
++		 * --use-krb5-ccache option via cli credentials. Fallback to
++		 * KRB5CCNAME environment variable to get 'net ads kerberos'
++		 * functions to work at all - gd */
++
++		krb5ccname = cli_credentials_get_out_ccache_name(c->creds);
++		if (krb5ccname == NULL || krb5ccname[0] == '\0') {
++			krb5ccname = getenv("KRB5CCNAME");
++		}
++		if (krb5ccname == NULL || krb5ccname[0] == '\0') {
+ 			krb5ccname = talloc_strdup(c, "MEMORY:net");
+ 		}
+ 		if (krb5ccname == NULL) {
++			DBG_ERR("Not able to setup krb5 ccache");
+ 			exit(1);
+ 		}
+ 		c->opt_krb5_ccache = krb5ccname;
+diff --git a/source3/utils/net_ads.c b/source3/utils/net_ads.c
+index 753b957e43f..2dc7de37e43 100644
+--- a/source3/utils/net_ads.c
++++ b/source3/utils/net_ads.c
+@@ -3283,7 +3283,11 @@ static int net_ads_kerberos_kinit(struct net_context *c, int argc, const char **
+ 	if (ret) {
+ 		d_printf(_("failed to kinit password: %s\n"),
+ 			nt_errstr(status));
++		return ret;
+ 	}
++
++	d_printf("Stored Kerberos TGT in: %s\n", c->opt_krb5_ccache);
++
+ 	return ret;
+ }
+ 
+-- 
+2.53.0
+
+
+From 4800989ab9721c075ad0f23001f45f20677c7389 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
+Date: Sat, 13 Dec 2025 13:49:37 +0100
+Subject: [PATCH 30/38] doc-xml: Document "net ads kerberos" commands
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
+
+Guenther
+
+Signed-off-by: Guenther Deschner <gd@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Günther Deschner <gd@samba.org>
+Autobuild-Date(master): Mon Jan  5 15:49:04 UTC 2026 on atb-devel-224
+---
+ docs-xml/manpages/net.8.xml | 139 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 139 insertions(+)
+
+diff --git a/docs-xml/manpages/net.8.xml b/docs-xml/manpages/net.8.xml
+index 05191236ecc..3f276236e1e 100644
+--- a/docs-xml/manpages/net.8.xml
++++ b/docs-xml/manpages/net.8.xml
+@@ -1801,7 +1801,146 @@ the following entry types;
+ 
+ </refsect2>
+ 
++<refsect2>
++	<title>ADS KERBEROS</title>
++
++<para>
++	Issue Kerberos operations against an Active Directory KDC.
++</para>
++
++</refsect2>
++
++<refsect2>
++	<title>ADS KERBEROS KINIT</title>
++
++<para>
++	Issue a kinit request for a given user. When no other options are
++	defined the ticket granting ticket (TGT) will be stored in a memory cache.
++</para>
++
++<para>
++	To store the TGT in a different location either use the
++	<option>--krb5-ccache</option> option or set the
++	<replaceable>KRB5CCNAME</replaceable> environment variable.
++</para>
++
++<para>Example: <userinput>net ads kerberos kinit -P --krb5-ccache=/tmp/krb5cache</userinput></para>
++
++</refsect2>
++
++<refsect2>
++	<title>ADS KERBEROS RENEW</title>
++
++<para>
++	Renew an already acquired ticket granting ticket (TGT).
++</para>
++
++<para>Example: <userinput>net ads kerberos renew</userinput></para>
++
++</refsect2>
++
++<refsect2>
++	<title>ADS KERBEROS PAC</title>
++
++<para>
++	Request a Kerberos PAC while authenticating to an Active Directory KDC.
++</para>
++
++<para>
++	The following commands are provided:
++</para>
++
++<simplelist>
++<member>net ads kerberos pac dump - Dump a PAC to stdout.</member>
++<member>net ads kerneros pac save - Save a PAC to a file.</member>
++</simplelist>
++
++<para>
++	All commands allow to define an impersonation principal to do a Kerberos
++	Service for User (S4U2SELF) operation via
++	the <replaceable>impersonate=STRING</replaceable> option.
++	The impersonation principal can have multiple different formats:
++</para>
++
++<itemizedlist>
++	<listitem>
++		<para><replaceable>user@MY.REALM</replaceable></para>
++		<para>This is the default format.</para>
++	</listitem>
++	<listitem>
++		<para><replaceable>user@MY.REALM@MY.REALM</replaceable></para>
++		<para>The Kerberos Service for User (S4U2SELF) also supports
++		Enterprise Principals.</para>
++	</listitem>
++	<listitem>
++		<para><replaceable>user@UPN.SUFFIX@MY.REALM</replaceable></para>
++		<para>Enterprise Principal using a defined upn suffix.</para>
++	</listitem>
++	<listitem>
++		<para><replaceable>user@WORKGROUP@MY.REALM</replaceable></para>
++		<para>Enterprise Principal with netbios domain name.
++		This format is currently not supported by Samba AD.</para>
++	</listitem>
++</itemizedlist>
+ 
++<para>
++	By default net will request a service ticket for the local service
++	of the joined machine. A different service can be defined via
++        <replaceable>local_service=STRING</replaceable>.
++</para>
++
++</refsect2>
++<refsect2>
++	<title>ADS KERBEROS PAC DUMP [impersonate=string] [local_service=string] [pac_buffer_type=int]</title>
++
++<para>
++	Request a Kerberos PAC while authenticating to an Active Directory KDC.
++	The PAC will be printed on stdout.
++</para>
++
++<para>
++	When no specific pac_buffer is selected, all buffers will be printed.
++	It is possible to select a specific one via
++	<replaceable>pac_buffer_type=INT</replaceable> from this list:
++</para>
++
++<simplelist>
++<member>1 PAC_TYPE_LOGON_INFO</member>
++<member>2 PAC_TYPE_CREDENTIAL_INFO</member>
++<member>6 PAC_TYPE_SRV_CHECKSUM</member>
++<member>7 PAC_TYPE_KDC_CHECKSUM</member>
++<member>10 PAC_TYPE_LOGON_NAME</member>
++<member>11 PAC_TYPE_CONSTRAINED_DELEGATION</member>
++<member>12 PAC_TYPE_UPN_DNS_INFO</member>
++<member>13 PAC_TYPE_CLIENT_CLAIMS_INFO</member>
++<member>14 PAC_TYPE_DEVICE_INFO</member>
++<member>15 PAC_TYPE_DEVICE_CLAIMS_INFO</member>
++<member>16 PAC_TYPE_TICKET_CHECKSUM</member>
++<member>17 PAC_TYPE_ATTRIBUTES_INFO</member>
++<member>18 PAC_TYPE_REQUESTER_SID</member>
++<member>19 PAC_TYPE_FULL_CHECKSUM</member>
++</simplelist>
++
++<para>Example: <userinput>net ads kerberos pac dump -P impersonate=anyuser@MY.REALM.COM</userinput></para>
++
++</refsect2>
++
++<refsect2>
++	<title>ADS KERBEROS PAC SAVE [impersonate=string] [local_service=string] [filename=string]</title>
++
++<para>
++	Request a Kerberos PAC while authenticating to an Active Directory KDC.
++	The PAC will be saved in a file.
++</para>
++
++<para>
++	The filename to store the PAC can be set via the
++	<replaceable>filename=STRING</replaceable> option.
++</para>
++
++<para>Example: <userinput>net ads kerberos pac save -U user%password filename=/tmp/pacstore</userinput></para>
++
++</refsect2>
+ <refsect2>
+ <title>SAM CREATEBUILTINGROUP &lt;NAME&gt;</title>
+ 
+-- 
+2.53.0
+
+
+From 5b3b05af328824dbbab431da7aafc53f4ff2c474 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Tue, 3 Feb 2026 12:53:10 +0100
+Subject: [PATCH 31/38] s3:utils: 'net ads kerberos kinit' should use also
+ default ccache name from krb5.conf
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This is re-introducing the behavior from samba-4.20 where both these
+commands operated on the same ccache (default_ccache_name in
+[libdefaults] section of krb5.conf)
+
+ 'net ads kerberos kinit -P'
+ 'klist'
+
+ With samba-4.21 it no longer works, 'net ads kerberos kinit -P'
+ fallbacks to 'MEMORY:net' (which is of a very limited use, ticket
+ cannot be used by other process) and klist finds no ticket.
+
+ The order is changed from:
+
+    --use-krb5-ccache
+    env "KRB5CCNAME"
+    "MEMORY:net"
+
+to ("MEMORY:net" is removed):
+
+    --use-krb5-ccache
+    env "KRB5CCNAME"
+    default_ccache_name
+
+'--use-krb5-ccache=MEMORY:net' can be used to validate the credentials.
+
+Use smb_force_krb5_cc_default_name() instead of krb5_cc_default_name()
+because of commit:
+1ca6fb5 make sure krb5_cc_default[_name]() is no longer used directly
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15993
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 4cc6a13590434f6a3aa1add663728188970d727e)
+---
+ source3/utils/net.c | 36 ++++++++++++++++++++++++++----------
+ 1 file changed, 26 insertions(+), 10 deletions(-)
+
+diff --git a/source3/utils/net.c b/source3/utils/net.c
+index 271c96cf804..0ce03f8213d 100644
+--- a/source3/utils/net.c
++++ b/source3/utils/net.c
+@@ -54,6 +54,7 @@
+ #include "source3/utils/passwd_proto.h"
+ #include "auth/gensec/gensec.h"
+ #include "lib/param/param.h"
++#include "lib/krb5_wrap/krb5_samba.h"
+ 
+ #ifdef WITH_FAKE_KASERVER
+ #include "utils/net_afs.h"
+@@ -1414,18 +1415,33 @@ static struct functable net_func[] = {
+ 				CRED_SPECIFIED);
+ 		}
+ 
+-		/* cli_credentials_get_ccache_name_obtained() would not work
+-		 * here but we can now access the content of the
+-		 * --use-krb5-ccache option via cli credentials. Fallback to
+-		 * KRB5CCNAME environment variable to get 'net ads kerberos'
+-		 * functions to work at all - gd */
+-
++		/*
++		 * Priority order for krb5 credential cache name
++		 *
++		 *    via cli_credentials_get_out_ccache_name() :
++		 *
++		 * 1. '--use-krb5-ccache' option
++		 *
++		 *    via krb5_cc_default_name() :
++		 *
++		 * 2. KRB5CCNAME environment variable
++		 * 3. default_ccache_name in [libdefaults] section of krb5.conf
++		 * 4. ...more - krb5_cc_default_name() always returns something
++		 *    - see documentation
++		 */
+ 		krb5ccname = cli_credentials_get_out_ccache_name(c->creds);
+ 		if (krb5ccname == NULL || krb5ccname[0] == '\0') {
+-			krb5ccname = getenv("KRB5CCNAME");
+-		}
+-		if (krb5ccname == NULL || krb5ccname[0] == '\0') {
+-			krb5ccname = talloc_strdup(c, "MEMORY:net");
++			krb5_context ct = NULL;
++			krb5_error_code ret = smb_krb5_init_context_common(&ct);
++
++			if (ret == 0) {
++				krb5ccname = smb_force_krb5_cc_default_name(ct);
++				if (krb5ccname != NULL) {
++					krb5ccname = talloc_strdup(c,
++								   krb5ccname);
++				}
++				krb5_free_context(ct);
++			}
+ 		}
+ 		if (krb5ccname == NULL) {
+ 			DBG_ERR("Not able to setup krb5 ccache");
+-- 
+2.53.0
+
+
+From c230940ede67f1078a6671be163968dea4d76061 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Thu, 5 Feb 2026 16:04:25 +0100
+Subject: [PATCH 32/38] manpages: Update NET ADS KERBEROS KINIT manpage
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15993
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Thu Feb  5 21:11:13 UTC 2026 on atb-devel-224
+
+(cherry picked from commit 9d083a28fe45afd8f82441c6e24255e4c64c113b)
+---
+ docs-xml/manpages/net.8.xml | 36 ++++++++++++++++++++++++++++--------
+ 1 file changed, 28 insertions(+), 8 deletions(-)
+
+diff --git a/docs-xml/manpages/net.8.xml b/docs-xml/manpages/net.8.xml
+index 3f276236e1e..4e149394df3 100644
+--- a/docs-xml/manpages/net.8.xml
++++ b/docs-xml/manpages/net.8.xml
+@@ -1814,17 +1814,37 @@ the following entry types;
+ 	<title>ADS KERBEROS KINIT</title>
+ 
+ <para>
+-	Issue a kinit request for a given user. When no other options are
+-	defined the ticket granting ticket (TGT) will be stored in a memory cache.
++	Issue a kinit request for a given user.  The following methods can be used
++	to specify where to store the ticket granting ticket (TGT) (in order of
++	precedence):
+ </para>
+ 
+-<para>
+-	To store the TGT in a different location either use the
+-	<option>--krb5-ccache</option> option or set the
+-	<replaceable>KRB5CCNAME</replaceable> environment variable.
+-</para>
++<itemizedlist>
++	<listitem>
++		<para>option <option>--use-krb5-ccache</option></para>
++	</listitem>
++	<listitem>
++		<para><replaceable>KRB5CCNAME</replaceable> environment variable</para>
++	</listitem>
++	<listitem>
++		<para><parameter>default_ccache_name</parameter> setting in <filename>krb5.conf</filename></para>
++	</listitem>
++</itemizedlist>
+ 
+-<para>Example: <userinput>net ads kerberos kinit -P --krb5-ccache=/tmp/krb5cache</userinput></para>
++<variablelist><title>Examples:</title>
++<varlistentry>
++<term>Use file based cache (FILE:/tmp/krb5cache)</term>
++<listitem><literallayout>
++net ads kerberos kinit -P --use-krb5-ccache=/tmp/krb5cache
++</literallayout></listitem>
++</varlistentry>
++<varlistentry>
++<term>Use memory cache (MEMORY:net) to verify the authentication</term>
++<listitem><literallayout>
++net ads kerberos kinit -P --use-krb5-ccache=MEMORY:net
++</literallayout></listitem>
++</varlistentry>
++</variablelist>
+ 
+ </refsect2>
+ 
+-- 
+2.53.0
+
+
+From 51b0f44caddd8e4cc5975dd8f982fad9f35f99fe Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Thu, 23 Oct 2025 11:00:38 +0200
+Subject: [PATCH 33/38] docs-xml: Improve the samba-bgqd manpage
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15809
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Anoop C S <anoopcs@samba.org>
+
+Autobuild-User(master): Andreas Schneider <asn@cryptomilk.org>
+Autobuild-Date(master): Fri Nov 14 15:05:11 UTC 2025 on atb-devel-224
+
+(cherry picked from commit 9322231f716237abba8627acda62c279c6a90f4f)
+---
+ docs-xml/manpages/samba-bgqd.8.xml | 37 +++++++++++++++++++++++++-----
+ 1 file changed, 31 insertions(+), 6 deletions(-)
+
+diff --git a/docs-xml/manpages/samba-bgqd.8.xml b/docs-xml/manpages/samba-bgqd.8.xml
+index ef50a542a9e..9a16a2aaad0 100644
+--- a/docs-xml/manpages/samba-bgqd.8.xml
++++ b/docs-xml/manpages/samba-bgqd.8.xml
+@@ -14,28 +14,53 @@
+ <refnamediv>
+ 	<refname>samba-bgqd</refname>
+ 	<refpurpose>This is an internal helper program performing
+-	asynchronous printing-related jobs.</refpurpose>
++	asynchronous printing-related tasks</refpurpose>
+ </refnamediv>
+ 
+ <refsynopsisdiv>
+ 	<cmdsynopsis>
+ 		<command>samba-bgqd</command>
++		<arg choice="opt">-D|--daemon</arg>
++		<arg choice="opt">-i|--interactive</arg>
++		<arg choice="opt">-F|--foreground</arg>
++		<arg choice="opt">--no-process-group</arg>
++		<arg choice="opt">-d &lt;debug level&gt;</arg>
++		<arg choice="opt">--debug-stdout</arg>
++		<arg choice="opt">--configfile=&lt;configuration file&gt;</arg>
++		<arg choice="opt">--option=&lt;name&gt;=&lt;value&gt;</arg>
++		<arg choice="opt">-l|--log-basename &lt;log directory&gt;</arg>
++		<arg choice="opt">--ready-signal-fd &lt;fd&gt;</arg>
++		<arg choice="opt">--parent-watch-fd &lt;fd&gt;</arg>
+ 	</cmdsynopsis>
+ </refsynopsisdiv>
+ 
+ <refsect1>
+ 	<title>DESCRIPTION</title>
+ 
+-	<para>This tool is part of the
++	<para>This program is part of the
+ 	<citerefentry><refentrytitle>samba</refentrytitle>
+ 	<manvolnum>7</manvolnum></citerefentry> suite.</para>
+ 
+-	<para>samba-bgqd is an helper program to be spawned by smbd or
+-	spoolssd to perform jobs like updating the printer list or
+-	other management tasks asynchronously on demand. It is not
+-	intended to be called by users or administrators.</para>
++	<para><command>samba-bgqd</command> is not intended to be invoked
++	directly by users.</para>
++
++	<para>Likewise, while <command>samba-bgqd</command> is also not
++	intended to be run manually by system administrators, on systems with a
++	large number of printers configured via CUPS, it is recommended to run
++	<command>samba-bgqd</command> as a systemd service to improve
++	performance and responsiveness of printing operations.</para>
+ </refsect1>
+ 
++<refsect1>
++	<title>SEE ALSO</title>
++
++	<para>
++	<citerefentry><refentrytitle>smbd</refentrytitle>
++	<manvolnum>8</manvolnum></citerefentry>, and
++	<citerefentry><refentrytitle>smb.conf</refentrytitle>
++	<manvolnum>5</manvolnum></citerefentry>.
++	</para>
++</refsect1>
+ <refsect1>
+ 	<title>AUTHOR</title>
+ 
+-- 
+2.53.0
+
+
+From 058dd1db3914b7e9ca7dff5b8d1e3727fe236ef0 Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Thu, 23 Oct 2025 10:49:31 +0200
+Subject: [PATCH 34/38] s3:printing: Load the shares for [printers] in
+ samba-bgqd
+
+One of the main functions of bgqd is:
+
+        delete_and_reload_printers_full()
+
+It isn't able to do its work, if we don't load the shares. Normally bgqd was
+forked from smbd and this loaded the shares. But with the introduction of
+samba-dcerpcd it is a standalone service now. As a standalone service it is
+responsible to load the shares if it needs to work on them.
+
+The following message is printed if delete_and_reload_printers_full() tries to
+do its job:
+
+[2025/10/23 09:57:27,  7, pid=41935, effective(0, 0), real(0, 0)] ../../source3/param/loadparm.c:4419(lp_servicenumber)
+  lp_servicenumber: couldn't find printers
+[2025/10/23 09:57:27,  7, pid=41935, effective(0, 0), real(0, 0)] ../../source3/param/loadparm.c:4419(lp_servicenumber)
+  lp_servicenumber: couldn't find printers
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15936
+
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Anoop C S <anoopcs@samba.org>
+(cherry picked from commit 327e60adf2e1e0c040bd32c748fbabc9e4a3593b)
+---
+ source3/printing/queue_process.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/source3/printing/queue_process.c b/source3/printing/queue_process.c
+index 0f95bd736f2..51eafa31572 100644
+--- a/source3/printing/queue_process.c
++++ b/source3/printing/queue_process.c
+@@ -265,6 +265,7 @@ static void bq_smb_conf_updated(struct messaging_context *msg_ctx,
+ 	DEBUG(10,("smb_conf_updated: Got message saying smb.conf was "
+ 		  "updated. Reloading.\n"));
+ 	change_to_root_user();
++	lp_load_with_shares(get_dyn_CONFIGFILE());
+ 	pcap_cache_reload(state->ev, msg_ctx, reload_pcap_change_notify);
+ 	printing_subsystem_queue_tasks(state);
+ }
+@@ -322,6 +323,8 @@ struct bq_state *register_printing_bq_handlers(
+ 		goto fail_free_handlers;
+ 	}
+ 
++	/* Load shares, needed for [printers] */
++	lp_load_with_shares(get_dyn_CONFIGFILE());
+ 	/* Initialize the printcap cache as soon as the daemon starts. */
+ 	pcap_cache_reload(state->ev, state->msg, reload_pcap_change_notify);
+ 
+-- 
+2.53.0
+
+
+From 6f78c96595c9f19dbaecd671ce5dc6582158e64d Mon Sep 17 00:00:00 2001
+From: Noel Power <noel.power@suse.com>
+Date: Fri, 13 Feb 2026 11:54:46 +0000
+Subject: [PATCH 35/38] selftest: Update tests to use
+ --use-kereros=desired|required no creds
+
+Add tests to call smbclient without passing credentials to
+demonstrate failure with --use-kereros=desired
+
+Also add knownfail
+
+Signed-off-by: Noel Power <noel.power@suse.com>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit a22af9420965083b99b956477d1833000b7f2414)
+---
+ selftest/knownfail                              |  2 ++
+ source3/script/tests/test_smbclient_kerberos.sh | 12 ++++++++++++
+ 2 files changed, 14 insertions(+)
+
+diff --git a/selftest/knownfail b/selftest/knownfail
+index ab2d79d7114..f0a5f7bb935 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -315,6 +315,8 @@
+ # ad_member don't support ntlmv1 (not even over SMB1)
+ ^samba3.blackbox.smbclient_auth.plain.*option=clientntlmv2auth=no.member.creds.*as.user.*ad_member
+ ^samba3.blackbox.smbclient_auth.plain.*option=clientntlmv2auth=no.*mNT1.member.creds.*as.user.*ad_member
++# regression smbclient using --use-kerberos=desired https://bugzilla.samba.org/show_bug.cgi?id=15789
++samba3.blackbox.smbclient.kerberos.smbclient.smb3.kerberos.desired \(no user/pass\).*
+ #nt-vfs server blocks read with execute access
+ ^samba4.smb2.read.access
+ #ntvfs server blocks copychunk with execute access on read handle
+diff --git a/source3/script/tests/test_smbclient_kerberos.sh b/source3/script/tests/test_smbclient_kerberos.sh
+index 31678d17e28..1139efd70d7 100755
+--- a/source3/script/tests/test_smbclient_kerberos.sh
++++ b/source3/script/tests/test_smbclient_kerberos.sh
+@@ -73,6 +73,18 @@ test_smbclient "smbclient.smb3.kerberos.desired[//${SERVER}/tmp]" \
+ 	--use-kerberos=desired -U${USERNAME}%${PASSWORD} -mSMB3 ||
+ 	failed=$(expr $failed + 1)
+ 
++test_smbclient "smbclient.smb3.kerberos.desired (no user/pass) [//${SERVER}/tmp]" \
++	"ls; quit" //${SERVER}/tmp \
++	--use-kerberos=desired -mSMB3 ||
++	failed=$(expr $failed + 1)
++
++test_smbclient "smbclient.smb3.kerberos.required (no user/pass) [//${SERVER}/tmp]" \
++	"ls; quit" //${SERVER}/tmp \
++	--use-kerberos=required -mSMB3 ||
++	failed=$(expr $failed + 1)
++
++
++
+ $samba_kdestroy
+ 
+ rm -rf $KRB5CCNAME_PATH
+-- 
+2.53.0
+
+
+From 27542cd8ed5c0efbfd3f4fe4b399668c931fdcc4 Mon Sep 17 00:00:00 2001
+From: Noel Power <noel.power@suse.com>
+Date: Mon, 19 Jan 2026 15:46:59 +0000
+Subject: [PATCH 36/38] auth/credentials: Fix regression with
+ --use-kerberos=desired for smbclient
+
+As part of the gse_krb5 processing the following call chain
+
+gensec_gse_client_start()
+  ---> gensec_kerberos_possible()
+         ---> cli_credentials_authentication_requested()
+
+gensec_kerberos_possible()  will always fail when
+cli_credentials_get_kerberos_state() returns CRED_USE_KERBEROS_DESIRED
+
+It seems since use kerberos == desired is the default that it isn't
+necessary to see if credentials were modified to indicated authentication
+was requested. gensec_kerberos_possible() should afaics return true
+if kerberos is desired OR required (regardless of whether credentials
+were requested)
+
+This commit removes the knownfail associated with this bug.
+
+Bug: https://bugzilla.samba.org/show_bug.cgi?id=15789
+Signed-off-by: <noel.power@suse.com>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 88f42eb222f299189d5f5f8204ae353e63a50970)
+---
+ auth/gensec/gensec_util.c | 5 -----
+ selftest/knownfail        | 2 --
+ 2 files changed, 7 deletions(-)
+
+diff --git a/auth/gensec/gensec_util.c b/auth/gensec/gensec_util.c
+index 0c7688d33d2..af6d198d48f 100644
+--- a/auth/gensec/gensec_util.c
++++ b/auth/gensec/gensec_util.c
+@@ -362,7 +362,6 @@ char *gensec_get_unparsed_target_principal(struct gensec_security *gensec_securi
+ NTSTATUS gensec_kerberos_possible(struct gensec_security *gensec_security)
+ {
+ 	struct cli_credentials *creds = gensec_get_credentials(gensec_security);
+-	bool auth_requested = cli_credentials_authentication_requested(creds);
+ 	enum credentials_use_kerberos krb5_state =
+ 		cli_credentials_get_kerberos_state(creds);
+ 	char *user_principal = NULL;
+@@ -370,10 +369,6 @@ NTSTATUS gensec_kerberos_possible(struct gensec_security *gensec_security)
+ 	const char *target_principal = gensec_get_target_principal(gensec_security);
+ 	const char *hostname = gensec_get_target_hostname(gensec_security);
+ 
+-	if (!auth_requested) {
+-		return NT_STATUS_INVALID_PARAMETER;
+-	}
+-
+ 	if (krb5_state == CRED_USE_KERBEROS_DISABLED) {
+ 		return NT_STATUS_INVALID_PARAMETER;
+ 	}
+diff --git a/selftest/knownfail b/selftest/knownfail
+index f0a5f7bb935..ab2d79d7114 100644
+--- a/selftest/knownfail
++++ b/selftest/knownfail
+@@ -315,8 +315,6 @@
+ # ad_member don't support ntlmv1 (not even over SMB1)
+ ^samba3.blackbox.smbclient_auth.plain.*option=clientntlmv2auth=no.member.creds.*as.user.*ad_member
+ ^samba3.blackbox.smbclient_auth.plain.*option=clientntlmv2auth=no.*mNT1.member.creds.*as.user.*ad_member
+-# regression smbclient using --use-kerberos=desired https://bugzilla.samba.org/show_bug.cgi?id=15789
+-samba3.blackbox.smbclient.kerberos.smbclient.smb3.kerberos.desired \(no user/pass\).*
+ #nt-vfs server blocks read with execute access
+ ^samba4.smb2.read.access
+ #ntvfs server blocks copychunk with execute access on read handle
+-- 
+2.53.0
+
+
+From 5d396529406d8bd48ab396d7640303ac762c3ed8 Mon Sep 17 00:00:00 2001
+From: Noel Power <noel.power@suse.com>
+Date: Mon, 19 Jan 2026 16:10:10 +0000
+Subject: [PATCH 37/38] s3/libsmb: cli_session_creds_init fails when kerberos
+ is desired
+
+There is a regression with code using cli_session_creds_init when
+cli_credentials_get_kerberos_state() returns CRED_USE_KERBEROS_DESIRED
+
+Authentication succeeds when boolean fallback_after_kerberos is false
+and fails when true.
+There doesn't seem to be a good reason why the value of
+fallback_after_kerberos should initialise the krb5 ccache or not.
+It would seems that krb5 cache should be setup for creds
+for *any* kerberos auth (whether fallback is enabled or not)
+
+Partial patch from <will69@gmx.de> (see bug referenced below)
+Bug: https://bugzilla.samba.org/show_bug.cgi?id=15789
+Signed-off-by: Noel Power <noel.power@suse.com>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+(cherry picked from commit 1c48599105736499d18aa1f647bce9e1f8dbdcca)
+---
+ source3/libsmb/cliconnect.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source3/libsmb/cliconnect.c b/source3/libsmb/cliconnect.c
+index bd75393ac07..da751f54f00 100644
+--- a/source3/libsmb/cliconnect.c
++++ b/source3/libsmb/cliconnect.c
+@@ -215,7 +215,7 @@ struct cli_credentials *cli_session_creds_init(TALLOC_CTX *mem_ctx,
+ 				goto fail;
+ 			}
+ 		}
+-	} else if (use_kerberos && !fallback_after_kerberos) {
++	} else if (use_kerberos) {
+ 		const char *error_string = NULL;
+ 		int rc;
+ 
+-- 
+2.53.0
+
+
+From c9f258277da8089deb16b251aa42e7877039a3c3 Mon Sep 17 00:00:00 2001
+From: Noel Power <noel.power@suse.com>
+Date: Mon, 19 Jan 2026 16:18:02 +0000
+Subject: [PATCH 38/38] s3/libsmb: block anon authentication fallback is
+ use-kerberos = desired
+
+When cli_credentials_get_kerberos_state returns CRED_USE_KERBEROS_REQUIRED
+libsmbclient method SMBC_server_internal will still try to fallback to
+anon NTLM. This patch prevents that.
+
+Bug: https://bugzilla.samba.org/show_bug.cgi?id=15789
+Signed-off-by: Noel Power <noel.power@suse.com>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Noel Power <npower@samba.org>
+Autobuild-Date(master): Tue Feb 17 16:06:18 UTC 2026 on atb-devel-224
+
+(cherry picked from commit bc868800276fe09cbcb206ebe4cb4da32af7599f)
+---
+ source3/libsmb/libsmb_server.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/source3/libsmb/libsmb_server.c b/source3/libsmb/libsmb_server.c
+index 8808781d410..a0d9c47e431 100644
+--- a/source3/libsmb/libsmb_server.c
++++ b/source3/libsmb/libsmb_server.c
+@@ -607,6 +607,8 @@ SMBC_server_internal(TALLOC_CTX *ctx,
+ 		password_used = "";
+ 
+                 if (smbc_getOptionNoAutoAnonymousLogin(context) ||
++		    cli_credentials_get_kerberos_state(creds) ==
++			    CRED_USE_KERBEROS_REQUIRED ||
+ 		    !NT_STATUS_IS_OK(cli_session_setup_anon(c))) {
+ 
+                         cli_shutdown(c);
+-- 
+2.53.0
 
