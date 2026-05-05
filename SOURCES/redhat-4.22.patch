@@ -1,7 +1,7 @@
 From b0ff8644c06b01252bdbac6a31c77c5781d4b5a0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 29 Jul 2025 11:19:07 +0200
-Subject: [PATCH 01/38] selftest: Add the short name for localvampiredc to
+Subject: [PATCH 01/59] selftest: Add the short name for localvampiredc to
  hosts file
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -36,7 +36,7 @@ index 9da339f6239..af0434a8e6b 100755
 From 03431792b4707e50afc8f9e356f08a91f4fb67c3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 11:20:54 +0200
-Subject: [PATCH 02/38] tests: Add test for 'net ads join' to a preferred DC
+Subject: [PATCH 02/59] tests: Add test for 'net ads join' to a preferred DC
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -151,7 +151,7 @@ index 00000000000..1bebc2f4dbe
 From 5cff37091161976a979752351003c9c1deb0d39f Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 28 Jul 2025 10:43:36 +0200
-Subject: [PATCH 03/38] s3:net: Pass down the server from cmdline to
+Subject: [PATCH 03/59] s3:net: Pass down the server from cmdline to
  sync_pw2keytabs()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -494,7 +494,7 @@ index 46531210411..753b957e43f 100644
 From 5b23ab3845597dcfcf33e2c0a7d7af820d3167a5 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 13 Aug 2025 17:02:16 +0200
-Subject: [PATCH 04/38] smbtorture: fix locking offset in
+Subject: [PATCH 04/59] smbtorture: fix locking offset in
  test_fruit_locking_conflict()
 
 AD_FILELOCK_RSRC_DENY_WR = AD_FILELOCK_BASE + 6
@@ -532,7 +532,7 @@ index 6bad4e409c6..e9ff4a57e66 100644
 From 9c7228f46c3955b0e1a3c91fd42da6f2ea864cb8 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 1 Aug 2025 17:28:04 +0200
-Subject: [PATCH 05/38] smbd: don't use sticky write times on POSIX handles
+Subject: [PATCH 05/59] smbd: don't use sticky write times on POSIX handles
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
 
@@ -565,7 +565,7 @@ index 9a8ecf6e0a7..ab45f9edbb9 100644
 From ec9f60e4eda3162aec63ada4ec49574e99362989 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 19 Sep 2025 00:20:43 +0200
-Subject: [PATCH 06/38] smbtorture: add test vfs.fruit.readonly-exclusive-lock
+Subject: [PATCH 06/59] smbtorture: add test vfs.fruit.readonly-exclusive-lock
 
 Verify macOS clients get Windows byterange lock behavour by trying to set an
 exclusive lock on a file opened in read-only mode.
@@ -696,7 +696,7 @@ index e9ff4a57e66..02f7acd0fea 100644
 From 87e6e2d0cdb78cfe9b372732439706d94a5ea7a2 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 19 Sep 2025 06:43:57 +0200
-Subject: [PATCH 07/38] smbtorture: add test vfs.fruit.case_insensitive_find
+Subject: [PATCH 07/59] smbtorture: add test vfs.fruit.case_insensitive_find
 
 Verifies case insensitive directory scanning works.
 
@@ -819,7 +819,7 @@ index 02f7acd0fea..a6f86cd5edf 100644
 From 98e1a3b39cb3e4fa03ac8340338179cd85df18f3 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 10 Mar 2025 15:01:42 +0100
-Subject: [PATCH 08/38] vfs_fruit: add option "fruit:posix_opens = yes|no"
+Subject: [PATCH 08/59] vfs_fruit: add option "fruit:posix_opens = yes|no"
  (default: yes)
 
 Tags alls opens as POSIX by setting fsp_flags.posix_open to true.
@@ -1002,7 +1002,7 @@ index ba744e52a96..ce9cba2525c 100644
 From 1549f90eccfe838fe984cebe0c02f768b50666f2 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 18 Sep 2025 23:44:34 +0200
-Subject: [PATCH 09/38] smbd: hang posix brl per-handle check on the pathname
+Subject: [PATCH 09/59] smbd: hang posix brl per-handle check on the pathname
 
 For the SMB3 POSIX client both posix_open=true and (fsp->fsp_name->flags &
 SMB_FILENAME_POSIX_PATH) will always be the case, so this is no change in
@@ -1069,7 +1069,7 @@ index 8591b2fbd2c..73a341eff79 100644
 From fe490422b79c74fc789358c191d157d31761be68 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 18 Sep 2025 20:35:22 +0200
-Subject: [PATCH 10/38] smbd: hang directory pattern matching case sensitivity
+Subject: [PATCH 10/59] smbd: hang directory pattern matching case sensitivity
  on the pathname
 
 For the SMB3 POSIX client both posix_open=true and (fsp->fsp_name->flags &
@@ -1121,7 +1121,7 @@ index afc9c74dfdd..c72fd4349d2 100644
 From 68d6be8e2c68385797b9c9f51d87b601a9eace33 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Sat, 6 Sep 2025 08:48:44 +0200
-Subject: [PATCH 11/38] vfs_fruit: ignore Set-ACL requests with zero ACEs
+Subject: [PATCH 11/59] vfs_fruit: ignore Set-ACL requests with zero ACEs
 
 Workaround for a new behaviour in latest macOS versions.
 
@@ -1229,7 +1229,7 @@ index ce9cba2525c..213d4cc3eeb 100644
 From 73d2494edfc58bd8c8806c7ca6aeb38bb2310cee Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 14 Nov 2025 14:55:12 +0100
-Subject: [PATCH 12/38] vfs_fruit: psd->dacl can be NULL, use orig_num_aces
+Subject: [PATCH 12/59] vfs_fruit: psd->dacl can be NULL, use orig_num_aces
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15926
 
@@ -1269,7 +1269,7 @@ index 213d4cc3eeb..795f79ce09c 100644
 From 0b0e342500042b80dedda6c5bd1d9d2598f710ca Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 2 Dec 2025 14:02:08 +0100
-Subject: [PATCH 13/38] Revert "ldb: User hexchars_upper from replace.h"
+Subject: [PATCH 13/59] Revert "ldb: User hexchars_upper from replace.h"
 
 This reverts commit 542cf01bfe530a83dfbc8a606d182c0a5a622059.
 
@@ -1326,7 +1326,7 @@ index 5b8c0f4f580..389da444904 100644
 From d8558ac294e7c622e6bb1239635e4e17f5f6e8cf Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 19 Jan 2026 14:33:52 +0100
-Subject: [PATCH 14/38] s3:libads: Reset ads->config.flags in ads_disconnect()
+Subject: [PATCH 14/59] s3:libads: Reset ads->config.flags in ads_disconnect()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1400,7 +1400,7 @@ index 49fa1d47298..8dde09e3551 100644
 From 37cbf09ec9b9bacd2c9e8fd50bd4b80046388d9a Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Sun, 18 Jan 2026 01:04:11 +0100
-Subject: [PATCH 15/38] s3:libads: Separate use of ads->config.flags for NBT_*
+Subject: [PATCH 15/59] s3:libads: Separate use of ads->config.flags for NBT_*
  and DS_* values
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1612,7 +1612,7 @@ index 2c18aeba060..45b68ebe561 100644
 From e02f1dca11cbee015923d9e8c141a727dc1c02d3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 22 Jan 2026 14:27:09 +0100
-Subject: [PATCH 16/38] s3:libads: Allocate cli_credentials on a stackframe
+Subject: [PATCH 16/59] s3:libads: Allocate cli_credentials on a stackframe
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1693,7 +1693,7 @@ index 9d6d962a2bc..d01afa69697 100644
 From 2bdf2b96a818a64d7c420f0fb675530959602188 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Mon, 26 Jan 2026 13:36:02 +0100
-Subject: [PATCH 17/38] s3:rpc_client: Fix memory leak opening local named pipe
+Subject: [PATCH 17/59] s3:rpc_client: Fix memory leak opening local named pipe
 
 If no local server name was passed to rpc_pipe_open_local_np() then
 get_myname() was called with NULL talloc context instead of the
@@ -1736,7 +1736,7 @@ index 23adbbc62fa..91afccd7fb2 100644
 From 17c104ea4171aa002df0e7f69e61312898c7fad5 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Fri, 4 Apr 2025 10:27:50 +0200
-Subject: [PATCH 18/38] lib:cmdline: Make sure --use-krb5-ccache sets the
+Subject: [PATCH 18/59] lib:cmdline: Make sure --use-krb5-ccache sets the
  ccache
 
 Pair-Programmed-With: Alexander Bokovoy <ab@samba.org>
@@ -1889,7 +1889,7 @@ index 161ba8874bf..5902628cc15 100644
 From d36e10471ddbd2175da53c046e3e62b9cdb576fd Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Fri, 11 Apr 2025 10:56:43 +0200
-Subject: [PATCH 19/38] lib:cmdline: POPT_CALLBACK_REASON_POST should handle if
+Subject: [PATCH 19/59] lib:cmdline: POPT_CALLBACK_REASON_POST should handle if
  we skip the password callback
 
 It is already checking if there is a valid ccache and disabling the callback.
@@ -1942,7 +1942,7 @@ index 54554ea3290..395b5bc989a 100755
 From c4369a82dffbc550b8740fca70aba57bc46400d4 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Fri, 25 Apr 2025 11:30:14 +0200
-Subject: [PATCH 20/38] auth:creds: Make sure when parsing username that realm
+Subject: [PATCH 20/59] auth:creds: Make sure when parsing username that realm
  is uppercase
 
 Signed-off-by: Andreas Schneider <asn@samba.org>
@@ -2020,7 +2020,7 @@ index f9781f8ba03..bc132681c48 100644
 From 0673310878659d01fb250243c427d36b6cda105c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Fri, 4 Apr 2025 13:32:41 +0200
-Subject: [PATCH 21/38] auth:creds: Always store the ccache name
+Subject: [PATCH 21/59] auth:creds: Always store the ccache name
 
 This will allow us to specify the cache as one to fill with credentials.
 
@@ -2069,7 +2069,7 @@ index ce76b10361d..7d8b744b3e2 100644
 From d1ab591115e1d09e89eb2e960ca989a1f14fe62d Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Fri, 4 Apr 2025 13:33:19 +0200
-Subject: [PATCH 22/38] auth:creds: Add cli_credentials_get_out_ccache_name()
+Subject: [PATCH 22/59] auth:creds: Add cli_credentials_get_out_ccache_name()
 
 Signed-off-by: Andreas Schneider <asn@samba.org>
 Reviewed-by: Alexander Bokovoy <ab@samba.org>
@@ -2113,7 +2113,7 @@ index 7d8b744b3e2..6c61eca7b4b 100644
 From 843a279c4fd93bf312ab242f7dc9569e65ffdcd5 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Fri, 4 Apr 2025 13:37:21 +0200
-Subject: [PATCH 23/38] librpc:gse: Implement storing tickets into an emtpy
+Subject: [PATCH 23/59] librpc:gse: Implement storing tickets into an emtpy
  ccache
 
 smbclient //server/share --krb5-use-ccache=/tmp/foo
@@ -2256,7 +2256,7 @@ index 58b9fb802d0..87cd6e9a1b8 100644
 From cc930a27882a5ad2878ceb5dfd7eac2f164c98b1 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Fri, 25 Apr 2025 17:32:16 +0200
-Subject: [PATCH 24/38] lib:cmdline: Check if we have a valid default ccache
+Subject: [PATCH 24/59] lib:cmdline: Check if we have a valid default ccache
 
 If you don't specify anything, and we have a valid ccache then try to
 use it!
@@ -2303,7 +2303,7 @@ index e434d65a2ef..f96ca88f95b 100644
 From 5bb7e14a4e23626383467f25b34f5d4d1b01ab91 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 5 Aug 2025 09:15:43 +0200
-Subject: [PATCH 25/38] docs-xml: Update documentation for --use-kerberos and
+Subject: [PATCH 25/59] docs-xml: Update documentation for --use-kerberos and
  --use-krb5-ccache
 
 Signed-off-by: Andreas Schneider <asn@samba.org>
@@ -2359,7 +2359,7 @@ index cefddacd9b7..65d597ae8ff 100644
 From b5cf950c9bdca697bdba6dfbceccabcb18a62a49 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 2 Dec 2025 17:17:33 +0100
-Subject: [PATCH 26/38] s3-selftest: mention in-memory ccache usage when
+Subject: [PATCH 26/59] s3-selftest: mention in-memory ccache usage when
  nothing is provided
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
@@ -2396,10 +2396,10 @@ index 8a3c9ef2bc7..92d3996d078 100755
 2.53.0
 
 
-From a95b0b800022286db1a8680a5ea98aa0e4253020 Mon Sep 17 00:00:00 2001
+From 62f84f324a6c2d999f564f2d2d29ab6937ec65eb Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 2 Dec 2025 17:18:41 +0100
-Subject: [PATCH 27/38] s3-selftest: verify KRB5CCNAME presence after kinit
+Subject: [PATCH 27/59] s3-selftest: verify KRB5CCNAME presence after kinit
  using klist
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
@@ -2453,10 +2453,10 @@ index 92d3996d078..c53520cf733 100755
 2.53.0
 
 
-From 9743315e50823c1e8d884ba62167c5e8d62a3a40 Mon Sep 17 00:00:00 2001
+From dbddccedd00a71f75b2af6eee39519503f46dba0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 2 Dec 2025 17:01:31 +0100
-Subject: [PATCH 28/38] s3-selftest: Activate "net ads kerberos kinit" tests
+Subject: [PATCH 28/59] s3-selftest: Activate "net ads kerberos kinit" tests
  with --use-krb5-ccache
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
@@ -2532,10 +2532,10 @@ index c53520cf733..b7933bab6a6 100755
 2.53.0
 
 
-From a90df88fbce5e9ead92093edfe51e5f6014216b7 Mon Sep 17 00:00:00 2001
+From 106053bd124c95ebf24f164e774b512c7cf52557 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 2 Dec 2025 16:56:44 +0100
-Subject: [PATCH 29/38] s3-net: properly setup krb5 ccache name via
+Subject: [PATCH 29/59] s3-net: properly setup krb5 ccache name via
  --use-krb5-ccache
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
@@ -2620,10 +2620,10 @@ index 753b957e43f..2dc7de37e43 100644
 2.53.0
 
 
-From 4800989ab9721c075ad0f23001f45f20677c7389 Mon Sep 17 00:00:00 2001
+From 3d9d2a73fa16661a4908dd89a65c24b497e38f00 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Sat, 13 Dec 2025 13:49:37 +0100
-Subject: [PATCH 30/38] doc-xml: Document "net ads kerberos" commands
+Subject: [PATCH 30/59] doc-xml: Document "net ads kerberos" commands
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2796,10 +2796,10 @@ index 05191236ecc..3f276236e1e 100644
 2.53.0
 
 
-From 5b3b05af328824dbbab431da7aafc53f4ff2c474 Mon Sep 17 00:00:00 2001
+From 4968f9680faa37a4814b30fc17f9dd85ca4e842e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 3 Feb 2026 12:53:10 +0100
-Subject: [PATCH 31/38] s3:utils: 'net ads kerberos kinit' should use also
+Subject: [PATCH 31/59] s3:utils: 'net ads kerberos kinit' should use also
  default ccache name from krb5.conf
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2903,10 +2903,10 @@ index 271c96cf804..0ce03f8213d 100644
 2.53.0
 
 
-From c230940ede67f1078a6671be163968dea4d76061 Mon Sep 17 00:00:00 2001
+From 1094773e980bded36d2e3993e61fb1a8236c4ab2 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 5 Feb 2026 16:04:25 +0100
-Subject: [PATCH 32/38] manpages: Update NET ADS KERBEROS KINIT manpage
+Subject: [PATCH 32/59] manpages: Update NET ADS KERBEROS KINIT manpage
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2978,10 +2978,10 @@ index 3f276236e1e..4e149394df3 100644
 2.53.0
 
 
-From 51b0f44caddd8e4cc5975dd8f982fad9f35f99fe Mon Sep 17 00:00:00 2001
+From 64540e6cc5aba9ac0806dd30485d5c593076771d Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Thu, 23 Oct 2025 11:00:38 +0200
-Subject: [PATCH 33/38] docs-xml: Improve the samba-bgqd manpage
+Subject: [PATCH 33/59] docs-xml: Improve the samba-bgqd manpage
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15809
 
@@ -3064,10 +3064,10 @@ index ef50a542a9e..9a16a2aaad0 100644
 2.53.0
 
 
-From 058dd1db3914b7e9ca7dff5b8d1e3727fe236ef0 Mon Sep 17 00:00:00 2001
+From 49d53f23b6051b33810fd0a3e0173f258d6e4383 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Thu, 23 Oct 2025 10:49:31 +0200
-Subject: [PATCH 34/38] s3:printing: Load the shares for [printers] in
+Subject: [PATCH 34/59] s3:printing: Load the shares for [printers] in
  samba-bgqd
 
 One of the main functions of bgqd is:
@@ -3121,10 +3121,10 @@ index 0f95bd736f2..51eafa31572 100644
 2.53.0
 
 
-From 6f78c96595c9f19dbaecd671ce5dc6582158e64d Mon Sep 17 00:00:00 2001
+From 6dd0f468f75966e64d0340301fbfc4da461492df Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Fri, 13 Feb 2026 11:54:46 +0000
-Subject: [PATCH 35/38] selftest: Update tests to use
+Subject: [PATCH 35/59] selftest: Update tests to use
  --use-kereros=desired|required no creds
 
 Add tests to call smbclient without passing credentials to
@@ -3180,10 +3180,10 @@ index 31678d17e28..1139efd70d7 100755
 2.53.0
 
 
-From 27542cd8ed5c0efbfd3f4fe4b399668c931fdcc4 Mon Sep 17 00:00:00 2001
+From dc40fdde863e95c1ff24e76e4397e55aa257a7cf Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Mon, 19 Jan 2026 15:46:59 +0000
-Subject: [PATCH 36/38] auth/credentials: Fix regression with
+Subject: [PATCH 36/59] auth/credentials: Fix regression with
  --use-kerberos=desired for smbclient
 
 As part of the gse_krb5 processing the following call chain
@@ -3252,10 +3252,10 @@ index f0a5f7bb935..ab2d79d7114 100644
 2.53.0
 
 
-From 5d396529406d8bd48ab396d7640303ac762c3ed8 Mon Sep 17 00:00:00 2001
+From 2681e90123b1b2a9efdb55b841f2cd0ae6fed273 Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Mon, 19 Jan 2026 16:10:10 +0000
-Subject: [PATCH 37/38] s3/libsmb: cli_session_creds_init fails when kerberos
+Subject: [PATCH 37/59] s3/libsmb: cli_session_creds_init fails when kerberos
  is desired
 
 There is a regression with code using cli_session_creds_init when
@@ -3294,10 +3294,10 @@ index bd75393ac07..da751f54f00 100644
 2.53.0
 
 
-From c9f258277da8089deb16b251aa42e7877039a3c3 Mon Sep 17 00:00:00 2001
+From c6c1567ee601ba06d97e6269d6378278cc145e39 Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Mon, 19 Jan 2026 16:18:02 +0000
-Subject: [PATCH 38/38] s3/libsmb: block anon authentication fallback is
+Subject: [PATCH 38/59] s3/libsmb: block anon authentication fallback is
  use-kerberos = desired
 
 When cli_credentials_get_kerberos_state returns CRED_USE_KERBEROS_REQUIRED
@@ -3329,6 +3329,1502 @@ index 8808781d410..a0d9c47e431 100644
  		    !NT_STATUS_IS_OK(cli_session_setup_anon(c))) {
  
                          cli_shutdown(c);
+-- 
+2.53.0
+
+
+From b60ba4c12b8509652d269ab07b2619075e77aa2e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Wed, 18 Mar 2026 20:24:37 +0100
+Subject: [PATCH 39/59] s3:libnet: Fix DC numeric ip handling
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This is fixing regression introduced via 82f53c8
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15999
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+---
+ source3/libnet/libnet_join.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/source3/libnet/libnet_join.c b/source3/libnet/libnet_join.c
+index cb997dcbe23..3507e87032f 100644
+--- a/source3/libnet/libnet_join.c
++++ b/source3/libnet/libnet_join.c
+@@ -2632,7 +2632,7 @@ static WERROR libnet_DomainJoin(TALLOC_CTX *mem_ctx,
+ 		struct sockaddr_storage ss = {0};
+ 		const char *numeric_dcip = info->dc_address + 2;
+ 
+-		if (numeric_dcip[0] == '\0') {
++		if (numeric_dcip[0] != '\0') {
+ 			if (!interpret_string_addr(&ss, numeric_dcip,
+ 						   AI_NUMERICHOST)) {
+ 				DBG_ERR(
+-- 
+2.53.0
+
+
+From c27a523baa05e726f479f2a0d59a03fe7aa8e8ee Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 23 Mar 2026 19:03:34 +0100
+Subject: [PATCH 40/59] s3:libads: Allow to specify 'dns_lookup_kdc' in
+ krb5.conf
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15999
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+---
+ source3/libads/kerberos.c       | 23 ++++++++++++++++-------
+ source3/libads/kerberos_proto.h | 33 +++++++++++++++++++++++++++++----
+ 2 files changed, 45 insertions(+), 11 deletions(-)
+
+diff --git a/source3/libads/kerberos.c b/source3/libads/kerberos.c
+index d8325201b2f..b0b1895ba48 100644
+--- a/source3/libads/kerberos.c
++++ b/source3/libads/kerberos.c
+@@ -1362,10 +1362,12 @@ static char *get_enctypes(TALLOC_CTX *mem_ctx)
+ }
+ #endif
+ 
+-bool create_local_private_krb5_conf_for_domain(const char *realm,
+-						const char *domain,
+-						const char *sitename,
+-					        const struct sockaddr_storage *pss)
++bool create_local_private_krb5_conf_for_domain_internal(
++	const char *realm,
++	const char *domain,
++	const char *sitename,
++	const struct sockaddr_storage *pss,
++	bool dns_lookup_kdc)
+ {
+ 	char *dname;
+ 	char *tmpname = NULL;
+@@ -1441,10 +1443,16 @@ bool create_local_private_krb5_conf_for_domain(const char *realm,
+ #endif
+ 
+ 	/*
+-	 * We are setting 'dns_lookup_kdc' to true, because we want to lookup
+-	 * KDCs which are not configured via DNS SRV records, eg. if we do:
++	 * Normally 'dns_lookup_kdc' should be set to true, because we want to
++	 * also lookup KDCs via DNS SRV records, e.g. cross domain scenario:
+ 	 *
+ 	 *     net ads join -Uadmin@otherdomain
++	 *
++	 * However, during domain join we need to set it to false when we
++	 * reconnect using the freshly created machine account credentials.
++	 * With dns_lookup_kdc = true, Kerberos may pick a different DC
++	 * for the TCP retry (after UDP response is too large), and that DC
++	 * might not have replicated the new machine account yet.
+ 	 */
+ 	file_contents =
+ 	    talloc_asprintf(fname,
+@@ -1452,7 +1460,7 @@ bool create_local_private_krb5_conf_for_domain(const char *realm,
+ 			    "\tdefault_realm = %s\n"
+ 			    "%s"
+ 			    "\tdns_lookup_realm = false\n"
+-			    "\tdns_lookup_kdc = true\n\n"
++			    "\tdns_lookup_kdc = %s\n\n"
+ 			    "[realms]\n\t%s = {\n"
+ 			    "%s\t}\n"
+ 			    "\t%s = {\n"
+@@ -1460,6 +1468,7 @@ bool create_local_private_krb5_conf_for_domain(const char *realm,
+ 			    "%s\n",
+ 			    realm_upper,
+ 			    enctypes,
++			    dns_lookup_kdc ? "true" : "false",
+ 			    realm_upper,
+ 			    kdc_ip_string,
+ 			    domain,
+diff --git a/source3/libads/kerberos_proto.h b/source3/libads/kerberos_proto.h
+index a96211c7289..fbeaeff92a9 100644
+--- a/source3/libads/kerberos_proto.h
++++ b/source3/libads/kerberos_proto.h
+@@ -70,10 +70,35 @@ int ads_kdestroy(const char *cc_name);
+ int kerberos_kinit_password(const char *principal,
+ 			    const char *password,
+ 			    const char *cache_name);
+-bool create_local_private_krb5_conf_for_domain(const char *realm,
+-						const char *domain,
+-						const char *sitename,
+-					        const struct sockaddr_storage *pss);
++
++bool create_local_private_krb5_conf_for_domain_internal(
++	const char *realm,
++	const char *domain,
++	const char *sitename,
++	const struct sockaddr_storage *pss,
++	bool dns_lookup_kdc);
++
++/* Create krb5.conf that allows DC lookup using DNS. */
++static inline bool create_local_private_krb5_conf_for_domain(
++	const char *realm,
++	const char *domain,
++	const char *sitename,
++	const struct sockaddr_storage *pss)
++{
++	return create_local_private_krb5_conf_for_domain_internal(
++		realm, domain, sitename, pss, true);
++}
++
++/* Create krb5.conf that disables DC lookup using DNS - needed during join. */
++static inline bool create_local_private_krb5_conf_for_domain_join(
++	const char *realm,
++	const char *domain,
++	const char *sitename,
++	const struct sockaddr_storage *pss)
++{
++	return create_local_private_krb5_conf_for_domain_internal(
++		realm, domain, sitename, pss, false);
++}
+ 
+ /* The following definitions come from libads/authdata.c  */
+ 
+-- 
+2.53.0
+
+
+From 9328d62302aa4328f8763e09aaa6f561e1a5bad3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Mon, 23 Mar 2026 19:05:31 +0100
+Subject: [PATCH 41/59] s3:libads: Set dns_lookup_kdc=false during net ads join
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15999
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Andreas Schneider <asn@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Tue Apr  7 14:09:40 UTC 2026 on atb-devel-224
+---
+ source3/libnet/libnet_join.c | 60 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 59 insertions(+), 1 deletion(-)
+
+diff --git a/source3/libnet/libnet_join.c b/source3/libnet/libnet_join.c
+index 3507e87032f..6ccf505ca19 100644
+--- a/source3/libnet/libnet_join.c
++++ b/source3/libnet/libnet_join.c
+@@ -2870,6 +2870,10 @@ WERROR libnet_Join(TALLOC_CTX *mem_ctx,
+ 		   struct libnet_JoinCtx *r)
+ {
+ 	WERROR werr;
++#ifdef HAVE_ADS
++	struct sockaddr_storage dc_ss = {0};
++	bool dns_lookup_kdc_disabled = false;
++#endif /* HAVE_ADS */
+ 
+ 	if (r->in.debug) {
+ 		LIBNET_JOIN_IN_DUMP_CTX(mem_ctx, r);
+@@ -2893,6 +2897,49 @@ WERROR libnet_Join(TALLOC_CTX *mem_ctx,
+ 		}
+ 	}
+ 
++#ifdef HAVE_ADS
++	/*
++	 * The machine account was just created on r->in.dc_name,
++	 * but might not have replicated to other DCs yet.
++	 * Regenerate the krb5.conf with dns_lookup_kdc = false
++	 * so that the Kerberos library only talks to the DC
++	 * where the account was created. This covers all
++	 * subsequent machine-credential operations:
++	 *   - libnet_join_post_processing_ads_modify() (etype update)
++	 *   - libnet_join_post_verify() (domain membership verification)
++	 */
++	if (r->out.domain_is_ad &&
++	    !(r->in.join_flags & WKSSVC_JOIN_FLAGS_JOIN_UNSECURE) &&
++	    !r->in.request_offline_join)
++	{
++		bool ok;
++		const char *ip = NULL;
++
++		/* dcinfo might not be set for offline joins, however this
++		 * check is redundant since we have a guard:
++		 * !r->in.request_offline_join
++		 */
++		if (r->out.dcinfo) {
++			ip = r->out.dcinfo->dc_address + 2; /* Strip "\\" */
++		}
++
++		if (ip && ip[0] != '\0') {
++			ok = interpret_string_addr(&dc_ss, ip, AI_NUMERICHOST);
++		} else {
++			ok = interpret_string_addr(&dc_ss, r->in.dc_name, 0);
++		}
++
++		if (ok) {
++			create_local_private_krb5_conf_for_domain_join(
++				r->out.dns_domain_name,
++				r->out.netbios_domain_name,
++				NULL, /* sitename */
++				&dc_ss);
++			dns_lookup_kdc_disabled = true;
++		}
++	}
++#endif /* HAVE_ADS */
++
+ 	werr = libnet_join_post_processing(mem_ctx, r);
+ 	if (!W_ERROR_IS_OK(werr)) {
+ 		goto done;
+@@ -2920,7 +2967,18 @@ WERROR libnet_Join(TALLOC_CTX *mem_ctx,
+ 		}
+ 	}
+ 
+- done:
++done:
++#ifdef HAVE_ADS
++	if (dns_lookup_kdc_disabled) {
++		/* Restore dns_lookup_kdc = true for subsequent operations */
++		create_local_private_krb5_conf_for_domain(
++			r->out.dns_domain_name,
++			r->out.netbios_domain_name,
++			NULL, /* sitename */
++			&dc_ss);
++	}
++#endif /* HAVE_ADS */
++
+ 	r->out.result = werr;
+ 
+ 	if (r->in.debug) {
+-- 
+2.53.0
+
+
+From 1618908df1133d9cb3080363b5078e7b892fb260 Mon Sep 17 00:00:00 2001
+From: Volker Lendecke <vl@samba.org>
+Date: Thu, 23 Jan 2025 13:42:48 +0100
+Subject: [PATCH 42/59] vfs: Allow WITH_BACKUP_INTENT in vfs openat functions
+
+BACKUP_INTENT has no real meaning so far throughout our code, so we
+should ignore and thus allow it in our openat-intercepting functions.
+
+Signed-off-by: Volker Lendecke <vl@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_aio_pthread.c   | 2 +-
+ source3/modules/vfs_ceph.c          | 2 +-
+ source3/modules/vfs_ceph_new.c      | 2 +-
+ source3/modules/vfs_fruit.c         | 2 +-
+ source3/modules/vfs_glusterfs.c     | 2 +-
+ source3/modules/vfs_streams_depot.c | 2 +-
+ source3/modules/vfs_streams_xattr.c | 2 +-
+ 7 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/source3/modules/vfs_aio_pthread.c b/source3/modules/vfs_aio_pthread.c
+index b099a6b5b52..bd0c94b8cce 100644
+--- a/source3/modules/vfs_aio_pthread.c
++++ b/source3/modules/vfs_aio_pthread.c
+@@ -457,7 +457,7 @@ static int aio_pthread_openat_fn(vfs_handle_struct *handle,
+ 	bool aio_allow_open = lp_parm_bool(
+ 		SNUM(handle->conn), "aio_pthread", "aio open", false);
+ 
+-	if (how->resolve != 0) {
++	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+diff --git a/source3/modules/vfs_ceph.c b/source3/modules/vfs_ceph.c
+index 49cbd17692f..3913cb01b2c 100644
+--- a/source3/modules/vfs_ceph.c
++++ b/source3/modules/vfs_ceph.c
+@@ -472,7 +472,7 @@ static int cephwrap_openat(struct vfs_handle_struct *handle,
+ 	int result = -ENOENT;
+ 	int dirfd = -1;
+ 
+-	if (how->resolve != 0) {
++	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+diff --git a/source3/modules/vfs_ceph_new.c b/source3/modules/vfs_ceph_new.c
+index b97279982cd..28e91235b91 100644
+--- a/source3/modules/vfs_ceph_new.c
++++ b/source3/modules/vfs_ceph_new.c
+@@ -2274,7 +2274,7 @@ static int vfs_ceph_openat(struct vfs_handle_struct *handle,
+ 	int result = -ENOENT;
+ 
+ 	START_PROFILE(syscall_openat);
+-	if (how->resolve != 0) {
++	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
+ 		result = -ENOSYS;
+ 		goto err_out;
+ 	}
+diff --git a/source3/modules/vfs_fruit.c b/source3/modules/vfs_fruit.c
+index 795f79ce09c..4da7c1efa07 100644
+--- a/source3/modules/vfs_fruit.c
++++ b/source3/modules/vfs_fruit.c
+@@ -1787,7 +1787,7 @@ static int fruit_openat(vfs_handle_struct *handle,
+ 		return fd;
+ 	}
+ 
+-	if (how->resolve != 0) {
++	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+diff --git a/source3/modules/vfs_glusterfs.c b/source3/modules/vfs_glusterfs.c
+index 48a76189096..63dc7a30b04 100644
+--- a/source3/modules/vfs_glusterfs.c
++++ b/source3/modules/vfs_glusterfs.c
+@@ -731,7 +731,7 @@ static int vfs_gluster_openat(struct vfs_handle_struct *handle,
+ 
+ 	START_PROFILE(syscall_openat);
+ 
+-	if (how->resolve != 0) {
++	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
+ 		END_PROFILE(syscall_openat);
+ 		errno = ENOSYS;
+ 		return -1;
+diff --git a/source3/modules/vfs_streams_depot.c b/source3/modules/vfs_streams_depot.c
+index 951f1af17a9..9d6bdf826dc 100644
+--- a/source3/modules/vfs_streams_depot.c
++++ b/source3/modules/vfs_streams_depot.c
+@@ -759,7 +759,7 @@ static int streams_depot_openat(struct vfs_handle_struct *handle,
+ 					   how);
+ 	}
+ 
+-	if (how->resolve != 0) {
++	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+diff --git a/source3/modules/vfs_streams_xattr.c b/source3/modules/vfs_streams_xattr.c
+index 7601e744198..ac01cc46043 100644
+--- a/source3/modules/vfs_streams_xattr.c
++++ b/source3/modules/vfs_streams_xattr.c
+@@ -416,7 +416,7 @@ static int streams_xattr_openat(struct vfs_handle_struct *handle,
+ 					   how);
+ 	}
+ 
+-	if (how->resolve != 0) {
++	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+-- 
+2.53.0
+
+
+From e6bb0d0ba3097365fdeedfd06cce3cf610eb123e Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Fri, 14 Feb 2025 17:07:14 +0100
+Subject: [PATCH 43/59] vfs: Add VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
+
+It disallows traversal of mount points during path resolution, including bind
+mounts.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/include/vfs.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/source3/include/vfs.h b/source3/include/vfs.h
+index cab809de5d3..1353f661d20 100644
+--- a/source3/include/vfs.h
++++ b/source3/include/vfs.h
+@@ -923,6 +923,7 @@ struct vfs_aio_state {
+ 
+ #define VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS 1
+ #define VFS_OPEN_HOW_WITH_BACKUP_INTENT 2
++#define VFS_OPEN_HOW_RESOLVE_NO_XDEV 4
+ 
+ struct vfs_open_how {
+ 	int flags;
+-- 
+2.53.0
+
+
+From b9342aca75aaa2bc9f923461c97c81bb8ec0f1d6 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Fri, 14 Feb 2025 17:13:39 +0100
+Subject: [PATCH 44/59] vfs: Use RESOLVE_NO_XDEV by default on all shares
+
+Enable the flag by default on all shares, it will be automatically
+disabled if the system does not support openat2().
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ script/autobuild.py           |  2 +-
+ source3/modules/vfs_default.c | 11 +++++++++++
+ 2 files changed, 12 insertions(+), 1 deletion(-)
+
+diff --git a/script/autobuild.py b/script/autobuild.py
+index 137a6eb0999..5a7dad4b8fa 100755
+--- a/script/autobuild.py
++++ b/script/autobuild.py
+@@ -322,7 +322,7 @@ tasks = {
+     "samba-no-opath-build": {
+         "git-clone-required": True,
+         "sequence": [
+-            ("configure", "ADDITIONAL_CFLAGS='-DDISABLE_OPATH=1 -DDISABLE_VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS=1 -DDISABLE_PROC_FDS=1' ./configure.developer --without-ad-dc " + samba_configure_params),
++            ("configure", "ADDITIONAL_CFLAGS='-DDISABLE_OPATH=1 -DDISABLE_VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS=1 -DDISABLE_VFS_OPEN_HOW_RESOLVE_NO_XDEV=1 -DDISABLE_PROC_FDS=1' ./configure.developer --without-ad-dc " + samba_configure_params),
+             ("make", "make -j"),
+             ("check-clean-tree", CLEAN_SOURCE_TREE_CMD),
+             ("chmod-R-a-w", "chmod -R a-w ."),
+diff --git a/source3/modules/vfs_default.c b/source3/modules/vfs_default.c
+index 5d16cbb5bf3..c11eae3da04 100644
+--- a/source3/modules/vfs_default.c
++++ b/source3/modules/vfs_default.c
+@@ -76,6 +76,17 @@ static int vfswrap_connect(vfs_handle_struct *handle, const char *service, const
+ #ifdef DISABLE_VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS
+ 	handle->conn->open_how_resolve &= ~VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS;
+ #endif
++	bval = lp_parm_bool(SNUM(handle->conn),
++			    "vfs_default",
++			    "VFS_OPEN_HOW_RESOLVE_NO_XDEV",
++			    true);
++	if (bval) {
++		handle->conn->open_how_resolve |=
++			VFS_OPEN_HOW_RESOLVE_NO_XDEV;
++	}
++#ifdef DISABLE_VFS_OPEN_HOW_RESOLVE_NO_XDEV
++	handle->conn->open_how_resolve &= ~VFS_OPEN_HOW_RESOLVE_NO_XDEV;
++#endif
+ 
+ 	return 0;    /* Return >= 0 for success */
+ }
+-- 
+2.53.0
+
+
+From bf6c44ddf0dcffd545615b5ef51053834262b219 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Wed, 8 Oct 2025 10:54:55 +0200
+Subject: [PATCH 45/59] selftest/Samba3: nt4_dc* use
+ vfs_default:VFS_OPEN_HOW_RESOLVE_NO_XDEV=no
+
+From 076c22fbd7ecbf22dbfeb1711609f07fd42f88b0, we should always test the
+code path without openat2 being available, even if the kernel supports it.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ selftest/target/Samba3.pm | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/selftest/target/Samba3.pm b/selftest/target/Samba3.pm
+index 8906608bc1f..681808eafe0 100755
+--- a/selftest/target/Samba3.pm
++++ b/selftest/target/Samba3.pm
+@@ -304,6 +304,7 @@ sub setup_nt4_dc
+ 	server schannel require seal:torturetest\$ = no
+ 
+ 	vfs_default:VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS = no
++	vfs_default:VFS_OPEN_HOW_RESOLVE_NO_XDEV = no
+ 
+ 	fss: sequence timeout = 1
+ 	check parent directory delete on close = yes
+-- 
+2.53.0
+
+
+From 396e34c5a4d56c211fec2de004e87d898426536d Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Fri, 14 Feb 2025 17:14:59 +0100
+Subject: [PATCH 46/59] vfs: Pass the RESOLVE_NO_XDEV from upper layers to
+ openat2() syscall
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_default.c | 19 ++++++++++++++++---
+ 1 file changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/source3/modules/vfs_default.c b/source3/modules/vfs_default.c
+index c11eae3da04..14d16ab8ae4 100644
+--- a/source3/modules/vfs_default.c
++++ b/source3/modules/vfs_default.c
+@@ -630,7 +630,9 @@ static int vfswrap_openat(vfs_handle_struct *handle,
+ 	SMB_ASSERT((dirfd != -1) || (smb_fname->base_name[0] == '/'));
+ 
+ 	if (how->resolve & ~(VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS |
+-			     VFS_OPEN_HOW_WITH_BACKUP_INTENT)) {
++			     VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			     VFS_OPEN_HOW_RESOLVE_NO_XDEV))
++	{
+ 		errno = ENOSYS;
+ 		result = -1;
+ 		goto out;
+@@ -663,12 +665,20 @@ static int vfswrap_openat(vfs_handle_struct *handle,
+ 	}
+ #endif
+ 
+-	if (how->resolve & VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS) {
++	if (how->resolve & VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS ||
++	    how->resolve & VFS_OPEN_HOW_RESOLVE_NO_XDEV)
++	{
+ 		struct open_how linux_how = {
+ 			.flags = flags,
+ 			.mode = mode,
+-			.resolve = RESOLVE_NO_SYMLINKS,
++			.resolve = 0,
+ 		};
++		if (how->resolve & VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS) {
++			linux_how.resolve |= RESOLVE_NO_SYMLINKS;
++		}
++		if (how->resolve & VFS_OPEN_HOW_RESOLVE_NO_XDEV) {
++			linux_how.resolve |= RESOLVE_NO_XDEV;
++		}
+ 
+ 		result = openat2(dirfd,
+ 				 smb_fname->base_name,
+@@ -681,10 +691,13 @@ static int vfswrap_openat(vfs_handle_struct *handle,
+ 				 * openat2(), so indicate to
+ 				 * the callers that
+ 				 * VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS
++				 * or VFS_OPEN_HOW_RESOLVE_NO_XDEV
+ 				 * would just be a waste of time.
+ 				 */
+ 				fsp->conn->open_how_resolve &=
+ 					~VFS_OPEN_HOW_RESOLVE_NO_SYMLINKS;
++				fsp->conn->open_how_resolve &=
++					~VFS_OPEN_HOW_RESOLVE_NO_XDEV;
+ 			}
+ 			goto out;
+ 		}
+-- 
+2.53.0
+
+
+From 31c935b9c3384e61ba475b2321486e48603b5860 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Wed, 8 Oct 2025 13:18:44 +0200
+Subject: [PATCH 47/59] smbd: Refactor reopen_from_fsp(), factor out name based
+ reopen
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/smbd/open.c | 55 +++++++++++++++++++++++++++++++--------------
+ 1 file changed, 38 insertions(+), 17 deletions(-)
+
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index b91f9d8ce1e..4bc26f6994b 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -847,6 +847,33 @@ static NTSTATUS fd_open_atomic(struct files_struct *dirfsp,
+ 	return status;
+ }
+ 
++/*
++ * Close the existing pathref fd and set the fsp flag
++ * is_pathref to false so we get a "normal" fd this time.
++ */
++static NTSTATUS reopen_from_fsp_namebased(struct files_struct *dirfsp,
++					  struct smb_filename *smb_fname,
++					  struct files_struct *fsp,
++					  const struct vfs_open_how *how,
++					  bool *p_file_created)
++{
++	NTSTATUS status;
++
++	status = fd_close(fsp);
++	if (!NT_STATUS_IS_OK(status)) {
++		return status;
++	}
++
++	fsp->fsp_flags.is_pathref = false;
++
++	status = fd_open_atomic(dirfsp,
++				smb_fname,
++				fsp,
++				how,
++				p_file_created);
++	return status;
++}
++
+ NTSTATUS reopen_from_fsp(struct files_struct *dirfsp,
+ 			 struct smb_filename *smb_fname,
+ 			 struct files_struct *fsp,
+@@ -896,7 +923,12 @@ NTSTATUS reopen_from_fsp(struct files_struct *dirfsp,
+ 					 * point we get ENOENT. We
+ 					 * have to retry pathbased.
+ 					 */
+-					goto namebased_open;
++					return reopen_from_fsp_namebased(dirfsp,
++									 smb_fname,
++									 fsp,
++									 how,
++									 p_file_created);
++
+ 				}
+ 				/* restore ENOENT if changed in the meantime */
+ 				errno = ENOENT;
+@@ -916,22 +948,11 @@ NTSTATUS reopen_from_fsp(struct files_struct *dirfsp,
+ 		return NT_STATUS_OK;
+ 	}
+ 
+-#if defined(HAVE_FSTATFS) && defined(HAVE_LINUX_MAGIC_H)
+-namebased_open:
+-#endif
+-	/*
+-	 * Close the existing pathref fd and set the fsp flag
+-	 * is_pathref to false so we get a "normal" fd this time.
+-	 */
+-	status = fd_close(fsp);
+-	if (!NT_STATUS_IS_OK(status)) {
+-		return status;
+-	}
+-
+-	fsp->fsp_flags.is_pathref = false;
+-
+-	status = fd_open_atomic(dirfsp, smb_fname, fsp, how, p_file_created);
+-	return status;
++	return reopen_from_fsp_namebased(dirfsp,
++					 smb_fname,
++					 fsp,
++					 how,
++					 p_file_created);
+ }
+ 
+ /****************************************************************************
+-- 
+2.53.0
+
+
+From 7c80ee9fd5b3ee5f99caadab4275fe4e7cdb5766 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Wed, 8 Oct 2025 13:53:14 +0200
+Subject: [PATCH 48/59] smbd: Refactor reopen_from_fsp(), factor out
+ automounter mountpoint check
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/smbd/open.c | 66 +++++++++++++++++++++++++++------------------
+ 1 file changed, 40 insertions(+), 26 deletions(-)
+
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index 4bc26f6994b..73d99fb2600 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -874,6 +874,30 @@ static NTSTATUS reopen_from_fsp_namebased(struct files_struct *dirfsp,
+ 	return status;
+ }
+ 
++static bool fsp_is_automount_mountpoint(struct files_struct *fsp, int old_fd)
++{
++#if defined(HAVE_FSTATFS) && defined(HAVE_LINUX_MAGIC_H)
++	struct statfs sbuf = {};
++	int ret;
++
++	if (!S_ISDIR(fsp->fsp_name->st.st_ex_mode)) {
++		return false;
++	}
++
++	ret = fstatfs(old_fd, &sbuf);
++	if (ret == -1) {
++		DBG_ERR("fstatfs failed: %s\n",	strerror(errno));
++		return false;
++	}
++	if (sbuf.f_type == AUTOFS_SUPER_MAGIC) {
++		return true;
++	}
++	return false;
++#else
++	return false;
++#endif
++}
++
+ NTSTATUS reopen_from_fsp(struct files_struct *dirfsp,
+ 			 struct smb_filename *smb_fname,
+ 			 struct files_struct *fsp,
+@@ -908,33 +932,23 @@ NTSTATUS reopen_from_fsp(struct files_struct *dirfsp,
+ 					fsp,
+ 					how);
+ 		if (new_fd == -1) {
+-#if defined(HAVE_FSTATFS) && defined(HAVE_LINUX_MAGIC_H)
+-			if (S_ISDIR(fsp->fsp_name->st.st_ex_mode) &&
+-			    (errno == ENOENT)) {
+-				struct statfs sbuf = {};
+-				int ret = fstatfs(old_fd, &sbuf);
+-				if (ret == -1) {
+-					DBG_ERR("fstatfs failed: %s\n",
+-						strerror(errno));
+-				} else if (sbuf.f_type == AUTOFS_SUPER_MAGIC) {
+-					/*
+-					 * When reopening an as-yet
+-					 * unmounted autofs mount
+-					 * point we get ENOENT. We
+-					 * have to retry pathbased.
+-					 */
+-					return reopen_from_fsp_namebased(dirfsp,
+-									 smb_fname,
+-									 fsp,
+-									 how,
+-									 p_file_created);
+-
+-				}
+-				/* restore ENOENT if changed in the meantime */
+-				errno = ENOENT;
++			int saved_errno = errno;
++			if (saved_errno == ENOENT &&
++			    fsp_is_automount_mountpoint(fsp, old_fd))
++			{
++				/*
++				 * When reopening an as-yet unmounted autofs
++				 * mount point we get ENOENT. We have to retry
++				 * pathbased.
++				 */
++				return reopen_from_fsp_namebased(dirfsp,
++								 smb_fname,
++								 fsp,
++								 how,
++								 p_file_created);
+ 			}
+-#endif
+-			status = map_nt_error_from_unix(errno);
++
++			status = map_nt_error_from_unix(saved_errno);
+ 			fd_close(fsp);
+ 			return status;
+ 		}
+-- 
+2.53.0
+
+
+From cc59f5ed57ca6e2d01de14b644297055eadc8403 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Wed, 8 Oct 2025 14:17:27 +0200
+Subject: [PATCH 49/59] smbd: Refactor reopen_from_fsp(), factor out pathref
+ based
+
+Best viewed ignoring white space changes
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/smbd/open.c | 117 +++++++++++++++++++++++++-------------------
+ 1 file changed, 66 insertions(+), 51 deletions(-)
+
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index 73d99fb2600..f1f5945a817 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -898,68 +898,83 @@ static bool fsp_is_automount_mountpoint(struct files_struct *fsp, int old_fd)
+ #endif
+ }
+ 
+-NTSTATUS reopen_from_fsp(struct files_struct *dirfsp,
+-			 struct smb_filename *smb_fname,
+-			 struct files_struct *fsp,
+-			 const struct vfs_open_how *how,
+-			 bool *p_file_created)
++static NTSTATUS reopen_from_fsp_pathref_based(
++	struct files_struct *dirfsp,
++	struct smb_filename *smb_fname,
++	struct files_struct *fsp,
++	const struct vfs_open_how *how,
++	bool *p_file_created)
+ {
+ 	NTSTATUS status;
+-	int old_fd;
++	struct sys_proc_fd_path_buf buf;
++	int pathref_fd = fsp_get_pathref_fd(fsp);
++	struct smb_filename proc_fname = {
++		.base_name = sys_proc_fd_path(pathref_fd, &buf),
++	};
++	mode_t mode = fsp->fsp_name->st.st_ex_mode;
++	int new_fd;
+ 
+-	if (fsp->fsp_flags.have_proc_fds &&
+-	    ((old_fd = fsp_get_pathref_fd(fsp)) != -1)) {
++	if (S_ISLNK(mode)) {
++		return NT_STATUS_STOPPED_ON_SYMLINK;
++	}
++	if (!(S_ISREG(mode) || S_ISDIR(mode))) {
++		return NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED;
++	}
+ 
+-		struct sys_proc_fd_path_buf buf;
+-		struct smb_filename proc_fname = {
+-			.base_name = sys_proc_fd_path(old_fd, &buf),
+-		};
+-		mode_t mode = fsp->fsp_name->st.st_ex_mode;
+-		int new_fd;
++	fsp->fsp_flags.is_pathref = false;
+ 
+-		if (S_ISLNK(mode)) {
+-			return NT_STATUS_STOPPED_ON_SYMLINK;
+-		}
+-		if (!(S_ISREG(mode) || S_ISDIR(mode))) {
+-			return NT_STATUS_IO_REPARSE_TAG_NOT_HANDLED;
++	new_fd = SMB_VFS_OPENAT(fsp->conn,
++				fsp->conn->cwd_fsp,
++				&proc_fname,
++				fsp,
++				how);
++	if (new_fd == -1) {
++		int saved_errno = errno;
++		if (saved_errno == ENOENT &&
++		    fsp_is_automount_mountpoint(fsp, pathref_fd))
++		{
++			/*
++			 * When reopening an as-yet unmounted autofs
++			 * mount point we get ENOENT. We have to retry
++			 * pathbased.
++			 */
++			return reopen_from_fsp_namebased(dirfsp,
++							 smb_fname,
++							 fsp,
++							 how,
++							 p_file_created);
+ 		}
+ 
+-		fsp->fsp_flags.is_pathref = false;
++		status = map_nt_error_from_unix(saved_errno);
++		fd_close(fsp);
++		return status;
++	}
+ 
+-		new_fd = SMB_VFS_OPENAT(fsp->conn,
+-					fsp->conn->cwd_fsp,
+-					&proc_fname,
+-					fsp,
+-					how);
+-		if (new_fd == -1) {
+-			int saved_errno = errno;
+-			if (saved_errno == ENOENT &&
+-			    fsp_is_automount_mountpoint(fsp, old_fd))
+-			{
+-				/*
+-				 * When reopening an as-yet unmounted autofs
+-				 * mount point we get ENOENT. We have to retry
+-				 * pathbased.
+-				 */
+-				return reopen_from_fsp_namebased(dirfsp,
+-								 smb_fname,
+-								 fsp,
+-								 how,
+-								 p_file_created);
+-			}
++	status = fd_close(fsp);
++	if (!NT_STATUS_IS_OK(status)) {
++		return status;
++	}
+ 
+-			status = map_nt_error_from_unix(saved_errno);
+-			fd_close(fsp);
+-			return status;
+-		}
++	fsp_set_fd(fsp, new_fd);
++	return NT_STATUS_OK;
++}
+ 
+-		status = fd_close(fsp);
+-		if (!NT_STATUS_IS_OK(status)) {
+-			return status;
+-		}
++NTSTATUS reopen_from_fsp(struct files_struct *dirfsp,
++			 struct smb_filename *smb_fname,
++			 struct files_struct *fsp,
++			 const struct vfs_open_how *how,
++			 bool *p_file_created)
++{
++	int old_fd;
+ 
+-		fsp_set_fd(fsp, new_fd);
+-		return NT_STATUS_OK;
++	if (fsp->fsp_flags.have_proc_fds &&
++	    ((old_fd = fsp_get_pathref_fd(fsp)) != -1))
++	{
++		return reopen_from_fsp_pathref_based(dirfsp,
++						     smb_fname,
++						     fsp,
++						     how,
++						     p_file_created);
+ 	}
+ 
+ 	return reopen_from_fsp_namebased(dirfsp,
+-- 
+2.53.0
+
+
+From d8a7aff642d7e18855a94b2a847198eadbf7b60f Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Wed, 8 Oct 2025 17:09:22 +0200
+Subject: [PATCH 50/59] smbd: Fix crossing direct automounter mount points
+
+The workaround implemented in commit ac7a16f9cc4bd97ef546d1b7b02605991000d0f9
+to trigger automounts does not work for direct automounts (either with
+systemd-automount or autofs daemon).
+
+In direct automounts the mount point is a real directory instead of a "ghost"
+directory so when turning the O_PATH handle into a real one through
+/proc/self/fd/<fdnum> openat() does not return ENOENT, it returs a fd referring
+to the mount point without triggering the mount.
+
+To trigger the mount first we have to know when we are crossing mount points
+by using the RESOLVE_NO_XDEV flag in open_how.resolve, then we can check with
+fstatfs() the .f_type and fallback to a path-based open for automounts or
+retry without RESOLVE_NO_XDEV otherwise.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/smbd/open.c | 71 ++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 67 insertions(+), 4 deletions(-)
+
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index f1f5945a817..739fb224b0b 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -913,6 +913,7 @@ static NTSTATUS reopen_from_fsp_pathref_based(
+ 	};
+ 	mode_t mode = fsp->fsp_name->st.st_ex_mode;
+ 	int new_fd;
++	struct vfs_open_how pathref_how = *how;
+ 
+ 	if (S_ISLNK(mode)) {
+ 		return NT_STATUS_STOPPED_ON_SYMLINK;
+@@ -923,26 +924,88 @@ static NTSTATUS reopen_from_fsp_pathref_based(
+ 
+ 	fsp->fsp_flags.is_pathref = false;
+ 
++#if defined(HAVE_FSTATFS) && defined(HAVE_LINUX_MAGIC_H)
++	/*
++	 * There is no point in setting RESOLVE_NO_XDEV if we can't
++	 * check with fstatfs later in fsp_is_automount_mountpoint
++	 */
++	if (S_ISDIR(fsp->fsp_name->st.st_ex_mode) &&
++	    fsp->conn->open_how_resolve & VFS_OPEN_HOW_RESOLVE_NO_XDEV) {
++		/*
++		 * If the *at cwd_fsp is a pathref (opened with O_PATH)
++		 * and old_fd refers to an automounter mount point not
++		 * yet mounted, we will get a fd referring to the
++		 * mount point without actually triggering the mount
++		 * (man 2 openat). To detect this situation set the
++		 * RESOLVE_NO_XDEV flag so openat2 will return an
++		 * error when crossing mount points. Then check
++		 * with fstatfs if it is an autofs mount point or not,
++		 * falling back to name-based openat or retry without
++		 * RESOLVE_NO_XDEV otherwise (could be a bind mount,
++		 * other type of mount of an automounter mount point
++		 * already mounted).
++		 */
++		pathref_how.resolve |= VFS_OPEN_HOW_RESOLVE_NO_XDEV;
++	}
++#endif
++
++retry:
+ 	new_fd = SMB_VFS_OPENAT(fsp->conn,
+ 				fsp->conn->cwd_fsp,
+ 				&proc_fname,
+ 				fsp,
+-				how);
++				&pathref_how);
+ 	if (new_fd == -1) {
+ 		int saved_errno = errno;
+ 		if (saved_errno == ENOENT &&
+ 		    fsp_is_automount_mountpoint(fsp, pathref_fd))
+ 		{
+ 			/*
+-			 * When reopening an as-yet unmounted autofs
+-			 * mount point we get ENOENT. We have to retry
+-			 * pathbased.
++			 * This is a not yet triggered indirect automount
++			 * detected by openat(pathref_fd). Retry name-based.
+ 			 */
+ 			return reopen_from_fsp_namebased(dirfsp,
+ 							 smb_fname,
+ 							 fsp,
+ 							 how,
+ 							 p_file_created);
++		} else if (saved_errno == EXDEV &&
++		    pathref_how.resolve & VFS_OPEN_HOW_RESOLVE_NO_XDEV &&
++		    fsp_is_automount_mountpoint(fsp, pathref_fd))
++		{
++			/*
++			 * This is a not yet triggered direct or indirect
++			 * automount, detected by
++			 * openat2(pathref_fd, .., RESOLVE_NO_XDEV).
++			 * Retry name-based.
++			 */
++			return reopen_from_fsp_namebased(dirfsp,
++							 smb_fname,
++							 fsp,
++							 how,
++							 p_file_created);
++		} else if (saved_errno == ENOSYS &&
++		    pathref_how.resolve & VFS_OPEN_HOW_RESOLVE_NO_XDEV)
++		{
++			/*
++			 * The kernel doesn't support openat2() yet, or any
++			 * VFS module rejected the flag. Notify to the user
++			 * and retry without RESOLVE_NO_XDEV.
++			 */
++			DBG_WARNING("Failed to open directory disallowing the "
++				    "traversal of mount points during path "
++				    "resolution. Retrying allowing traversal, "
++				    "but automounts won't be triggered.\n");
++			pathref_how.resolve &= ~VFS_OPEN_HOW_RESOLVE_NO_XDEV;
++			goto retry;
++		} else if (saved_errno == EXDEV &&
++		    pathref_how.resolve & VFS_OPEN_HOW_RESOLVE_NO_XDEV)
++		{
++			/*
++			 * Just crossing a mount. Retry allowing traversals.
++			 */
++			pathref_how.resolve &= ~VFS_OPEN_HOW_RESOLVE_NO_XDEV;
++			goto retry;
+ 		}
+ 
+ 		status = map_nt_error_from_unix(saved_errno);
+-- 
+2.53.0
+
+
+From 47fb5e3ad088f636cdf77a47e3bdc1a023ea4882 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@suse.de>
+Date: Fri, 2 May 2025 11:57:30 +0200
+Subject: [PATCH 51/59] vfs:aio_pthread: Handle VFS_OPEN_HOW_RESOLVE_NO_XDEV
+ flag
+
+This module uses openat() instead of openat2() so the flag won't be used and
+automounts might not be triggered.
+
+Disable flag usage for subsequent opens and return an error to callers to warn
+the user and retry without the flag.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_aio_pthread.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_aio_pthread.c b/source3/modules/vfs_aio_pthread.c
+index bd0c94b8cce..afbaaedf7b5 100644
+--- a/source3/modules/vfs_aio_pthread.c
++++ b/source3/modules/vfs_aio_pthread.c
+@@ -457,7 +457,9 @@ static int aio_pthread_openat_fn(vfs_handle_struct *handle,
+ 	bool aio_allow_open = lp_parm_bool(
+ 		SNUM(handle->conn), "aio_pthread", "aio open", false);
+ 
+-	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
++	if ((how->resolve & ~(VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			      VFS_OPEN_HOW_RESOLVE_NO_XDEV)) != 0)
++	{
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+@@ -498,6 +500,16 @@ static int aio_pthread_openat_fn(vfs_handle_struct *handle,
+ 		aio_allow_open = false;
+ 	}
+ 
++	if (how->resolve & VFS_OPEN_HOW_RESOLVE_NO_XDEV) {
++		/*
++		 * RESOLVE_NO_XDEV needs openat2(). Disallow further usage of
++		 * this flag and return ENOSYS to force a retry.
++		 */
++		fsp->conn->open_how_resolve &= ~VFS_OPEN_HOW_RESOLVE_NO_XDEV;
++		errno = ENOSYS;
++		return -1;
++	}
++
+ 	if (!aio_allow_open) {
+ 		/* aio opens turned off. */
+ 		return SMB_VFS_NEXT_OPENAT(handle,
+-- 
+2.53.0
+
+
+From 45f8a10c79dde52989119ec834872edfde65f47a Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@suse.de>
+Date: Fri, 2 May 2025 12:11:01 +0200
+Subject: [PATCH 52/59] vfs:ceph: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
+
+Don't return ENOSYS if the flag is set. It will be ignored,
+does not make sense in a ceph virtual filesystem.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_ceph.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_ceph.c b/source3/modules/vfs_ceph.c
+index 3913cb01b2c..d070fb644c7 100644
+--- a/source3/modules/vfs_ceph.c
++++ b/source3/modules/vfs_ceph.c
+@@ -472,7 +472,9 @@ static int cephwrap_openat(struct vfs_handle_struct *handle,
+ 	int result = -ENOENT;
+ 	int dirfd = -1;
+ 
+-	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
++	if ((how->resolve & ~(VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			      VFS_OPEN_HOW_RESOLVE_NO_XDEV)) != 0)
++	{
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+-- 
+2.53.0
+
+
+From ece9a7871cba6165f49a06e58c682caeaafad84a Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Tue, 30 Sep 2025 10:32:36 +0200
+Subject: [PATCH 53/59] vfs:ceph_new: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
+
+Don't return ENOSYS if the flag is set. It will be ignored,
+does not make sense in a ceph filesystem.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_ceph_new.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_ceph_new.c b/source3/modules/vfs_ceph_new.c
+index 28e91235b91..ec611b8e5c9 100644
+--- a/source3/modules/vfs_ceph_new.c
++++ b/source3/modules/vfs_ceph_new.c
+@@ -2274,7 +2274,9 @@ static int vfs_ceph_openat(struct vfs_handle_struct *handle,
+ 	int result = -ENOENT;
+ 
+ 	START_PROFILE(syscall_openat);
+-	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
++	if ((how->resolve & ~(VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			      VFS_OPEN_HOW_RESOLVE_NO_XDEV)) != 0)
++	{
+ 		result = -ENOSYS;
+ 		goto err_out;
+ 	}
+-- 
+2.53.0
+
+
+From fd133f3e3f4165e2f25e8d3b243a2df679499b42 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Thu, 9 Oct 2025 12:30:17 +0200
+Subject: [PATCH 54/59] vfs:glusterfs: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
+
+Don't return ENOSYS if the flag is set. It will be ignored as does not make
+sense in this module.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_glusterfs.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_glusterfs.c b/source3/modules/vfs_glusterfs.c
+index 63dc7a30b04..4d7d96f2888 100644
+--- a/source3/modules/vfs_glusterfs.c
++++ b/source3/modules/vfs_glusterfs.c
+@@ -731,7 +731,9 @@ static int vfs_gluster_openat(struct vfs_handle_struct *handle,
+ 
+ 	START_PROFILE(syscall_openat);
+ 
+-	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
++	if ((how->resolve & ~(VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			      VFS_OPEN_HOW_RESOLVE_NO_XDEV)) != 0)
++	{
+ 		END_PROFILE(syscall_openat);
+ 		errno = ENOSYS;
+ 		return -1;
+-- 
+2.53.0
+
+
+From 07fb5c69afeeab9c4eed3da552c6d8d19b59f03f Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@suse.de>
+Date: Fri, 2 May 2025 13:21:52 +0200
+Subject: [PATCH 55/59] vfs:shadow_copy2: Allow RESOLVE_NO_XDEV flag
+
+This module updates the path and calls the next VFS module.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_shadow_copy2.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_shadow_copy2.c b/source3/modules/vfs_shadow_copy2.c
+index 42626653e0f..d8a5a05e0d0 100644
+--- a/source3/modules/vfs_shadow_copy2.c
++++ b/source3/modules/vfs_shadow_copy2.c
+@@ -1573,7 +1573,9 @@ static int shadow_copy2_openat(vfs_handle_struct *handle,
+ 	int ret;
+ 	bool ok;
+ 
+-	if ((how.resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
++	if ((how.resolve & ~(VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			     VFS_OPEN_HOW_RESOLVE_NO_XDEV)) != 0)
++	{
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+-- 
+2.53.0
+
+
+From 636c474cc963bb0b162a1a84ec298fc453ee1443 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Thu, 9 Oct 2025 12:52:11 +0200
+Subject: [PATCH 56/59] vfs:streams_depot: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
+ flag
+
+The flag is passed down the modules stack.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_streams_depot.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_streams_depot.c b/source3/modules/vfs_streams_depot.c
+index 9d6bdf826dc..576a7cef67d 100644
+--- a/source3/modules/vfs_streams_depot.c
++++ b/source3/modules/vfs_streams_depot.c
+@@ -759,7 +759,9 @@ static int streams_depot_openat(struct vfs_handle_struct *handle,
+ 					   how);
+ 	}
+ 
+-	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
++	if ((how->resolve & ~(VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			      VFS_OPEN_HOW_RESOLVE_NO_XDEV)) != 0)
++	{
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+-- 
+2.53.0
+
+
+From 1f2e84b8eeb046d189636bdbf27d57f8555ddbfe Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Thu, 9 Oct 2025 12:59:59 +0200
+Subject: [PATCH 57/59] vfs:fruit: Allow RESOLVE_NO_XDEV flag
+
+For stream opens, it returns a fake fd. The streams will be stored by
+vfs_streams_depot or vfs_streams_xattr.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+---
+ source3/modules/vfs_fruit.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_fruit.c b/source3/modules/vfs_fruit.c
+index 4da7c1efa07..812e3a351d2 100644
+--- a/source3/modules/vfs_fruit.c
++++ b/source3/modules/vfs_fruit.c
+@@ -1787,7 +1787,9 @@ static int fruit_openat(vfs_handle_struct *handle,
+ 		return fd;
+ 	}
+ 
+-	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
++	if ((how->resolve & ~(VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			      VFS_OPEN_HOW_RESOLVE_NO_XDEV)) != 0)
++	{
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+-- 
+2.53.0
+
+
+From 4132b12d9b86df111ef8101c3432cd364f47eff4 Mon Sep 17 00:00:00 2001
+From: Samuel Cabrero <scabrero@samba.org>
+Date: Thu, 9 Oct 2025 13:05:16 +0200
+Subject: [PATCH 58/59] vfs:streams_xattr: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
+
+The open function returns a fake fd. Extended attributes will be stored by
+vfs_xattr_tdb or vfs_default.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
+
+Signed-off-by: Samuel Cabrero <scabrero@samba.org>
+Reviewed-by: Ralph Boehme <slow@samba.org>
+
+Autobuild-User(master): Samuel Cabrero <scabrero@samba.org>
+Autobuild-Date(master): Tue Nov 18 09:08:38 UTC 2025 on atb-devel-224
+---
+ source3/modules/vfs_streams_xattr.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/source3/modules/vfs_streams_xattr.c b/source3/modules/vfs_streams_xattr.c
+index ac01cc46043..6dd4b58b642 100644
+--- a/source3/modules/vfs_streams_xattr.c
++++ b/source3/modules/vfs_streams_xattr.c
+@@ -416,7 +416,9 @@ static int streams_xattr_openat(struct vfs_handle_struct *handle,
+ 					   how);
+ 	}
+ 
+-	if ((how->resolve & ~VFS_OPEN_HOW_WITH_BACKUP_INTENT) != 0) {
++	if ((how->resolve & ~(VFS_OPEN_HOW_WITH_BACKUP_INTENT |
++			      VFS_OPEN_HOW_RESOLVE_NO_XDEV)) != 0)
++	{
+ 		errno = ENOSYS;
+ 		return -1;
+ 	}
+-- 
+2.53.0
+
+
+From e994ad2ede02b71a600de0133d6a374efd8f70fb Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Tue, 7 Apr 2026 16:28:05 +0200
+Subject: [PATCH 59/59] smbdotconf: Add "automount fs types" to smb.conf
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This adds a new global parameter "automount fs types" that allows
+administrators to configure additional filesystem types that should
+trigger automounting, beyond the always-supported autofs filesystem.
+
+To enable 'samba unaware FS' automounting, add:
+
+    automount fs types = 0x12345678
+
+This allows e.g. ZFS snapshots in <dataset root>/.zfs/snapshot to be
+mounted. To find out the magic number that is not listed
+in /usr/include/linux/magic.h, run:
+
+    stat -f -c '0x%t' /path/to/mountpoint
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15991
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Samuel Cabrero <scabrero@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Mon Apr 20 19:57:42 UTC 2026 on atb-devel-224
+---
+ docs-xml/smbdotconf/misc/automountfstypes.xml | 24 ++++++++++++++
+ source3/smbd/open.c                           | 31 +++++++++++++++++++
+ 2 files changed, 55 insertions(+)
+ create mode 100644 docs-xml/smbdotconf/misc/automountfstypes.xml
+
+diff --git a/docs-xml/smbdotconf/misc/automountfstypes.xml b/docs-xml/smbdotconf/misc/automountfstypes.xml
+new file mode 100644
+index 00000000000..4c5bc510520
+--- /dev/null
++++ b/docs-xml/smbdotconf/misc/automountfstypes.xml
+@@ -0,0 +1,24 @@
++<samba:parameter name="automount fs types"
++                 context="G"
++                 type="cmdlist"
++                 xmlns:samba="http://www.samba.org/samba/DTD/samba-doc">
++<description>
++	<para>This parameter specifies a list of additional filesystem magic numbers
++	that should trigger automounting when accessed.</para>
++
++	<para>The values should be specified as hexadecimal numbers (with or without
++	0x prefix), separated by spaces or commas.</para>
++
++	<para>Note: This parameter is only available on Linux systems.</para>
++
++	<para>To find the filesystem magic number for a mounted filesystem,
++	consult /usr/include/linux/magic.h or call:
++	<command>stat -f -c '0x%t' /path/to/mountpoint</command></para>
++
++	<para>Note: autofs (0x187) is always checked and does not need to be included
++	in this list.</para>
++</description>
++
++<value type="default"></value>
++<value type="example">0xA0B0C0D0 0x12345678</value>
++</samba:parameter>
+diff --git a/source3/smbd/open.c b/source3/smbd/open.c
+index 739fb224b0b..00dabc5ac95 100644
+--- a/source3/smbd/open.c
++++ b/source3/smbd/open.c
+@@ -42,6 +42,7 @@
+ #include "locking/leases_db.h"
+ #include "librpc/gen_ndr/ndr_leases_db.h"
+ #include "lib/util/time_basic.h"
++#include "lib/util/smb_strtox.h"
+ #include "source3/smbd/dir.h"
+ 
+ #if defined(HAVE_LINUX_MAGIC_H)
+@@ -879,6 +880,8 @@ static bool fsp_is_automount_mountpoint(struct files_struct *fsp, int old_fd)
+ #if defined(HAVE_FSTATFS) && defined(HAVE_LINUX_MAGIC_H)
+ 	struct statfs sbuf = {};
+ 	int ret;
++	const char **fs_types_list = NULL;
++	int i;
+ 
+ 	if (!S_ISDIR(fsp->fsp_name->st.st_ex_mode)) {
+ 		return false;
+@@ -892,6 +895,34 @@ static bool fsp_is_automount_mountpoint(struct files_struct *fsp, int old_fd)
+ 	if (sbuf.f_type == AUTOFS_SUPER_MAGIC) {
+ 		return true;
+ 	}
++
++	/* Check for additional filesystem types from configuration */
++	fs_types_list = lp_automount_fs_types();
++	if (fs_types_list == NULL) {
++		return false;
++	}
++
++	for (i = 0; fs_types_list[i] != NULL; i++) {
++		unsigned long long fs_type_val;
++		int error = 0;
++
++		fs_type_val = smb_strtoull(fs_types_list[i],
++					   NULL,
++					   0,
++					   &error,
++					   SMB_STR_FULL_STR_CONV);
++		if (error != 0) {
++			DBG_WARNING(
++				"Invalid value in 'automount fs types': %s\n",
++				fs_types_list[i]);
++			continue;
++		}
++
++		if (sbuf.f_type == fs_type_val) {
++			return true;
++		}
++	}
++
+ 	return false;
+ #else
+ 	return false;
 -- 
 2.53.0
 
