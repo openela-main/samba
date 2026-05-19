@@ -1,8 +1,8 @@
 ## START: Set by rpmautospec
-## (rpmautospec version 0.6.5)
+## (rpmautospec version 0.8.3)
 ## RPMAUTOSPEC: autorelease, autochangelog
 %define autorelease(e:s:pb:n) %{?-p:0.}%{lua:
-    release_number = 22;
+    release_number = 8;
     base_release_number = tonumber(rpm.expand("%{?-b*}%{!?-b:1}"));
     print(release_number + base_release_number - 1);
 }%{?-e:.%{-e*}}%{?-s:.%{-s*}}%{!?-n:%{?dist}}
@@ -117,13 +117,20 @@
 %bcond etcd_mutex 0
 %endif
 
+# Build the prometheus exporter by default on Fedora
+%if 0%{?fedora}
+%bcond prometheus 1
+%else
+%bcond prometheus 0
+%endif
+
 %ifarch aarch64 ppc64le s390x x86_64 riscv64
 %bcond lmdb 1
 %else
 %bcond lmdb 0
 %endif
 
-%global samba_version 4.22.4
+%global samba_version 4.23.5
 
 # The release field is extended:
 # <pkgrel>[.<extraver>][.<snapinfo>]%%{?dist}[.<minorbump>]
@@ -169,8 +176,8 @@
 %global libwbclient_so_version 0
 
 %global talloc_version 2.4.3
-%global tdb_version 1.4.13
-%global tevent_version 0.16.2
+%global tdb_version 1.4.14
+%global tevent_version 0.17.1
 
 %global required_mit_krb5 1.20.1
 
@@ -229,11 +236,11 @@ Source202:      samba.abignore
 #
 # git clone git@gitlab.com:samba-redhat/samba.git
 # cd samba
-# git checkout v4-22-redhat
-# git format-patch --stdout -l1 --no-renames -N > redhat-4.22.patch
+# git checkout v4-23-redhat
+# git format-patch --stdout -l1 --no-renames -N > redhat-4.23.patch
 # where N is number of commits
 
-Patch0:        redhat-4.22.patch
+Patch0:        redhat-4.23.patch
 
 Requires(pre): %{name}-common = %{samba_depver}
 Requires: %{name}-common = %{samba_depver}
@@ -334,6 +341,11 @@ BuildRequires: xz
 BuildRequires: zlib-devel >= 1.2.3
 
 BuildRequires: pkgconfig(libsystemd)
+# TODO FIXME This is not in RHEL yet
+%if 0%{?fedora} >= 43
+BuildRequires: pkgconfig(libngtcp2)
+BuildRequires: pkgconfig(libngtcp2_crypto_gnutls)
+%endif
 
 %ifnarch i686
 %if 0%{?fedora} >= 37
@@ -362,6 +374,9 @@ BuildRequires: librados-devel
 %endif
 %if %{with etcd_mutex}
 BuildRequires: python3-etcd
+%endif
+%if %{with prometheus}
+BuildRequires: libevent-devel
 %endif
 
 BuildRequires: cepces-certmonger >= 0.3.8
@@ -1224,6 +1239,18 @@ Support for using an existing CEPH cluster as a mutex helper for CTDB
 #endif with clustering
 %endif
 
+%if %{with prometheus}
+
+%package prometheus
+Summary: SMB Prometheus exporter
+Requires: samba = %{samba_depver}
+
+%description prometheus
+Support for exporting metrics via Prometheus
+
+#endif with prometheus
+%endif
+
 ### LIBLDB
 %package -n libldb
 Summary: A schema-less, ldap like, API and database
@@ -1374,6 +1401,8 @@ if [ -n "${CCACHE}" ]; then
 fi
 %endif
 
+# workaround https://gitlab.com/ita1024/waf/-/issues/2472
+export PYTHONARCHDIR=%{python3_sitearch}
 %configure \
         --enable-fhs \
         --with-piddir=/run \
@@ -1413,6 +1442,9 @@ fi
 %endif
 %if %{with etcd_mutex}
         --enable-etcd-reclock \
+%endif
+%if %{with prometheus}
+        --with-prometheus-exporter \
 %endif
         --with-profiling-data \
         --with-systemd \
@@ -2012,22 +2044,27 @@ fi
 %{_libdir}/samba/libndr-samba4-private-samba.so
 %{_libdir}/samba/libnet-keytab-private-samba.so
 %{_libdir}/samba/libnetif-private-samba.so
+%if 0%{?rhel}
+%{_libdir}/samba/libngtcp2-crypto-gnutls-private-samba.so
+%{_libdir}/samba/libngtcp2-private-samba.so
+%endif
 %{_libdir}/samba/libnpa-tstream-private-samba.so
 %{_libdir}/samba/libposix-eadb-private-samba.so
 %{_libdir}/samba/libprinter-driver-private-samba.so
 %{_libdir}/samba/libprinting-migrate-private-samba.so
+%{_libdir}/samba/libquic-private-samba.so
 %{_libdir}/samba/libregistry-private-samba.so
 %{_libdir}/samba/libsamba-cluster-support-private-samba.so
 %{_libdir}/samba/libsamba-debug-private-samba.so
 %{_libdir}/samba/libsamba-modules-private-samba.so
 %{_libdir}/samba/libsamba-security-private-samba.so
+%{_libdir}/samba/libsamba-security-trusts-private-samba.so
 %{_libdir}/samba/libsamba-sockets-private-samba.so
 %{_libdir}/samba/libsamba3-util-private-samba.so
 %{_libdir}/samba/libsamdb-common-private-samba.so
 %{_libdir}/samba/libsecrets3-private-samba.so
 %{_libdir}/samba/libserver-id-db-private-samba.so
 %{_libdir}/samba/libserver-role-private-samba.so
-%{_libdir}/samba/libsmb-transport-private-samba.so
 %{_libdir}/samba/libsmbclient-raw-private-samba.so
 %{_libdir}/samba/libsmbd-base-private-samba.so
 %{_libdir}/samba/libsmbd-shim-private-samba.so
@@ -2123,6 +2160,7 @@ fi
 %{_mandir}/man8/net.8*
 %{_mandir}/man8/pdbedit.8*
 %{_mandir}/man8/smbpasswd.8*
+%{_datadir}/locale/*/LC_MESSAGES/net.mo
 
 ### TOOLS
 %files tools
@@ -2200,6 +2238,7 @@ fi
 %{_libdir}/samba/ldb/subtree_delete.so
 %{_libdir}/samba/ldb/subtree_rename.so
 %{_libdir}/samba/ldb/tombstone_reanimate.so
+%{_libdir}/samba/ldb/trust_notify.so
 %{_libdir}/samba/ldb/unique_object_sids.so
 %{_libdir}/samba/ldb/update_keytab.so
 %{_libdir}/samba/ldb/vlv.so
@@ -2245,6 +2284,7 @@ fi
 %{_libdir}/samba/service/dns.so
 %{_libdir}/samba/service/dns_update.so
 %{_libdir}/samba/service/drepl.so
+%{_libdir}/samba/service/ft_scanner.so
 %{_libdir}/samba/service/kcc.so
 %{_libdir}/samba/service/kdc.so
 %{_libdir}/samba/service/ldap.so
@@ -2597,6 +2637,7 @@ fi
 %{python3_sitearch}/samba/dcerpc/atsvc.*.so
 %{python3_sitearch}/samba/dcerpc/auth.*.so
 %{python3_sitearch}/samba/dcerpc/base.*.so
+%{python3_sitearch}/samba/dcerpc/bcrypt_rsakey_blob.*.so
 %{python3_sitearch}/samba/dcerpc/claims.*.so
 %{python3_sitearch}/samba/dcerpc/conditional_ace.*.so
 %{python3_sitearch}/samba/dcerpc/dcerpc.*.so
@@ -2612,6 +2653,7 @@ fi
 %{python3_sitearch}/samba/dcerpc/idmap.*.so
 %{python3_sitearch}/samba/dcerpc/initshutdown.*.so
 %{python3_sitearch}/samba/dcerpc/irpc.*.so
+%{python3_sitearch}/samba/dcerpc/keycredlink.*.so
 %{python3_sitearch}/samba/dcerpc/krb5ccache.*.so
 %{python3_sitearch}/samba/dcerpc/krb5pac.*.so
 %{python3_sitearch}/samba/dcerpc/lsa.*.so
@@ -2633,6 +2675,7 @@ fi
 %{python3_sitearch}/samba/dcerpc/spoolss.*.so
 %{python3_sitearch}/samba/dcerpc/srvsvc.*.so
 %{python3_sitearch}/samba/dcerpc/svcctl.*.so
+%{python3_sitearch}/samba/dcerpc/tpm20_rsakey_blob.*.so
 %{python3_sitearch}/samba/dcerpc/unixinfo.*.so
 %{python3_sitearch}/samba/dcerpc/winbind.*.so
 %{python3_sitearch}/samba/dcerpc/windows_event_ids.*.so
@@ -3136,6 +3179,7 @@ fi
 %{python3_sitearch}/samba/tests/__pycache__/auth_log_netlogon_bad_creds.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/auth_log_samlogon.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/auth_log_winbind.*.pyc
+%{python3_sitearch}/samba/tests/__pycache__/bcrypt_rsakey_blob.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/common.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/complex_expressions.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/compression.*.pyc
@@ -3177,6 +3221,7 @@ fi
 %{python3_sitearch}/samba/tests/__pycache__/hostconfig.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/imports.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/join.*.pyc
+%{python3_sitearch}/samba/tests/__pycache__/key_credential_link.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/krb5_credentials.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/ldap_raw.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/ldap_referrals.*.pyc
@@ -3254,6 +3299,7 @@ fi
 %{python3_sitearch}/samba/tests/__pycache__/subunitrun.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/tdb_util.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/token_factory.*.pyc
+%{python3_sitearch}/samba/tests/__pycache__/tpm20_rsakey_blob.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/upgrade.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/upgradeprovision.*.pyc
 %{python3_sitearch}/samba/tests/__pycache__/upgradeprovisionneeddc.*.pyc
@@ -3271,6 +3317,7 @@ fi
 %{python3_sitearch}/samba/tests/auth_log_pass_change.py
 %{python3_sitearch}/samba/tests/auth_log_samlogon.py
 %{python3_sitearch}/samba/tests/auth_log_winbind.py
+%{python3_sitearch}/samba/tests/bcrypt_rsakey_blob.py
 %dir %{python3_sitearch}/samba/tests/blackbox
 %{python3_sitearch}/samba/tests/blackbox/__init__.py
 %dir %{python3_sitearch}/samba/tests/blackbox/__pycache__
@@ -3339,6 +3386,7 @@ fi
 %{python3_sitearch}/samba/tests/dcerpc/__pycache__/array.*.pyc
 %{python3_sitearch}/samba/tests/dcerpc/__pycache__/bare.*.pyc
 %{python3_sitearch}/samba/tests/dcerpc/__pycache__/binding.*.pyc
+%{python3_sitearch}/samba/tests/dcerpc/__pycache__/dfs.*.pyc
 %{python3_sitearch}/samba/tests/dcerpc/__pycache__/dnsserver.*.pyc
 %{python3_sitearch}/samba/tests/dcerpc/__pycache__/integer.*.pyc
 %{python3_sitearch}/samba/tests/dcerpc/__pycache__/lsa.*.pyc
@@ -3359,6 +3407,7 @@ fi
 %{python3_sitearch}/samba/tests/dcerpc/array.py
 %{python3_sitearch}/samba/tests/dcerpc/bare.py
 %{python3_sitearch}/samba/tests/dcerpc/binding.py
+%{python3_sitearch}/samba/tests/dcerpc/dfs.py
 %{python3_sitearch}/samba/tests/dcerpc/dnsserver.py
 %{python3_sitearch}/samba/tests/dcerpc/integer.py
 %{python3_sitearch}/samba/tests/dcerpc/lsa.py
@@ -3431,6 +3480,7 @@ fi
 %{python3_sitearch}/samba/tests/kcc/graph_utils.py
 %{python3_sitearch}/samba/tests/kcc/kcc_utils.py
 %{python3_sitearch}/samba/tests/kcc/ldif_import_export.py
+%{python3_sitearch}/samba/tests/key_credential_link.py
 %dir %{python3_sitearch}/samba/tests/krb5
 %dir %{python3_sitearch}/samba/tests/krb5/__pycache__
 %{python3_sitearch}/samba/tests/krb5/__pycache__/alias_tests.*.pyc
@@ -3546,6 +3596,12 @@ fi
 %{python3_sitearch}/samba/tests/net_join_no_spnego.py
 %{python3_sitearch}/samba/tests/net_join.py
 %{python3_sitearch}/samba/tests/netlogonsvc.py
+%dir %{python3_sitearch}/samba/tests/nss
+%dir %{python3_sitearch}/samba/tests/nss/__pycache__
+%{python3_sitearch}/samba/tests/nss/__pycache__/base.*.pyc
+%{python3_sitearch}/samba/tests/nss/__pycache__/group.*.pyc
+%{python3_sitearch}/samba/tests/nss/base.py
+%{python3_sitearch}/samba/tests/nss/group.py
 %{python3_sitearch}/samba/tests/ntacls.py
 %{python3_sitearch}/samba/tests/ntacls_backup.py
 %{python3_sitearch}/samba/tests/ntlmdisabled.py
@@ -3706,10 +3762,21 @@ fi
 %{python3_sitearch}/samba/tests/subunitrun.py
 %{python3_sitearch}/samba/tests/tdb_util.py
 %{python3_sitearch}/samba/tests/token_factory.py
+%{python3_sitearch}/samba/tests/tpm20_rsakey_blob.py
 %{python3_sitearch}/samba/tests/upgrade.py
 %{python3_sitearch}/samba/tests/upgradeprovision.py
 %{python3_sitearch}/samba/tests/upgradeprovisionneeddc.py
 %{python3_sitearch}/samba/tests/usage.py
+%dir %{python3_sitearch}/samba/tests/varlink
+%dir %{python3_sitearch}/samba/tests/varlink/__pycache__
+%{python3_sitearch}/samba/tests/varlink/__pycache__/base.*.pyc
+%{python3_sitearch}/samba/tests/varlink/__pycache__/getgrouprecord.*.pyc
+%{python3_sitearch}/samba/tests/varlink/__pycache__/getmemberships.*.pyc
+%{python3_sitearch}/samba/tests/varlink/__pycache__/getuserrecord.*.pyc
+%{python3_sitearch}/samba/tests/varlink/base.py
+%{python3_sitearch}/samba/tests/varlink/getgrouprecord.py
+%{python3_sitearch}/samba/tests/varlink/getmemberships.py
+%{python3_sitearch}/samba/tests/varlink/getuserrecord.py
 %{python3_sitearch}/samba/tests/xattr.py
 
 ### TEST
@@ -3778,6 +3845,7 @@ fi
 %config(noreplace) %{_sysconfdir}/security/pam_winbind.conf
 %{_mandir}/man5/pam_winbind.conf.5*
 %{_mandir}/man8/pam_winbind.8*
+%{_datadir}/locale/*/LC_MESSAGES/pam_winbind.mo
 
 %if %{with clustering}
 %files -n ctdb
@@ -3927,6 +3995,13 @@ fi
 %{_mandir}/man1/winexe.1.gz
 %endif
 
+%if %{with prometheus}
+%files prometheus
+%{_bindir}/smb_prometheus_endpoint
+%{_mandir}/man8/smb_prometheus_endpoint.8.gz
+#endif with prometheus
+
+%endif
 %files -n libldb
 %license lib/ldb/LICENSE
 %{_libdir}/libldb.so.*
@@ -3988,192 +4063,192 @@ fi
 
 %changelog
 ## START: Generated by rpmautospec
-* Wed Apr 22 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-121
-- Fix samba automount triggering for more file systems
-- resolves: RHEL-137447
-
-* Wed Apr 22 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-120
+* Tue Apr 21 2026 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.5-107
 - Fix 'net ads join' AD replication race with multiple DCs
-- resolves: RHEL-169667
+- resolves: RHEL-169668
 
-* Thu Feb 19 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-119
+* Tue Apr 21 2026 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.5-106
+- Fix samba automount triggering for more file systems
+- resolves: RHEL-137446
+
+* Thu Feb 19 2026 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.5-105
 - Fix regression with --use-kerberos=desired for smbclient
-- resolves: RHEL-150823
+- resolves: RHEL-150820
 
-* Mon Feb 09 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-118
-- Fix samba-bgqd to load [printers] share
-- resolves: RHEL-147859
-
-* Mon Feb 09 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-117
+* Wed Feb 11 2026 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.5-104
 - Fix 'net ads kerberos kinit' to use default ccache name from krb5.conf
-- resolves: RHEL-147420
+- resolves: RHEL-147417
 
-* Mon Feb 02 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-116
-- Fix 'net ads kerberos kinit -P' with option '--use-krb5-ccache' (v2)
-- resolves: RHEL-144593
+* Wed Feb 11 2026 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.5-103
+- Fix samba-bgqd to load [printers] share
+- resolves: RHEL-53167
 
-* Tue Jan 27 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-115
+* Tue Jan 27 2026 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.5-102
 - Fix 'net ads kerberos kinit -P' with option '--use-krb5-ccache'
-- resolves: RHEL-144593
+- resolves: RHEL-144586
 
-* Tue Jan 27 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-114
+* Tue Jan 27 2026 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.5-101
 - Fix winbind memory leak seen with long living rpcd_* workers
-- resolves: RHEL-144499
+- resolves: RHEL-144479
 
-* Fri Jan 23 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-113
-- Fix ERROR: talloc_free with references
-- related: RHEL-143402
+* Fri Jan 23 2026 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.5-100
+- Update to version 4.23.5
+- resolves: RHEL-138263 - Fix winbind group resolution
+- resolves: RHEL-141012 - Fix winbind crash
 
-* Thu Jan 22 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-112
-- Fix winbind group resolution
-- resolves: RHEL-143402
-
-* Thu Jan 22 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-111
-- Revert samba automounter triggering fix
-- reverts: RHEL-137447
-
-* Tue Jan 06 2026 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-110
-- Fix samba automounter triggering
-- resolves: RHEL-137447
-
-* Thu Dec 18 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-109
+* Thu Dec 18 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.4-101
 - Remove libldb dependency to samba-common-libs
-- resolves: RHEL-133005
+- resolves: RHEL-132975
 
-* Wed Dec 17 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-108
-- Remove unexpected dependency of libldb to samba
+* Mon Dec 15 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.4-100
+- Update to version 4.23.4
+- resolves: RHEL-114545 - Update to version 4.23.4
+- resolves: RHEL-132338 - Fix Time Machine backup
+- resolves: RHEL-132975 - Remove unexpected dependency of libldb to samba
 
-* Wed Dec 17 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-107
-- Fix Time Machine backup
+* Thu Nov 20 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.3-101
+- Remove osci.brew-build.tier0.functional from gating.yaml
 
-* Thu Sep 11 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-106
+* Fri Nov 07 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.3-100
+- Update to version 4.23.3
+- resolves: RHEL-114545
+
+* Thu Sep 18 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.0-101
+- Update to pre-version of 4.23.1
+- resolves: RHEL-114545
+
+* Sat Sep 13 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.23.0-100
+- Update to version 4.23.0
+- resolves: RHEL-114545
+
+* Thu Sep 11 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.4-106
 - resolves: RHEL-106240 - Fix 'net ads join' in setups with multiple DCs
 
-* Mon Aug 25 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-105
+* Mon Aug 25 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.4-105
 - rpminspect.yaml: skip failing annocheck test in smbtorture
 
-* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-104
+* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.4-104
 - resolves: RHEL-101759 - Fix DC discovery after Windows netlogon hardening
   (follow-up, main fix is in samba-4.22.2-103.el10)
 
-* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-103
+* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.4-103
 - resolves: RHEL-110529 - Fix winbind fork bomb in 'IPA with AD trust'
   environment
 
-* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-102
+* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.4-102
 - resolves: RHEL-102931 - Fix samba-gpupdate to process empty GPO Link
 
-* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-101
+* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.4-101
 - resolves: RHEL-104704 - Fix 'net ads kerberos kinit'
 
-* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.4-100
+* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.4-100
 - Update to version 4.22.4
 - resolves: RHEL-89870
 
-* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.3-102
+* Thu Aug 21 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.3-102
 - resolves: RHEL-101567 - Update '@printadmin' in sbm.conf
 
-* Tue Jul 08 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.3-101
+* Tue Jul 08 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.3-101
 - resolves: RHEL-102369 - Fix issue with unresponsive second DC when using
   idmap_ad
 
-* Tue Jul 08 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.3-100
+* Tue Jul 08 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.3-100
 - Update to version 4.22.3
 - resolves: RHEL-89870
 
-* Mon Jul 07 2025 Andreas Schneider <asn@redhat.com> - 0:4.22.2-103
+* Mon Jul 07 2025 Andreas Schneider <asn@redhat.com> - 2:4.22.2-103
 - Fix DC discovery after Windows netlogon hardening.
 
-* Tue Jun 10 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.2-102
+* Tue Jun 10 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.2-102
 - resolves: RHEL-87570 - Fix deadlock between two smbd processes
 
-* Tue Jun 10 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.2-101
+* Tue Jun 10 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.2-101
 - resolves: RHEL-85335 - Fix winbindd memory leak
 
-* Tue Jun 10 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.22.2-100
+* Tue Jun 10 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.22.2-100
 - Update to version 4.22.2
 - resolves: RHEL-89870
 
-* Fri Mar 14 2025 David Abdurachmanov <davidlt@rivosinc.com> - 0:4.21.3-103
+* Fri Mar 14 2025 David Abdurachmanov <davidlt@rivosinc.com> - 2:4.21.3-103
 - Enable lmdb on riscv64
 
-* Mon Feb 17 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.3-102
+* Mon Feb 17 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.3-102
 - resolves: RHEL-73183 - Fix keytab generation
 
-* Tue Jan 07 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.3-101
+* Tue Jan 07 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.3-101
 - resolves: RHEL-2223 - Fix vfs_crossrename
 
-* Tue Jan 07 2025 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.3-100
+* Tue Jan 07 2025 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.3-100
 - Update to version 4.21.3
 - related: RHEL-59777
 
-* Tue Nov 26 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.2-102
+* Tue Nov 26 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.2-102
 - resolves: RHEL-68945 - Fix libsmbclient for mounting CIFS share from
   gnome
 
-* Mon Nov 25 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.2-101
+* Mon Nov 25 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.2-101
 - resolves: RHEL-65730 - Fix winexe
 
-* Mon Nov 25 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.2-100
+* Mon Nov 25 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.2-100
 - Update to version 4.21.2
 - related: RHEL-59777
 
-* Wed Oct 23 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.1-104
+* Wed Oct 23 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.1-104
 - Add always do samba-devel: Requires: %%{name}-dc-libs
 
-* Tue Oct 22 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.1-103
+* Tue Oct 22 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.1-103
 - Add Requires: libwbclient
 
-* Tue Oct 22 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.1-102
+* Tue Oct 22 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.1-102
 - Fix samba 4.20 -> 4.21 upgrade for the removed python3-samba-devel
 
-* Tue Oct 15 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.1-101
+* Tue Oct 15 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.1-101
 - Fix several rpminspect warnings
 
-* Mon Oct 14 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.1-100
+* Mon Oct 14 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.1-100
 - Update to version 4.21.1
 - related: RHEL-59777
 
-* Thu Oct 03 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.0-106
+* Thu Oct 03 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.0-106
 - resolves: RHEL-41041 - Fix smbd-notifyd O(n*n) performance issue
 
-* Thu Oct 03 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.0-105
+* Thu Oct 03 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.0-105
 - resolves: RHEL-61401 - Package certs directories in samba-common for
   gpupdate [rhel-10.0]
 
-* Wed Oct 02 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.0-104
+* Wed Oct 02 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.0-104
 - resolves: RHEL-53006 - [RFE] update keytab entries when renewing the
   machine account password
 
-* Wed Oct 02 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.0-103
+* Wed Oct 02 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.0-103
 - resolves: RHEL-34922 - Address SAST findings detected by static analyzers
   (libldb)
 
-* Wed Oct 02 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.0-102
+* Wed Oct 02 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.0-102
 - resolves: RHEL-59377 - Address SAST findings detected by static analyzers
   (samba)
 
-* Wed Oct 02 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.0-101
+* Wed Oct 02 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.0-101
 - related: RHEL-59777 - Build with ceph again for ppc64le
 
-* Fri Sep 27 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.21.0-100
+* Fri Sep 27 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.21.0-100
 - Update to version 4.21.0
 - resolves: RHEL-59777
 
-* Thu Aug 01 2024 Pavel Filipenský <pfilipensky@samba.org> - 0:4.20.2-104
+* Thu Aug 01 2024 Pavel Filipenský <pfilipensky@samba.org> - 2:4.20.2-104
 - resolves: RHEL-47308 Allow to run samba-bgqd as a standalone systemd
   service
 
-* Thu Jul 04 2024 Andreas Schneider <asn@redhat.com> - 0:4.20.2-103
+* Thu Jul 04 2024 Andreas Schneider <asn@redhat.com> - 2:4.20.2-103
 - related: RHEL-33591 - Rebuild package to run tests
 
-* Wed Jul 03 2024 Andreas Schneider <asn@redhat.com> - 0:4.20.2-102
+* Wed Jul 03 2024 Andreas Schneider <asn@redhat.com> - 2:4.20.2-102
 - resolves: RHEL-45838 - Fix idmap_ad with trusted domains
 
-* Mon Jul 01 2024 Andreas Schneider <asn@redhat.com> - 0:4.20.2-100
+* Mon Jul 01 2024 Andreas Schneider <asn@redhat.com> - 2:4.20.2-100
 - related: RHEL-33591 - Update to version 4.20.2
 
-* Mon Jun 24 2024 Troy Dawson <tdawson@redhat.com> - 0:4.20.1-103
+* Mon Jun 24 2024 Troy Dawson <tdawson@redhat.com> - 2:4.20.1-103
 - Bump release for June 2024 mass rebuild
 
 * Mon Jun 03 2024 Andreas Schneider <asn@redhat.com> - 4.20.1-102
