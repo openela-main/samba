@@ -147,7 +147,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.19.4
-%global baserelease 15
+%global baserelease 16
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -4479,6 +4479,12 @@ fi
 %endif
 
 %changelog
+* Wed May 20 2026 Pavel Filipenský <pfilipen@redhat.com> - 4.19.4-16
+- resolves: RHEL-156322 - Fix CVE-2026-3012
+- resolves: RHEL-161647 - Fix CVE-2026-4480
+- resolves: RHEL-177933 - Fix CVE-2026-4408
+- resolves: RHEL-166866 - Build hardening, stack protection with FORTIFY_SOURCE
+
 * Tue Jan 27 2026 Pavel Filipenský <pfilipen@redhat.com> - 4.19.4-15
 - resolves: RHEL-132396 - Fix deadlock between two smbd processes
 
