@@ -1,7 +1,7 @@
 From 3c29fc78029e1274f931e171c9e04c19ad0182c1 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:05:54 +0300
-Subject: [PATCH 001/122] gp: Support more global trust directories
+Subject: [PATCH 001/123] gp: Support more global trust directories
 
 In addition to the SUSE global trust directory, add support for RHEL and
 Debian-based distributions (including Ubuntu).
@@ -66,7 +66,7 @@ index 312c8ddf467..1b90ab46e90 100644
 From 063606e8ec83a58972df47eb561ab267f8937ba4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 17 Aug 2023 01:09:28 +0300
-Subject: [PATCH 002/122] gp: Support update-ca-trust helper
+Subject: [PATCH 002/123] gp: Support update-ca-trust helper
 
 This is used on RHEL/Fedora instead of update-ca-certificates. They
 behave similarly so it's enough to change the command name.
@@ -110,7 +110,7 @@ index 1b90ab46e90..cefdafa21b2 100644
 From 3b548bf280ca59ef12a7af10a9131813067a850a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 11 Aug 2023 18:46:42 +0300
-Subject: [PATCH 003/122] gp: Change root cert extension suffix
+Subject: [PATCH 003/123] gp: Change root cert extension suffix
 
 On Ubuntu, certificates must end in '.crt' in order to be considered by
 the `update-ca-certificates` helper.
@@ -144,7 +144,7 @@ index cefdafa21b2..c562722906b 100644
 From 7592ed5032836dc43f657f66607a0a4661edcdb4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:06:43 +0300
-Subject: [PATCH 004/122] gp: Test with binary content for certificate data
+Subject: [PATCH 004/123] gp: Test with binary content for certificate data
 
 This fails all GPO-related tests that call `gpupdate --rsop`.
 
@@ -222,7 +222,7 @@ index 00000000000..0aad59607c2
 From 7f7b235bda9e85c5ea330e52e734d1113a884571 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:20:11 +0300
-Subject: [PATCH 005/122] gp: Convert CA certificates to base64
+Subject: [PATCH 005/123] gp: Convert CA certificates to base64
 
 I don't know whether this applies universally, but in our case the
 contents of `es['cACertificate'][0]` are binary, so cleanly converting
@@ -295,7 +295,7 @@ index 0aad59607c2..00000000000
 From 49cc74015a603e80048a38fe635cd1ac28938ee4 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:16:23 +0300
-Subject: [PATCH 006/122] gp: Test adding new cert templates enforces changes
+Subject: [PATCH 006/123] gp: Test adding new cert templates enforces changes
 
 Ensure that cepces-submit reporting additional templates and re-applying
 will enforce the updated policy.
@@ -428,7 +428,7 @@ index 00000000000..4edc1dce730
 From 4c0906bd79f030e591701234bc54bc749a42d686 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:37:17 +0300
-Subject: [PATCH 007/122] gp: Template changes should invalidate cache
+Subject: [PATCH 007/123] gp: Template changes should invalidate cache
 
 If certificate templates are added or removed, the autoenroll extension
 should react to this and reapply the policy. Previously this wasn't
@@ -493,7 +493,7 @@ index 4edc1dce730..00000000000
 From e61f30dc2518d5a1c239f090baea4a309307f3f8 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 18 Aug 2023 17:26:59 +0300
-Subject: [PATCH 008/122] gp: Test disabled enrollment unapplies policy
+Subject: [PATCH 008/123] gp: Test disabled enrollment unapplies policy
 
 For this we need to stage a Registry.pol file with certificate
 autoenrollment enabled, but with checkboxes unticked.
@@ -594,7 +594,7 @@ index 00000000000..83bc9f0ac1f
 From 7757b9b48546d71e19798d1260da97780caa99c3 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Wed, 16 Aug 2023 12:33:59 +0300
-Subject: [PATCH 009/122] gp: Send list of keys instead of dict to remove
+Subject: [PATCH 009/123] gp: Send list of keys instead of dict to remove
 
 `cache_get_all_attribute_values` returns a dict whereas we need to pass
 a list of keys to `remove`. These will be interpolated in the gpdb search.
@@ -640,7 +640,7 @@ index 83bc9f0ac1f..00000000000
 From 4e9b2e6409c5764ec0e66cc6c90b08e70f702e7c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 9 Jan 2024 08:50:01 +0100
-Subject: [PATCH 010/122] python:gp: Print a nice message if cepces-submit
+Subject: [PATCH 010/123] python:gp: Print a nice message if cepces-submit
  can't be found
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15552
@@ -697,7 +697,7 @@ index 64c35782ae8..08d1a7348cd 100644
 From fb3aefff51c02cf8ba3f8dfeb7d3f971e8d4902a Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Mon, 8 Jan 2024 18:05:08 +0200
-Subject: [PATCH 011/122] gpo: Test certificate policy without NDES
+Subject: [PATCH 011/123] gpo: Test certificate policy without NDES
 
 As of 8231eaf856b, the NDES feature is no longer required on Windows, as
 cert auto-enroll can use the certificate from the LDAP request.
@@ -901,7 +901,7 @@ index 00000000000..f1e590bc7d8
 From 1a9af36177c7491687c75df151474bb10285f00e Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Thu, 18 Jan 2024 20:23:24 +0200
-Subject: [PATCH 012/122] gpo: Decode base64 root cert before importing
+Subject: [PATCH 012/123] gpo: Decode base64 root cert before importing
 
 The reasoning behind this is described in the previous commit message,
 but essentially this should either be wrapped in certificate blocks and
@@ -954,7 +954,7 @@ index f1e590bc7d8..00000000000
 From f5fc88f9ae255f4dc135580f0fa4a02f5addc390 Mon Sep 17 00:00:00 2001
 From: Gabriel Nagy <gabriel.nagy@canonical.com>
 Date: Fri, 19 Jan 2024 11:36:19 +0200
-Subject: [PATCH 013/122] gpo: Do not get templates list on first run
+Subject: [PATCH 013/123] gpo: Do not get templates list on first run
 
 This is a visual fix and has no impact on functionality apart from
 cleaner log messages.
@@ -1003,7 +1003,7 @@ index cd5e54f1110..559c903e1a2 100644
 From e8a6219181f2af87813b53fd09684650c1aa6f90 Mon Sep 17 00:00:00 2001
 From: David Mulder <dmulder@samba.org>
 Date: Fri, 5 Jan 2024 08:47:07 -0700
-Subject: [PATCH 014/122] gp: Skip site GP list if no site is found
+Subject: [PATCH 014/123] gp: Skip site GP list if no site is found
 
 [MS-GPOL] 3.2.5.1.4 Site Search says if the site
 search returns ERROR_NO_SITENAME, the GP site
@@ -1071,7 +1071,7 @@ index 617ef79350c..babd8f90748 100644
 From d0d1a890d6f2466691fa4ee663232ee0bd1c3776 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:14:30 +0100
-Subject: [PATCH 015/122] python:gp: Avoid path check for cepces-submit
+Subject: [PATCH 015/123] python:gp: Avoid path check for cepces-submit
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1117,7 +1117,7 @@ index 559c903e1a2..7325d5132cf 100644
 From 7f6c9a4945635c6eb8ada2255bd0febbf0f4e540 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 14:07:47 +0100
-Subject: [PATCH 016/122] python:gp: Improve logging for certificate enrollment
+Subject: [PATCH 016/123] python:gp: Improve logging for certificate enrollment
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1177,7 +1177,7 @@ index 7325d5132cf..a25a9678587 100644
 From 5321d5b5bd24d7659743576f2e12a7dc0a93a828 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:04:36 +0100
-Subject: [PATCH 017/122] python:gp: Do not print an error, if CA already
+Subject: [PATCH 017/123] python:gp: Do not print an error, if CA already
  exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1224,7 +1224,7 @@ index a25a9678587..0b23cd688db 100644
 From 6a7a8a4090b8cdb8e71f4ad590260ceeda253ce2 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:02 +0100
-Subject: [PATCH 018/122] python:gp: Do not print an error if template already
+Subject: [PATCH 018/123] python:gp: Do not print an error if template already
  exists
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1271,7 +1271,7 @@ index 0b23cd688db..db681cb6f69 100644
 From 43dc3d5d833bc1db885eb45402decd3225a7c946 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:05:24 +0100
-Subject: [PATCH 019/122] python:gp: Log an error if update fails
+Subject: [PATCH 019/123] python:gp: Log an error if update fails
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1308,7 +1308,7 @@ index db681cb6f69..c8ad2039dc6 100644
 From d8276d6a098d10f405b8f24c4dfb82af4496607c Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jan 2024 15:46:24 +0100
-Subject: [PATCH 020/122] python:gp: Improve working of log messages to avoid
+Subject: [PATCH 020/123] python:gp: Improve working of log messages to avoid
  confusion
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1361,7 +1361,7 @@ index c8ad2039dc6..2b7f7d22c2b 100644
 From 585357bf0d8889747a2769c2451ee34766087d95 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 29 Jan 2024 17:46:30 +0100
-Subject: [PATCH 021/122] python:gp: Fix logging with gp
+Subject: [PATCH 021/123] python:gp: Fix logging with gp
 
 This allows enable INFO level logging with: `samba-gpupdate -d3`
 
@@ -1403,7 +1403,7 @@ index a74a8707d50..c3de32825db 100644
 From 14ceb0b5f2f954bbabdaf78b8185fc515e3c8294 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 13 Mar 2024 13:55:41 +0100
-Subject: [PATCH 022/122] docs-xml: Add parameter all_groupmem to idmap_ad
+Subject: [PATCH 022/123] docs-xml: Add parameter all_groupmem to idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1445,7 +1445,7 @@ index b364bbfa231..de6d36afe95 100644
 From ac4184c8c3220263cb6f1a46a012533ed1c4e047 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 12 Mar 2024 13:20:24 +0100
-Subject: [PATCH 023/122] s3:winbindd: Improve performance of lookup_groupmem()
+Subject: [PATCH 023/123] s3:winbindd: Improve performance of lookup_groupmem()
  in idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1528,7 +1528,7 @@ index d7a665abbc6..e625aa6473f 100644
 From d0e2002efcc37055b35c351a6b936e6ab89fad32 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 25 Mar 2024 22:38:18 +0100
-Subject: [PATCH 024/122] selftest: Add "winbind expand groups = 1" to
+Subject: [PATCH 024/123] selftest: Add "winbind expand groups = 1" to
  setup_ad_member_idmap_ad
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1562,7 +1562,7 @@ index 44ac4a5901a..606c65f8ab1 100755
 From 9625b6aed981aa4e70fe11d9d1acdb54db7591a3 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 14 Mar 2024 15:24:21 +0100
-Subject: [PATCH 025/122] tests: Add a test for "all_groups=no" to
+Subject: [PATCH 025/123] tests: Add a test for "all_groups=no" to
  test_idmap_ad.sh
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1635,7 +1635,7 @@ index 7ae112ada71..1d4bd395ba9 100755
 From e5890e63c35a4a5af29ae16e6dd734c4a3a304cc Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:51:53 +0200
-Subject: [PATCH 026/122] s3:libads: Allow get_kdc_ip_string() to lookup the
+Subject: [PATCH 026/123] s3:libads: Allow get_kdc_ip_string() to lookup the
  KDCs IP
 
 Remove the requirement to provide an IP address. We should look up the
@@ -1700,7 +1700,7 @@ index 50f4a6de3c6..ddf97c11973 100644
 From 96a1ecd8db249fa03db60259cf76fdef9c1bd749 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:53:51 +0200
-Subject: [PATCH 027/122] s3:libads: Do not fail if we don't get an IP passed
+Subject: [PATCH 027/123] s3:libads: Do not fail if we don't get an IP passed
  down
 
 The IP should be optional and we should look it up if not provided.
@@ -1734,7 +1734,7 @@ index ddf97c11973..f74d8eb567c 100644
 From 4934642b7a7d92c6d81ba25ef6e4b66e3805f708 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 28 May 2024 13:54:24 +0200
-Subject: [PATCH 028/122] s3:winbind: Fix idmap_ad creating an invalid local
+Subject: [PATCH 028/123] s3:winbind: Fix idmap_ad creating an invalid local
  krb5.conf
 
 In case of a trusted domain, we are providing the realm of the primary
@@ -1790,7 +1790,7 @@ index 5c9fe07db95..b8002825161 100644
 From cccc902c64c93db317bf4707d0af5e56b2887286 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Mon, 22 Jul 2024 12:26:55 +0200
-Subject: [PATCH 029/122] s3:notifyd: Use a watcher per db record
+Subject: [PATCH 029/123] s3:notifyd: Use a watcher per db record
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2308,7 +2308,7 @@ index 36c08f47c54..db8e6e1c005 100644
 From b04cb93ee52aac0ce7213d0581d69e852df52d4a Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 5 Feb 2024 15:03:48 +0100
-Subject: [PATCH 030/122] smbd: simplify handling of failing fstat() after
+Subject: [PATCH 030/123] smbd: simplify handling of failing fstat() after
  unlinking file
 
 close_remove_share_mode() already called vfs_stat_fsp(), so we can skip the
@@ -2372,7 +2372,7 @@ index 3581c4b9173..93c12e00eb0 100644
 From 29f0c0fb2f1cb0cfc4c615d31e82048b46a2cb0d Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Tue, 20 Feb 2024 09:26:29 +0000
-Subject: [PATCH 031/122] s3/smbd: If we fail to close file_handle ensure we
+Subject: [PATCH 031/123] s3/smbd: If we fail to close file_handle ensure we
  should reset the fd
 
 if fsp_flags.fstat_before_close == true then close_file_smb will call
@@ -2453,7 +2453,7 @@ index 93c12e00eb0..74be444fef5 100644
 From ed138c4d679e8291de18162e1cac65cc9da33b4d Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Wed, 15 Jan 2025 10:21:19 -0800
-Subject: [PATCH 032/122] auth: Add missing talloc_free() in error code path.
+Subject: [PATCH 032/123] auth: Add missing talloc_free() in error code path.
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2490,7 +2490,7 @@ index b914075d85c..196654b36bd 100644
 From f8a7d7a3e8c3be3c7742c874239766b34c25ef3e Mon Sep 17 00:00:00 2001
 From: Jeremy Allison <jra@samba.org>
 Date: Thu, 16 Jan 2025 16:12:31 -0800
-Subject: [PATCH 033/122] auth: Cleanup exit code paths in
+Subject: [PATCH 033/123] auth: Cleanup exit code paths in
  kerberos_decode_pac().
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -2763,7 +2763,7 @@ index 196654b36bd..abb096bde1b 100644
 From 9fd06d5c331f5babaf417cc7339d12854a79fe4b Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 15 Feb 2024 17:29:46 +0100
-Subject: [PATCH 034/122] s3:libsmb/dsgetdcname: use
+Subject: [PATCH 034/123] s3:libsmb/dsgetdcname: use
  NETLOGON_NT_VERSION_AVOID_NT4EMUL
 
 In 2024 we always want an active directory response...
@@ -2800,7 +2800,7 @@ index 280ccd585b0..6fcaa26810c 100644
 From 58e28d056f2df0906ee77ccfb9b56e8a764b38b4 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Tue, 7 May 2024 14:53:24 +0000
-Subject: [PATCH 035/122] s3:libsmb: allow store_cldap_reply() to work with a
+Subject: [PATCH 035/123] s3:libsmb: allow store_cldap_reply() to work with a
  ipv6 response
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15642
@@ -2858,7 +2858,7 @@ index 6fcaa26810c..da173e7bbb0 100644
 From e4d5269b2359c670acdf0cba81248f148ae68c17 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 11 Oct 2024 13:32:22 +0000
-Subject: [PATCH 036/122] s3:libsmb: let discover_dc_netbios() return
+Subject: [PATCH 036/123] s3:libsmb: let discover_dc_netbios() return
  DOMAIN_CONTROLLER_NOT_FOUND
 
 We may get NT_STATUS_NOT_FOUND when the name can't be resolved
@@ -2904,7 +2904,7 @@ index da173e7bbb0..8278959dd7d 100644
 From d90d2b0e985913247f43192cb94eec0efb3e9046 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Wed, 2 Jul 2025 21:59:48 +0200
-Subject: [PATCH 037/122] s3-winbindd: Fix internal winbind dsgetdcname calls
+Subject: [PATCH 037/123] s3-winbindd: Fix internal winbind dsgetdcname calls
  w.r.t. domain name
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3088,7 +3088,7 @@ index fe93528787d..eca4116d0c8 100644
 From 7da6072ce95bca445368f6d0453247c8f92fcdf2 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 9 May 2025 09:38:41 +0200
-Subject: [PATCH 038/122] s3:winbindd: avoid using any netlogon call to get a
+Subject: [PATCH 038/123] s3:winbindd: avoid using any netlogon call to get a
  dc name
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15876
@@ -3391,7 +3391,7 @@ index f0fd18a8fa6..47c68257b12 100644
 From ad54ceadacfbcf0d9c96ad773e50db96003e2c08 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 23 Jul 2025 15:09:21 +0200
-Subject: [PATCH 039/122] s3:winbindd: Resolve dc name using CLDAP also for
+Subject: [PATCH 039/123] s3:winbindd: Resolve dc name using CLDAP also for
  ROLE_IPA_DC
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3445,7 +3445,7 @@ index 195259daa43..86dbf68f033 100644
 From b73efffbb02903427af2c2cc57171d4848ca11f8 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 08:35:29 +0200
-Subject: [PATCH 040/122] docs-xml: Make smb.conf 'server role' value
+Subject: [PATCH 040/123] docs-xml: Make smb.conf 'server role' value
  consistent with ROLE_IPA_DC in libparam
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3482,7 +3482,7 @@ index 4ea4e4751ee..40244e125ce 100644
 From 832a4e31630fd441f8ab4325439f90d561cb8fa4 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 23:26:02 +0200
-Subject: [PATCH 041/122] s3:netlogon: IPA DC is the PDC as well - allow
+Subject: [PATCH 041/123] s3:netlogon: IPA DC is the PDC as well - allow
  ROLE_IPA_DC in _netr_DsRGetForestTrustInformation()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3522,7 +3522,7 @@ index c5a4b0ef30c..7957d3ab34d 100644
 From 8d5638581dfc539c8524d7a507e8cc8977e827a2 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 4 Aug 2025 23:28:24 +0200
-Subject: [PATCH 042/122] s3:utils: Allow ROLE_IPA_DC to allow to use Kerberos
+Subject: [PATCH 042/123] s3:utils: Allow ROLE_IPA_DC to allow to use Kerberos
  in gensec
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -3571,7 +3571,7 @@ index cff3c53845f..2968ca47734 100644
 From 3ef02a381cdc83549506e159ebc457730c06c547 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 22 Jul 2025 19:22:31 +0200
-Subject: [PATCH 043/122] libads: fix get_kdc_ip_string()
+Subject: [PATCH 043/123] libads: fix get_kdc_ip_string()
 
 Correctly handle the interaction between optionally passed in DC via
 pss and DC lookup.
@@ -3622,7 +3622,7 @@ index f74d8eb567c..f324321c87b 100644
 From b0dbc167f85deabff2af5b18bc201e8db0d3b97d Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 22 Jul 2025 19:16:14 +0200
-Subject: [PATCH 044/122] winbindd: use find_domain_from_name_noinit() in
+Subject: [PATCH 044/123] winbindd: use find_domain_from_name_noinit() in
  find_dns_domain_name()
 
 Avoid triggering a connection to a DC of a trusted domain.
@@ -3656,7 +3656,7 @@ index eca4116d0c8..3a7a9114988 100644
 From 1961f54ce07f7dc3cfcae5c00b96b39109f08b3a Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 19 Dec 2023 11:11:55 +0100
-Subject: [PATCH 045/122] vfs_default: allow disabling /proc/fds and
+Subject: [PATCH 045/123] vfs_default: allow disabling /proc/fds and
  RESOLVE_NO_SYMLINK at compile time
 
 This will be used in CI to have a gitlab runner without all modern Linux
@@ -3726,7 +3726,7 @@ index 1d4b9b1a840..8d78831492f 100644
 From 26de62a2a968dd5b73af296251b26112cdd533e5 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 19 Dec 2023 11:12:49 +0100
-Subject: [PATCH 046/122] CI: disable /proc/fds and RESOLVE_NO_SYMLINK in
+Subject: [PATCH 046/123] CI: disable /proc/fds and RESOLVE_NO_SYMLINK in
  samba-no-opath-build runner
 
 This is a more sensible combination of missing Linux specific features:
@@ -3799,7 +3799,7 @@ index c3a13f5ec6e..67764a0b027 100644
 From 2c27aae5a4c8d7368dc142fb2be36919296d2a02 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 2 Jan 2024 12:49:14 +0100
-Subject: [PATCH 047/122] smbd: pass symlink target path to
+Subject: [PATCH 047/123] smbd: pass symlink target path to
  safe_symlink_target_path()
 
 Moves processing the symlink error response to the caller
@@ -3963,7 +3963,7 @@ index 8693dcf1153..45fb90381e2 100644
 From 99d7e841d4e18f760c137530bbed0dea6115311a Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 2 Jan 2024 13:25:25 +0100
-Subject: [PATCH 048/122] smbd: add a directory argument to
+Subject: [PATCH 048/123] smbd: add a directory argument to
  safe_symlink_target_path()
 
 Existing caller passes NULL, no change in behaviour. Prepares for
@@ -4041,7 +4041,7 @@ index 45fb90381e2..55a49e0ba93 100644
 From 5041a6fa5cdfd21bf697249d900ea5c107d355a2 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 2 Jan 2024 14:34:26 +0100
-Subject: [PATCH 049/122] smbd: use safe_symlink_target_path() in
+Subject: [PATCH 049/123] smbd: use safe_symlink_target_path() in
  symlink_target_below_conn()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15549
@@ -4187,7 +4187,7 @@ index 74be444fef5..6582bd60245 100644
 From f2fc99f0c7d441115a486413f345c0226a00b38b Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 18 Dec 2023 12:35:58 +0100
-Subject: [PATCH 050/122] smbd: use dirfsp and atname in open_directory()
+Subject: [PATCH 050/123] smbd: use dirfsp and atname in open_directory()
 
 On systems without /proc/fd support this avoid the expensive chdir()
 logic in non_widelink_open(). open_file_ntcreate() already passes
@@ -4232,7 +4232,7 @@ index 6582bd60245..b9849f82396 100644
 From 7d102268ebbebf6fc723a43485a82f72069d00ee Mon Sep 17 00:00:00 2001
 From: Volker Lendecke <vl@samba.org>
 Date: Fri, 16 Dec 2022 16:35:00 +0100
-Subject: [PATCH 051/122] smbd: Return open_symlink_err from
+Subject: [PATCH 051/123] smbd: Return open_symlink_err from
  filename_convert_dirfsp_nosymlink()
 
 Don't lose information returned from openat_pathref_fsp_nosymlink()
@@ -4395,7 +4395,7 @@ index 55a49e0ba93..9fd85af992a 100644
 From edaabc3d53fddd9e2fa6168c8bf01ebfbf229657 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 25 Apr 2024 15:24:57 +0200
-Subject: [PATCH 052/122] s3/lib: add next helper variable in server_id_watch_*
+Subject: [PATCH 052/123] s3/lib: add next helper variable in server_id_watch_*
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
 
@@ -4475,7 +4475,7 @@ index f0189e0e896..50b35f27b3e 100644
 From c25f1811c2ccaa2d5cc8005597fb9979aa1102ee Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 4 Apr 2024 12:31:05 +0200
-Subject: [PATCH 053/122] s3/lib: add option "serverid watch:debug = yes" to
+Subject: [PATCH 053/123] s3/lib: add option "serverid watch:debug = yes" to
  print kernel stack of hanging process
 
 We only do if sys_have_proc_fds() returns true, so it's most likely
@@ -4597,7 +4597,7 @@ index 50b35f27b3e..c372ec8c431 100644
 From 23dbf8f0317810d65e716a3c9b947c7a6549cb46 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 25 Apr 2024 15:17:08 +0200
-Subject: [PATCH 054/122] s3/lib: add option "serverid watch:debug script"
+Subject: [PATCH 054/123] s3/lib: add option "serverid watch:debug script"
 
 This takes just PID and NODE:PID on a cluster.
 
@@ -4690,7 +4690,7 @@ index c372ec8c431..8ddf9c6b1c8 100644
 From 59975168627e4bfbd2e75a611cb8cb13019a7df3 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Fri, 5 Apr 2024 12:15:28 +0200
-Subject: [PATCH 055/122] smbd: log share_mode_watch_recv() errors as errors
+Subject: [PATCH 055/123] smbd: log share_mode_watch_recv() errors as errors
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
 
@@ -4727,7 +4727,7 @@ index b9849f82396..da129119c7f 100644
 From e619b72fe1b9c36963c452c1d102009b28e8e289 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 4 Apr 2024 19:18:19 +0200
-Subject: [PATCH 056/122] smbd: add option "smbd lease break:debug hung procs"
+Subject: [PATCH 056/123] smbd: add option "smbd lease break:debug hung procs"
 
 By enabling this a process sending a lease break message to another process
 holding a lease will start watching that process and if that process didn't
@@ -4985,7 +4985,7 @@ index da129119c7f..4cc5190f690 100644
 From e6a0d821ba28839728371ca94bb364dd6865b5dd Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 20 Mar 2024 14:27:27 +0100
-Subject: [PATCH 057/122] smbd: move trace_state variable behind tv variable
+Subject: [PATCH 057/123] smbd: move trace_state variable behind tv variable
 
 Next commit adds timestamp variables to trace_state that want to be initialized
 with the current time, so moving behind tv we can then just reuse tv for that.
@@ -5033,7 +5033,7 @@ index fbbe4ef3992..188eaa14839 100644
 From 15276d7645255ddddf2a3bf6b7a429e3d40ec9b7 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 20 Mar 2024 14:28:43 +0100
-Subject: [PATCH 058/122] smbd: add option "smbd:debug events" for tevent
+Subject: [PATCH 058/123] smbd: add option "smbd:debug events" for tevent
  handling duration threshold warnings
 
 Can be used to enable printing an error message if tevent event handlers ran
@@ -5175,7 +5175,7 @@ index 188eaa14839..dbe91132f7f 100644
 From 4631b9d60a874db10dbdd52406d0094a7dbd1356 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 26 Aug 2024 14:11:02 +0200
-Subject: [PATCH 059/122] vfs_error_inject: add 'error_inject:durable_reconnect
+Subject: [PATCH 059/123] vfs_error_inject: add 'error_inject:durable_reconnect
  = st_ex_nlink'
 
 This allows to simulate durable reconnect failures because the stat
@@ -5296,7 +5296,7 @@ index 529504fd8d5..dcf0de0a2d9 100644
 From c8e88652163cc56b1f9fb0926a140c81e6b7ec94 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 26 Aug 2024 14:42:02 +0200
-Subject: [PATCH 060/122] s4:torture/smb2: add
+Subject: [PATCH 060/123] s4:torture/smb2: add
  smb2.durable-v2-regressions.durable_v2_reconnect_bug15624
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15624
@@ -5472,7 +5472,7 @@ index 5b6477e47bc..9cf7f5da78b 100644
 From 56a3aaf95c44052b19b61115686c71d5b7dbab4a Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 26 Aug 2024 14:42:12 +0200
-Subject: [PATCH 061/122] s3:tests: let test_durable_handle_reconnect.sh run
+Subject: [PATCH 061/123] s3:tests: let test_durable_handle_reconnect.sh run
  smb2.durable-v2-regressions.durable_v2_reconnect_bug15624
 
 This demonstrates the dead lock after a durable reconnect failed
@@ -5532,7 +5532,7 @@ index 0ab32974824..fd5c156956f 100755
 From d8f01885145ecfce15f2507fdcc625442db1738c Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 9 Apr 2024 14:52:44 +0200
-Subject: [PATCH 062/122] smbd: consolidate DH reconnect failure code
+Subject: [PATCH 062/123] smbd: consolidate DH reconnect failure code
 
 No change in behaviour, except that we now
 also call fd_close() if vfs_default_durable_cookie()
@@ -5836,7 +5836,7 @@ index b21c223b2e4..50075ddd3f7 100644
 From b248ddd3dd7193ba44c9ad86488dd180a25e3774 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 9 Apr 2024 14:53:32 +0200
-Subject: [PATCH 063/122] smbd: remove just created sharemode entry in the
+Subject: [PATCH 063/123] smbd: remove just created sharemode entry in the
  error codepaths
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -5908,7 +5908,7 @@ index 50075ddd3f7..98d0d403e30 100644
 From 67ff429e41004899e514d893e80332de79ca2bab Mon Sep 17 00:00:00 2001
 From: Earl Chew <earl_chew@yahoo.com>
 Date: Sun, 17 Dec 2023 08:37:33 -0800
-Subject: [PATCH 064/122] Augment library_flags() to return libraries
+Subject: [PATCH 064/123] Augment library_flags() to return libraries
 
 Extend library_flags() to return the libraries provided by
 pkg-config --libs.
@@ -6077,7 +6077,7 @@ index 9c27fc664f0..58858f69b31 100644
 From a4f79d7fb725fab47bda53b9482c1ee301a8393a Mon Sep 17 00:00:00 2001
 From: Earl Chew <earl_chew@yahoo.com>
 Date: Sat, 16 Dec 2023 17:47:09 -0800
-Subject: [PATCH 065/122] Improve CHECK_LIB interaction with CHECK_PKG
+Subject: [PATCH 065/123] Improve CHECK_LIB interaction with CHECK_PKG
 
 When checking for shared libraries, only name the target library
 if it was not previously discoverd by pkg-config --libs and now
@@ -6136,7 +6136,7 @@ index d3b6503c5ca..b1d2f761095 100644
 From 2b4f5a62eac69e12ecd9a1e3919ea4a8b3d40820 Mon Sep 17 00:00:00 2001
 From: Earl Chew <earl_chew@yahoo.com>
 Date: Sat, 16 Dec 2023 08:48:36 -0800
-Subject: [PATCH 066/122] Combine ICU libraries icu-i18n and icu-uc into a
+Subject: [PATCH 066/123] Combine ICU libraries icu-i18n and icu-uc into a
  single dependency
 
 Rather than probing for icu-i18n, icu-uc, and icudata libraries
@@ -6246,7 +6246,7 @@ index 58858f69b31..c49b55a4fd4 100644
 From 8e5968634b263c20ad71c75e839abb217614b567 Mon Sep 17 00:00:00 2001
 From: Earl Chew <earl_chew@yahoo.com>
 Date: Fri, 10 May 2024 19:46:28 -0700
-Subject: [PATCH 067/122] Restore empty string default for conf.env['icu-libs']
+Subject: [PATCH 067/123] Restore empty string default for conf.env['icu-libs']
 
 The reworked ICU libraries configuration code used [] as
 default for conf.env['icu-libs']. This breaks dependency analysis
@@ -6283,7 +6283,7 @@ index c49b55a4fd4..adae44eab5e 100644
 From 88a29be0ed6cf611eb812c0729d2ee61be07a3a3 Mon Sep 17 00:00:00 2001
 From: Earl Chew <earl_chew@yahoo.com>
 Date: Fri, 27 Sep 2024 06:50:31 -0700
-Subject: [PATCH 068/122] Describe implication of upstream ICU-22610
+Subject: [PATCH 068/123] Describe implication of upstream ICU-22610
 
 Add commentary to link commit 86c7688 (MR !3447) to the upstream
 fix for ICU-22610 in case there is subsequent breakage.
@@ -6322,7 +6322,7 @@ index adae44eab5e..451f7f7bca3 100644
 From 72c6766af2ac55854b816147a277404d98b1de9a Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 8 Jan 2026 11:55:18 +0100
-Subject: [PATCH 069/122] smbd: add a directory argument to
+Subject: [PATCH 069/123] smbd: add a directory argument to
  safe_symlink_target_path()
 
 Existing caller passes NULL, no change in behaviour. Prepares for
@@ -6451,7 +6451,7 @@ index 9fd85af992a..f6e9ed6aae0 100644
 From 9b8c2d3abe56b53b4ac7dfb6af927a889580ae7f Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 19 Jan 2026 14:33:52 +0100
-Subject: [PATCH 070/122] s3:libads: Reset ads->config.flags in
+Subject: [PATCH 070/123] s3:libads: Reset ads->config.flags in
  ads_disconnect()
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -6526,7 +6526,7 @@ index cc00753ff74..625377fa2cc 100644
 From 1e1c43cc946f1947835570907064b4ee3aaa3ee7 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 30 Aug 2024 14:22:24 +0200
-Subject: [PATCH 071/122] s4:torture/smb2: improve error handling in
+Subject: [PATCH 071/123] s4:torture/smb2: improve error handling in
  durable_open.c
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15649
@@ -6596,7 +6596,7 @@ index f56c55811ac..39b6efad567 100644
 From 9149916376570a97ee0d94e9ed64751796da5053 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 30 Aug 2024 14:22:24 +0200
-Subject: [PATCH 072/122] s4:torture/smb2: improve error handling in
+Subject: [PATCH 072/123] s4:torture/smb2: improve error handling in
  durable_v2_open.c
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15649
@@ -6646,7 +6646,7 @@ index 7447dd287a4..7eed4327b52 100644
 From 986cc4d97eba6d3807170f66f6b3664f395a6e3e Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 30 Aug 2024 17:38:02 +0200
-Subject: [PATCH 073/122] s4:torture/smb2: add smb2.durable-open.lock-noW-lease
+Subject: [PATCH 073/123] s4:torture/smb2: add smb2.durable-open.lock-noW-lease
 
 This demonstrates that a W lease is required for a
 durable handle to be durable when it has byte range locks.
@@ -6799,7 +6799,7 @@ index 39b6efad567..cc78c0aff66 100644
 From cdffe7d7a0b6919fe405fbf4b536a6f33d33363f Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 30 Aug 2024 17:38:02 +0200
-Subject: [PATCH 074/122] s4:torture/smb2: add
+Subject: [PATCH 074/123] s4:torture/smb2: add
  smb2.durable-v2-open.lock-{oplock,lease,noW-lease}
 
 This demonstrates that a W lease is required for a
@@ -7191,7 +7191,7 @@ index 7eed4327b52..685ef80c0cc 100644
 From d770866bbdd9ba70f896eb3b75bba6baa01fdf33 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 30 Aug 2024 18:10:16 +0200
-Subject: [PATCH 075/122] s3:smbd: only store durable handles with byte range
+Subject: [PATCH 075/123] s3:smbd: only store durable handles with byte range
  locks when having WRITE lease
 
 This simplifies the reconnect assumptions, when we want to allow
@@ -7242,7 +7242,7 @@ index 98d0d403e30..b7fa53e7555 100644
 From 14ec1065ac307f5c59e292ac8f805104f9c10884 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 28 Aug 2024 16:48:27 +0200
-Subject: [PATCH 076/122] s4:torture/smb2: add
+Subject: [PATCH 076/123] s4:torture/smb2: add
  smb2.durable-v2-open.{[non]stat[RH]-and,two-same,two-different}-lease
 
 These show that it's possible to have durable handles in addition
@@ -8095,7 +8095,7 @@ index 685ef80c0cc..e86b1955092 100644
 From 7c395c25b4e2d0365ef8c99404e5e9e88f0adf2d Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 4 Sep 2024 18:18:43 +0200
-Subject: [PATCH 077/122] s4:torture/smb2: add
+Subject: [PATCH 077/123] s4:torture/smb2: add
  smb2.durable-v2-open.{keep,purge}-disconnected-* tests
 
 These demonstrate which durables handles are kept and which are purged
@@ -10025,7 +10025,7 @@ index e86b1955092..104796e76ad 100644
 From 9b8a74aac964841fce8d032487678513a438274a Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 29 Aug 2024 20:20:23 +0200
-Subject: [PATCH 078/122] s3:smbd: let durable_reconnect_fn already check for a
+Subject: [PATCH 078/123] s3:smbd: let durable_reconnect_fn already check for a
  disconnected handle with the correct file_id
 
 We'll soon allow more than one disconnected durable handle, so
@@ -10112,7 +10112,7 @@ index b7fa53e7555..bf3cbed0a2c 100644
 From 2aa438545f3d31dfb2be6c054e3dcbd2c4707caa Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 29 Aug 2024 18:43:14 +0200
-Subject: [PATCH 079/122] s3:smbd: allow reset_share_mode_entry() to handle
+Subject: [PATCH 079/123] s3:smbd: allow reset_share_mode_entry() to handle
  more than one durable handle
 
 This means that multiple durable handles with RH leases can
@@ -10505,7 +10505,7 @@ index 3fc7d56562a..4bbccdcd3bd 100644
 From 2eca89f51181b452cc86277f45db234e8b00db74 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 30 Aug 2024 14:16:12 +0200
-Subject: [PATCH 080/122] s3:smbd: avoid false positives for got_oplock and
+Subject: [PATCH 080/123] s3:smbd: avoid false positives for got_oplock and
  have_other_lease in delay_for_oplock_fn
 
 stat opens should not cause a oplock/lease downgrade if
@@ -10619,7 +10619,7 @@ index 4cc5190f690..2ccccb9eb75 100644
 From 11fc816defc6e5d381c8ce8834dbf03fac4a2378 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 9 Jan 2025 08:57:17 +0100
-Subject: [PATCH 081/122] dbwrap: check for option "tdb_hash_size:DBNAME.tdb"
+Subject: [PATCH 081/123] dbwrap: check for option "tdb_hash_size:DBNAME.tdb"
  in db_open()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -10654,7 +10654,7 @@ index 52c8a94aeff..91556f22819 100644
 From 8d960286aa04b28b2e97fe7bfddb487c3694bef6 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 9 Jan 2025 12:27:43 +0100
-Subject: [PATCH 082/122] smbtorture: add test "open-brlock-deadlock"
+Subject: [PATCH 082/123] smbtorture: add test "open-brlock-deadlock"
 
 smbtorture reproducer for bug 15767. As it needs a very specific setup that
 can't easily be done in selftest, the test is only executed when manually called
@@ -10987,7 +10987,7 @@ index eac0d557fc3..e5cf61a471a 100644
 From 241beffc5dee532a6f9a013d3f2d60e5dc7fb472 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 6 Jan 2025 15:59:27 +0100
-Subject: [PATCH 083/122] s3/brlock: split out brl_get_locks_readonly_parse()
+Subject: [PATCH 083/123] s3/brlock: split out brl_get_locks_readonly_parse()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -11083,7 +11083,7 @@ index 905da049c58..a1713418d65 100644
 From e0acfc837633b184e933a2a60cdf294229767f9a Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 6 Jan 2025 17:07:11 +0100
-Subject: [PATCH 084/122] s3/brlock: add brl_req_set()
+Subject: [PATCH 084/123] s3/brlock: add brl_req_set()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -11136,7 +11136,7 @@ index 7fc177d7aa6..3413596baed 100644
 From 862bec505a66f8c9958f96411fa2f05db8059ed1 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Sat, 1 Feb 2025 10:37:40 +0100
-Subject: [PATCH 085/122] s3/brlock: add share_mode_do_locked_brl()
+Subject: [PATCH 085/123] s3/brlock: add share_mode_do_locked_brl()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -11293,7 +11293,7 @@ index 3413596baed..c9d769ba53f 100644
 From d18f6942b66eb7166f8929e9b475d0acbd721cb0 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 8 Jan 2025 15:43:04 +0100
-Subject: [PATCH 086/122] s3/brlock: don't increment current_lock_count if
+Subject: [PATCH 086/123] s3/brlock: don't increment current_lock_count if
  do_lock_fn() failed
 
 Also only assign psmblctx and pblocker_pid if the lock request failed.
@@ -11349,7 +11349,7 @@ index 6ee5987ffda..d796e6ffb7b 100644
 From 4a6c36f1d31556e1abcdbf090f76d4c49b261e92 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 29 Jan 2025 06:13:29 +0100
-Subject: [PATCH 087/122] s3/locking: add brl_set_modified()
+Subject: [PATCH 087/123] s3/locking: add brl_set_modified()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -11393,7 +11393,7 @@ index c9d769ba53f..c74539c8161 100644
 From 3362898470c1efa07bb9e05f6663a42fef53c784 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 29 Jan 2025 06:13:44 +0100
-Subject: [PATCH 088/122] smbd: use share_mode_do_locked_brl()
+Subject: [PATCH 088/123] smbd: use share_mode_do_locked_brl()
 
 Fix a deadlock that can happen if two clients happen to open and byte-range-lock
 two different files whos record in locking.tdb and brlock.tdb happen to sit on
@@ -12597,7 +12597,7 @@ index dfcd05d2cae..c782a624d7f 100644
 From e067ece27012e10a5a49cf0f757fcfb37bc97450 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 8 Jan 2025 12:51:37 +0100
-Subject: [PATCH 089/122] s3/brlock: remove brl_get_locks_for_locking()
+Subject: [PATCH 089/123] s3/brlock: remove brl_get_locks_for_locking()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -12662,7 +12662,7 @@ index e332abf34ec..44b43c1b1e2 100644
 From 79331346ad6305470c67710e7a6189442ca491f1 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Mon, 27 Jan 2025 15:22:26 +0100
-Subject: [PATCH 090/122] smbd: call locking_close_file() while still holding a
+Subject: [PATCH 090/123] smbd: call locking_close_file() while still holding a
  glock on the locking.tdb record
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -12732,7 +12732,7 @@ index e16cb2d3485..f36e699c6ea 100644
 From 02708477b64206765976cb03e70c95a4b4daf894 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 30 Jan 2025 17:35:26 +0100
-Subject: [PATCH 091/122] s3/locking: prepare brl_locktest() for upgradable
+Subject: [PATCH 091/123] s3/locking: prepare brl_locktest() for upgradable
  read-only locks
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -12812,7 +12812,7 @@ index 44b43c1b1e2..44808171f1a 100644
 From 0bf638a66c95a1f8304cb3efa284f2303445f2c0 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 2 Apr 2025 12:43:15 +0200
-Subject: [PATCH 092/122] smbd: check can_lock in strict_lock_check_default()
+Subject: [PATCH 092/123] smbd: check can_lock in strict_lock_check_default()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
 
@@ -12847,7 +12847,7 @@ index d8e70a479ad..9bb0696946e 100644
 From 936a9736ba92cf9827591a2d8279ec7953717323 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Thu, 30 Jan 2025 07:40:32 +0100
-Subject: [PATCH 093/122] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 093/123] smbd: use share_mode_do_locked_brl() in
  strict_lock_check_default()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -12937,7 +12937,7 @@ index 9bb0696946e..400b4722379 100644
 From 66794d5d5c2b930d6afde8103484333f53b2e68c Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 28 Jan 2025 11:19:05 +0100
-Subject: [PATCH 094/122] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 094/123] smbd: use share_mode_do_locked_brl() in
  vfs_default_durable_disconnect()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -13188,7 +13188,7 @@ index bf3cbed0a2c..1506d37208a 100644
 From 70a466aad41c97cdedb01d0a501d3a34c6fe1eb3 Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Wed, 2 Apr 2025 14:52:03 +0200
-Subject: [PATCH 095/122] smbd: use share_mode_do_locked_brl() in
+Subject: [PATCH 095/123] smbd: use share_mode_do_locked_brl() in
  vfs_default_durable_reconnect()
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15767
@@ -13887,7 +13887,7 @@ index 1506d37208a..34218d1c596 100644
 From 05df077f6fd9402f2513a9c9a9d55cfbb40971cf Mon Sep 17 00:00:00 2001
 From: Ralph Boehme <slow@samba.org>
 Date: Tue, 28 Jan 2025 14:48:39 +0100
-Subject: [PATCH 096/122] s3:rpc_server/srvsvc: use brl_get_locks_readonly()
+Subject: [PATCH 096/123] s3:rpc_server/srvsvc: use brl_get_locks_readonly()
  instead of brl_get_locks()
 
 No need to keep the record locked longer then needed.
@@ -13939,7 +13939,7 @@ index d6e7bed5949..c07eefdfaad 100644
 From e40fd11548bda2fe4cf178b639f56dd7652675ee Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 24 Mar 2026 15:00:21 +0100
-Subject: [PATCH 097/122] wafsamba: Add -D_FORTIFY_SOURCE=3 when stack
+Subject: [PATCH 097/123] wafsamba: Add -D_FORTIFY_SOURCE=3 when stack
  protector is enabled
 
 The capability check in SAMBA_CONFIG_H() already tests that the compiler
@@ -14015,7 +14015,7 @@ index 85043032d73..938c7a97fdd 100755
 From e916e33421ea017ebd106d418dfd1a3a4f0fe896 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Fri, 27 Feb 2026 11:30:40 +1300
-Subject: [PATCH 098/122] CVE-2026-3012: gpo tests: fix test cleanup
+Subject: [PATCH 098/123] CVE-2026-3012: gpo tests: fix test cleanup
 
 These tests are going to fail soon but as currently written they do
 not clean up after themselves, erroring instead of failing and causing
@@ -14191,7 +14191,7 @@ index a78af17dba4..067b92728d4 100644
 From 5edabac806ad07c2b77a725fe8fccb9155897d7e Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Mon, 23 Feb 2026 11:01:57 +1300
-Subject: [PATCH 099/122] CVE-2026-3012: do not fetch certificate over http
+Subject: [PATCH 099/123] CVE-2026-3012: do not fetch certificate over http
 
 In the case where a certificate was found via HTTP, it was trusted
 without verification and put in the global CA store.
@@ -14331,7 +14331,7 @@ index 00000000000..4bf4b8e3c72
 From b5f1e5a313c5cd2dd4b7c8f21dff0272abc9b904 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Thu, 26 Feb 2026 14:21:01 +1300
-Subject: [PATCH 100/122] CVE-2026-3012: gp_auto_enrol: skip CAs not found in
+Subject: [PATCH 100/123] CVE-2026-3012: gp_auto_enrol: skip CAs not found in
  LDAP
 
 If a certificate is mentioned in a GPO but is not present as a
@@ -14379,7 +14379,7 @@ index f1c55a0dbf1..c2cc73c80f0 100644
 From c9dee6ec8532681652de09f1e411cc25c6cb886f Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Fri, 27 Feb 2026 14:46:04 +1300
-Subject: [PATCH 101/122] CVE-2026-3012: gpo tests should use real certificates
+Subject: [PATCH 101/123] CVE-2026-3012: gpo tests should use real certificates
 
 Or at least, more real than a short arbitrary byte string, so that
 the certificates can be parsed.
@@ -14454,7 +14454,7 @@ index 4bf4b8e3c72..4b787a5ac86 100644
 From 272d18c47aa7c8e1c4a5d7690f8cd2c17c0d4161 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:20:15 +0200
-Subject: [PATCH 102/122] CVE-2026-4480/CVE-2026-4408: lib/util: inline
+Subject: [PATCH 102/123] CVE-2026-4480/CVE-2026-4408: lib/util: inline
  string_sub2() into string_sub() the only caller
 
 This will simplify further changes.
@@ -14524,7 +14524,7 @@ index b7b5588da86..26362ca77b2 100644
 From 4dd5b25a69b7b6ae9576e0da1514aa6bd9b6504d Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:20:15 +0200
-Subject: [PATCH 103/122] CVE-2026-4480/CVE-2026-4408: lib/util: remove unused
+Subject: [PATCH 103/123] CVE-2026-4480/CVE-2026-4408: lib/util: remove unused
  talloc_strdup(insert) from talloc_string_sub2()
 
 The insert string is not modified, so we do not need to copy it.
@@ -14652,7 +14652,7 @@ index 26362ca77b2..4a0c58ab3a7 100644
 From aa8022cabec1ca534b88272c6f4ba2ae22e87c99 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:20:15 +0200
-Subject: [PATCH 104/122] CVE-2026-4480/CVE-2026-4408: lib/util: factor out a
+Subject: [PATCH 104/123] CVE-2026-4480/CVE-2026-4408: lib/util: factor out a
  mask_unsafe_character() helper function
 
 This moves the logic into a single place and
@@ -14855,7 +14855,7 @@ index 3134cfcdea5..e1a82859dac 100644
 From 7d209a9a91c0c94b5d0069a83252df686752807d Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 30 Apr 2026 14:48:26 +0200
-Subject: [PATCH 105/122] CVE-2026-4480/CVE-2026-4408: lib/util: split out
+Subject: [PATCH 105/123] CVE-2026-4480/CVE-2026-4408: lib/util: split out
  realloc_string_sub_raw()
 
 This will allow realloc_string_sub2() to use it in order
@@ -15029,7 +15029,7 @@ index e1a82859dac..041a649fd18 100644
 From 362a51adc666ae43b7e4bb24c38a59a2de0493ba Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 6 May 2026 17:23:39 +0200
-Subject: [PATCH 106/122] CVE-2026-4480/CVE-2026-4408: s3:lib: fix potential
+Subject: [PATCH 106/123] CVE-2026-4480/CVE-2026-4408: s3:lib: fix potential
  memory leak in talloc_sub_basic()
 
 This makes the code easier to understand...
@@ -15070,7 +15070,7 @@ index 40eb15aee04..5121fcaac1c 100644
 From 203717ae88b5a51de3542366dc0ea375cbd7dcf9 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 21:11:27 +0200
-Subject: [PATCH 107/122] CVE-2026-4480/CVE-2026-4408: s3:lib: let
+Subject: [PATCH 107/123] CVE-2026-4480/CVE-2026-4408: s3:lib: let
  realloc_string_sub2() use realloc_string_sub_raw()
 
 We don't need this logic more than once!
@@ -15196,7 +15196,7 @@ index 26c5ee761f8..e0639f04eb8 100644
 From 92fa7a66d53334c1d27c46e3425a5a99d49395d5 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:21:08 +0200
-Subject: [PATCH 108/122] CVE-2026-4480/CVE-2026-4408: lib/util: let
+Subject: [PATCH 108/123] CVE-2026-4480/CVE-2026-4408: lib/util: let
  mask_unsafe_character() check all control characters
 
 There's no reason to mask only \r and \n.
@@ -15275,7 +15275,7 @@ index 041a649fd18..b183d864671 100644
 From 31f45a68954ee6597b520faa70dbd8c7f4169c67 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:21:08 +0200
-Subject: [PATCH 109/122] CVE-2026-4480/CVE-2026-4408: lib/util: add more
+Subject: [PATCH 109/123] CVE-2026-4480/CVE-2026-4408: lib/util: add more
  unsafe characters to STRING_SUB_UNSAFE_CHARACTERS
 
 |&<> are unsafe characters for shell processing.
@@ -15309,7 +15309,7 @@ index b183d864671..41f56c73ba2 100644
 From 076a15e3f20c8bca24bc92960770737b5b5d55cd Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 8 May 2026 22:33:32 +0200
-Subject: [PATCH 110/122] CVE-2026-4480/CVE-2026-4408: lib/util: let
+Subject: [PATCH 110/123] CVE-2026-4480/CVE-2026-4408: lib/util: let
  log_escape() make use of iscntrl()
 
 using iscntrl() also handles 0x7F (DEL).
@@ -15360,7 +15360,7 @@ index ea0fcc2f905..908f70fa47a 100644
 From 4384eeb867ddb35d217b7f6232b89e7c66966fb8 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 7 May 2026 18:10:50 +0200
-Subject: [PATCH 111/122] CVE-2026-4480/CVE-2026-4408: lib/util: add
+Subject: [PATCH 111/123] CVE-2026-4480/CVE-2026-4408: lib/util: add
  talloc_string_sub_{mixed_quoting,unsafe}() helpers
 
 This is the basic helper function for the security problems.
@@ -15694,7 +15694,7 @@ index 41f56c73ba2..b8205055da1 100644
 From d4588ae23b22671f3960c396644941d11f538778 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Sat, 9 May 2026 22:02:47 +1200
-Subject: [PATCH 112/122] CVE-2026-4480/CVE-2026-4408: lib/util: add
+Subject: [PATCH 112/123] CVE-2026-4480/CVE-2026-4408: lib/util: add
  test_string_sub unittests
 
 This demonstrates the logic of talloc_string_sub_{mixed_quoting,unsafe}()
@@ -16797,7 +16797,7 @@ index 2cafe2faa4e..3869d9894ee 100644
 From f1430e0324e53727c964baf46bb2bacaf5bd6699 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Sun, 15 Mar 2026 19:15:14 +0100
-Subject: [PATCH 113/122] CVE-2026-4480: s3:printing: mask and/or single quote
+Subject: [PATCH 113/123] CVE-2026-4480: s3:printing: mask and/or single quote
  jobname passed as %J to "print command"
 
 Fix an unauthenticated remote code execution vulnerability with
@@ -17025,7 +17025,7 @@ index 8798a4cf34a..c3a6f8b1506 100644
 From 97cef37691467fc2e910339ed2af49f7531691ac Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 8 May 2026 23:27:35 +0200
-Subject: [PATCH 114/122] CVE-2026-4480: s3:testparm: warn about 'print
+Subject: [PATCH 114/123] CVE-2026-4480: s3:testparm: warn about 'print
  command' %J usage
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=16033
@@ -17062,7 +17062,7 @@ index 96e05a57f47..16ac47f9ff4 100644
 From a8fc9494b7633950c7e027332479e16a59cc646a Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 11 May 2026 14:11:34 +0200
-Subject: [PATCH 115/122] CVE-2026-4480: docs-xml/smbdotconf: clarify '%J' in
+Subject: [PATCH 115/123] CVE-2026-4480: docs-xml/smbdotconf: clarify '%J' in
  'print command'
 
 Admins should use '%J'.
@@ -17100,7 +17100,7 @@ index c84e45f404d..d708287932a 100644
 From e8a0c5e718caff4b9792aa4758646dcff5cf3fe1 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:56:21 +0200
-Subject: [PATCH 116/122] CVE-2026-4408: lib/util: introduce
+Subject: [PATCH 116/123] CVE-2026-4408: lib/util: introduce
  strstr_for_invalid_account_characters()
 
 This splits out the logic from samaccountname_bad_chars_check()
@@ -17189,7 +17189,7 @@ index 7c1d15dbeb0..c4eda4f49f3 100644
 From d37f3cb93d96ec3c92f1d9f8ddf16093b4c18420 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 11 May 2026 20:21:36 +0200
-Subject: [PATCH 117/122] CVE-2026-4408: s3:samr-server: only allow
+Subject: [PATCH 117/123] CVE-2026-4408: s3:samr-server: only allow
  _samr_ValidatePassword as DC
 
 This is only supported with 'rpc start on demand helpers = no',
@@ -17231,7 +17231,7 @@ index 2cc168926a7..26d8e408d38 100644
 From d44e016983db65d430dfa0556755fba32e498dd1 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 18 Mar 2026 12:24:47 +0100
-Subject: [PATCH 118/122] CVE-2026-4408: s3:samr-server: deny, mask and/or
+Subject: [PATCH 118/123] CVE-2026-4408: s3:samr-server: deny, mask and/or
  single quote username to 'check password script'
 
 We pass this on to the check password script, prevent remote command
@@ -17400,7 +17400,7 @@ index 3373ffa76f6..0a1edb88712 100644
 From 778f3b61db7e4c2b617a97b1dfd463cdcf597148 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Sat, 2 May 2026 22:12:38 +1200
-Subject: [PATCH 119/122] CVE-2026-4408: s3:samr-server: make
+Subject: [PATCH 119/123] CVE-2026-4408: s3:samr-server: make
  check_password_complexity_internal() non-static, for easier testing
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=16034
@@ -17454,7 +17454,7 @@ index 5e839ac77c0..a3a22012858 100644
 From 179cacf4d661e83a402c98c1c5b3b321a9a52786 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Sat, 2 May 2026 22:14:43 +1200
-Subject: [PATCH 120/122] CVE-2026-4408: s3:torture: tests for password
+Subject: [PATCH 120/123] CVE-2026-4408: s3:torture: tests for password
  complexity scripts
 
 This tries to demonstrate the new logic for %u in
@@ -17871,7 +17871,7 @@ index 1d2520099e3..d04008b3df1 100644
 From f13ff6d7d0fafa1ca02e1d024d00f4b35cb5743e Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 8 May 2026 23:27:35 +0200
-Subject: [PATCH 121/122] CVE-2026-4408: s3:testparm: warn about 'check
+Subject: [PATCH 121/123] CVE-2026-4408: s3:testparm: warn about 'check
  password script' %u usage
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=16034
@@ -17919,7 +17919,7 @@ index 16ac47f9ff4..d49e8bcfc64 100644
 From 4c48c55544768d5bc5c168c326c8bdbc7ce0de95 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 11 May 2026 13:52:52 +0200
-Subject: [PATCH 122/122] CVE-2026-4408: docs-xml/smbdotconf: clarify '%u' in
+Subject: [PATCH 122/123] CVE-2026-4408: docs-xml/smbdotconf: clarify '%u' in
  'check password script'
 
 Admins should use SAMBA_CPS_ACCOUNT_NAME.
@@ -17960,6 +17960,182 @@ index 18aa2c6d290..dd162d89f08 100644
      <para>Note: In the example directory is a sample program called <command moreinfo="none">crackcheck</command>
      that uses cracklib to check the password quality.</para>
  
+-- 
+2.53.0
+
+
+From 5f763d14675029d6f4b3fc55d1ec60736144a4a5 Mon Sep 17 00:00:00 2001
+From: Stefan Metzmacher <metze@samba.org>
+Date: Fri, 8 May 2026 15:01:08 +0200
+Subject: [PATCH 123/123] pam_winbind: only chown the home directory if it was
+ created
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+Otherwise we may change the permission for '/'
+if some systemuser (e.g. nobody) has no homedir and root
+runs 'su - nobody'.
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=16073
+
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Reviewed-by: Bjoern Jacke <bjacke@samba.org>
+
+Autobuild-User(master): Björn Jacke <bjacke@samba.org>
+Autobuild-Date(master): Sun May 10 23:22:27 UTC 2026 on atb-devel-224
+
+(cherry picked from commit 79caa6ef08b9b333e17bb0762e95e18e250db463)
+---
+ nsswitch/pam_winbind.c | 84 +++++++++++++++++++++++-------------------
+ 1 file changed, 46 insertions(+), 38 deletions(-)
+
+diff --git a/nsswitch/pam_winbind.c b/nsswitch/pam_winbind.c
+index 5e5cf0af8b8..64cf9b8b9d5 100644
+--- a/nsswitch/pam_winbind.c
++++ b/nsswitch/pam_winbind.c
+@@ -1588,12 +1588,32 @@ static char *_pam_compose_pwd_restriction_string(struct pwb_context *ctx,
+ 
+ static int _pam_create_homedir(struct pwb_context *ctx,
+ 			       const char *dirname,
+-			       mode_t mode)
++			       mode_t mode,
++			       uid_t uid,
++			       gid_t gid)
+ {
+ 	int ret;
+ 
+ 	ret = mkdir(dirname, mode);
+-	if (ret != 0 && errno == EEXIST) {
++	if (ret == 0) {
++		if (uid == 0 && gid == 0) {
++			return PAM_SUCCESS;
++		}
++
++		ret = chown(dirname, uid, gid);
++		if (ret == 0) {
++			return PAM_SUCCESS;
++		}
++
++		_make_remark_format(ctx, PAM_TEXT_INFO,
++				    _("Change owner of user homedir: %s failed: %s"),
++				    dirname, strerror(errno));
++		_pam_log(ctx, LOG_ERR, "failed to chown user homedir: %s (%s)",
++			 dirname, strerror(errno));
++		return PAM_PERM_DENIED;
++	}
++
++	if (errno == EEXIST) {
+ 		struct stat sbuf;
+ 
+ 		ret = stat(dirname, &sbuf);
+@@ -1604,32 +1624,16 @@ static int _pam_create_homedir(struct pwb_context *ctx,
+ 		if (!S_ISDIR(sbuf.st_mode)) {
+ 			return PAM_PERM_DENIED;
+ 		}
+-	}
+-
+-	if (ret != 0) {
+-		_make_remark_format(ctx, PAM_TEXT_INFO,
+-				    _("Creating directory: %s failed: %s"),
+-				    dirname, strerror(errno));
+-		_pam_log(ctx, LOG_ERR, "could not create dir: %s (%s)",
+-		 dirname, strerror(errno));
+-		 return PAM_PERM_DENIED;
+-	}
+-
+-	return PAM_SUCCESS;
+-}
+ 
+-static int _pam_chown_homedir(struct pwb_context *ctx,
+-			      const char *dirname,
+-			      uid_t uid,
+-			      gid_t gid)
+-{
+-	if (chown(dirname, uid, gid) != 0) {
+-		_pam_log(ctx, LOG_ERR, "failed to chown user homedir: %s (%s)",
+-			 dirname, strerror(errno));
+-		return PAM_PERM_DENIED;
++		return PAM_SUCCESS;
+ 	}
+ 
+-	return PAM_SUCCESS;
++	_make_remark_format(ctx, PAM_TEXT_INFO,
++			    _("Creating directory: %s failed: %s"),
++			    dirname, strerror(errno));
++	_pam_log(ctx, LOG_ERR, "could not create dir: %s (%s)",
++		 dirname, strerror(errno));
++	return PAM_PERM_DENIED;
+ }
+ 
+ static int _pam_mkhomedir(struct pwb_context *ctx)
+@@ -1640,7 +1644,6 @@ static int _pam_mkhomedir(struct pwb_context *ctx)
+ 	char *user_dir = NULL;
+ 	int ret;
+ 	const char *username;
+-	mode_t mode = 0700;
+ 	char *safe_ptr = NULL;
+ 	char *p = NULL;
+ 
+@@ -1657,14 +1660,18 @@ static int _pam_mkhomedir(struct pwb_context *ctx)
+ 		return PAM_USER_UNKNOWN;
+ 	}
+ 	_pam_log_debug(ctx, LOG_DEBUG, "homedir is: %s", pwd->pw_dir);
+-
+-	ret = _pam_create_homedir(ctx, pwd->pw_dir, 0700);
+-	if (ret == PAM_SUCCESS) {
+-		ret = _pam_chown_homedir(ctx, pwd->pw_dir,
+-					 pwd->pw_uid,
+-					 pwd->pw_gid);
++	if (pwd->pw_uid == 0 && pwd->pw_gid == 0) {
++		/*
++		 * Just skip this for root.
++		 */
++		return PAM_SUCCESS;
+ 	}
+ 
++	ret = _pam_create_homedir(ctx,
++				  pwd->pw_dir,
++				  0700,
++				  pwd->pw_uid,
++				  pwd->pw_gid);
+ 	if (ret == PAM_SUCCESS) {
+ 		return ret;
+ 	}
+@@ -1687,8 +1694,9 @@ static int _pam_mkhomedir(struct pwb_context *ctx)
+ 	p = pwd->pw_dir;
+ 
+ 	while ((token = strtok_r(p, "/", &safe_ptr)) != NULL) {
+-
+-		mode = 0755;
++		mode_t mode = 0755;
++		uid_t uid = 0;
++		gid_t gid = 0;
+ 
+ 		p = NULL;
+ 
+@@ -1703,17 +1711,17 @@ static int _pam_mkhomedir(struct pwb_context *ctx)
+ 		if (strcmp(token, user_dir) == 0) {
+ 			_pam_log_debug(ctx, LOG_DEBUG, "assuming last directory: %s", token);
+ 			mode = 0700;
++			uid = pwd->pw_uid;
++			gid = pwd->pw_gid;
+ 		}
+ 
+-		ret = _pam_create_homedir(ctx, create_dir, mode);
++		ret = _pam_create_homedir(ctx, create_dir, mode, uid, gid);
+ 		if (ret != PAM_SUCCESS) {
+ 			return ret;
+ 		}
+ 	}
+ 
+-	return _pam_chown_homedir(ctx, create_dir,
+-				  pwd->pw_uid,
+-				  pwd->pw_gid);
++	return PAM_SUCCESS;
+ }
+ 
+ /* talk to winbindd */
 -- 
 2.53.0
 

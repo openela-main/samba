@@ -147,7 +147,7 @@
 %define samba_requires_eq()  %(LC_ALL="C" echo '%*' | xargs -r rpm -q --qf 'Requires: %%{name} = %%{epoch}:%%{version}\\n' | sed -e 's/ (none):/ /' -e 's/ 0:/ /' | grep -v "is not")
 
 %global samba_version 4.19.4
-%global baserelease 16
+%global baserelease 17
 # This should be rc1 or %%nil
 %global pre_release %nil
 
@@ -4479,6 +4479,9 @@ fi
 %endif
 
 %changelog
+* Tue Jun 02 2026 Pvel Filipenský <pfilipen@redhat.com> - 4.19.4-17
+- resolves: RHEL-178261 - Fix winbind mkhomedir ownership handling
+
 * Wed May 20 2026 Pavel Filipenský <pfilipen@redhat.com> - 4.19.4-16
 - resolves: RHEL-156322 - Fix CVE-2026-3012
 - resolves: RHEL-161647 - Fix CVE-2026-4480
