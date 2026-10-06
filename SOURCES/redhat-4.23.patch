@@ -1,7 +1,7 @@
 From e8384b6daea3b8091ad1bcfce84efc9e2c6a746d Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 22 Jan 2026 14:27:09 +0100
-Subject: [PATCH 01/67] s3:libads: Allocate cli_credentials on a stackframe
+Subject: [PATCH 01/68] s3:libads: Allocate cli_credentials on a stackframe
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -82,7 +82,7 @@ index 9d6d962a2bc..d01afa69697 100644
 From 7af95c7cb142aeb5f422a69d3b7a0ea3c0d2c2c2 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Mon, 26 Jan 2026 13:36:02 +0100
-Subject: [PATCH 02/67] s3:rpc_client: Fix memory leak opening local named pipe
+Subject: [PATCH 02/68] s3:rpc_client: Fix memory leak opening local named pipe
 
 If no local server name was passed to rpc_pipe_open_local_np() then
 get_myname() was called with NULL talloc context instead of the
@@ -125,7 +125,7 @@ index e3f48526492..c61b8eb16cf 100644
 From ab1287f78bd9d2397c8eb26fbedafa028e2aaa16 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 2 Dec 2025 17:17:33 +0100
-Subject: [PATCH 03/67] s3-selftest: mention in-memory ccache usage when
+Subject: [PATCH 03/68] s3-selftest: mention in-memory ccache usage when
  nothing is provided
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
@@ -165,7 +165,7 @@ index 8a3c9ef2bc7..92d3996d078 100755
 From 0aa0d39e9a5deb77114f40930b599f11fd7cf3b6 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 2 Dec 2025 17:18:41 +0100
-Subject: [PATCH 04/67] s3-selftest: verify KRB5CCNAME presence after kinit
+Subject: [PATCH 04/68] s3-selftest: verify KRB5CCNAME presence after kinit
  using klist
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
@@ -222,7 +222,7 @@ index 92d3996d078..c53520cf733 100755
 From b9c07d59c6a20931b80fa104629477ab8f78b4ad Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 2 Dec 2025 17:01:31 +0100
-Subject: [PATCH 05/67] s3-selftest: Activate "net ads kerberos kinit" tests
+Subject: [PATCH 05/68] s3-selftest: Activate "net ads kerberos kinit" tests
  with --use-krb5-ccache
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
@@ -301,7 +301,7 @@ index c53520cf733..b7933bab6a6 100755
 From c82b7636b633575621e8e5964a93332956c238ff Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Tue, 2 Dec 2025 16:56:44 +0100
-Subject: [PATCH 06/67] s3-net: properly setup krb5 ccache name via
+Subject: [PATCH 06/68] s3-net: properly setup krb5 ccache name via
  --use-krb5-ccache
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15840
@@ -389,7 +389,7 @@ index d49b7537e71..5c57a0b290e 100644
 From 4f5ffea631d805564f7e92cc5f0f2f7ad55ba493 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?G=C3=BCnther=20Deschner?= <gd@samba.org>
 Date: Sat, 13 Dec 2025 13:49:37 +0100
-Subject: [PATCH 07/67] doc-xml: Document "net ads kerberos" commands
+Subject: [PATCH 07/68] doc-xml: Document "net ads kerberos" commands
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -565,7 +565,7 @@ index d9293d0bb34..737415b3722 100644
 From f634526bd95b8396ea7f5f1c8ed059eb01a5286b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 3 Feb 2026 12:53:10 +0100
-Subject: [PATCH 08/67] s3:utils: 'net ads kerberos kinit' should use also
+Subject: [PATCH 08/68] s3:utils: 'net ads kerberos kinit' should use also
  default ccache name from krb5.conf
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -672,7 +672,7 @@ index 271c96cf804..0ce03f8213d 100644
 From 0ca830d6ddded29b2b5d1969ebcbc4df1156656e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Thu, 5 Feb 2026 16:04:25 +0100
-Subject: [PATCH 09/67] manpages: Update NET ADS KERBEROS KINIT manpage
+Subject: [PATCH 09/68] manpages: Update NET ADS KERBEROS KINIT manpage
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -747,7 +747,7 @@ index 737415b3722..b793361a27f 100644
 From 44b613d80c6a3818cc6ca593d57d51cd1bc00aa5 Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Fri, 13 Feb 2026 11:54:46 +0000
-Subject: [PATCH 10/67] selftest: Update tests to use
+Subject: [PATCH 10/68] selftest: Update tests to use
  --use-kereros=desired|required no creds
 
 Add tests to call smbclient without passing credentials to
@@ -806,7 +806,7 @@ index 31678d17e28..1139efd70d7 100755
 From 65f70c0505759489a8b219e1297f8cdee2cc260a Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Mon, 19 Jan 2026 15:46:59 +0000
-Subject: [PATCH 11/67] auth/credentials: Fix regression with
+Subject: [PATCH 11/68] auth/credentials: Fix regression with
  --use-kerberos=desired for smbclient
 
 As part of the gse_krb5 processing the following call chain
@@ -878,7 +878,7 @@ index f0a5f7bb935..ab2d79d7114 100644
 From 8c955cad98b197936fceaf98306047e1f929ddfe Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Mon, 19 Jan 2026 16:10:10 +0000
-Subject: [PATCH 12/67] s3/libsmb: cli_session_creds_init fails when kerberos
+Subject: [PATCH 12/68] s3/libsmb: cli_session_creds_init fails when kerberos
  is desired
 
 There is a regression with code using cli_session_creds_init when
@@ -920,7 +920,7 @@ index 116f746d37e..3fd423d8e5f 100644
 From 015167aea7ece2bb683f86aa4b8c688d7a83267d Mon Sep 17 00:00:00 2001
 From: Noel Power <noel.power@suse.com>
 Date: Mon, 19 Jan 2026 16:18:02 +0000
-Subject: [PATCH 13/67] s3/libsmb: block anon authentication fallback is
+Subject: [PATCH 13/68] s3/libsmb: block anon authentication fallback is
  use-kerberos = desired
 
 When cli_credentials_get_kerberos_state returns CRED_USE_KERBEROS_REQUIRED
@@ -959,7 +959,7 @@ index f9b52e1f05a..8c7208aaee0 100644
 From 3f66a4fbb46f614bf81533677944b1093439aaf8 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Wed, 18 Mar 2026 20:24:37 +0100
-Subject: [PATCH 14/67] s3:libnet: Fix DC numeric ip handling
+Subject: [PATCH 14/68] s3:libnet: Fix DC numeric ip handling
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -994,7 +994,7 @@ index 609b2b96222..66d682a5b95 100644
 From 4725da7df3028d37d8bf34b3671c553b7337703b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 23 Mar 2026 19:03:34 +0100
-Subject: [PATCH 15/67] s3:libads: Allow to specify 'dns_lookup_kdc' in
+Subject: [PATCH 15/68] s3:libads: Allow to specify 'dns_lookup_kdc' in
  krb5.conf
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -1117,7 +1117,7 @@ index a96211c7289..fbeaeff92a9 100644
 From 5e1fde5e03c3899b329bd38c36033c385f6fb5f0 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Mon, 23 Mar 2026 19:05:31 +0100
-Subject: [PATCH 16/67] s3:libads: Set dns_lookup_kdc=false during net ads join
+Subject: [PATCH 16/68] s3:libads: Set dns_lookup_kdc=false during net ads join
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -1225,7 +1225,7 @@ index 66d682a5b95..81bcb9793a6 100644
 From 42e48d3dd29027573f6e1c04f78f8d9cb91eb4ab Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Fri, 14 Feb 2025 17:07:14 +0100
-Subject: [PATCH 17/67] vfs: Add VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
+Subject: [PATCH 17/68] vfs: Add VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
 
 It disallows traversal of mount points during path resolution, including bind
 mounts.
@@ -1257,7 +1257,7 @@ index e87a0d923e5..15e2186eab7 100644
 From 5656562fd43507501aea62b7a43b1d3d5431b313 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Fri, 14 Feb 2025 17:13:39 +0100
-Subject: [PATCH 18/67] vfs: Use RESOLVE_NO_XDEV by default on all shares
+Subject: [PATCH 18/68] vfs: Use RESOLVE_NO_XDEV by default on all shares
 
 Enable the flag by default on all shares, it will be automatically
 disabled if the system does not support openat2().
@@ -1313,7 +1313,7 @@ index 83c9cc06de8..d531f277199 100644
 From 21ce7f160fb6f2bec613be36f2120002205bf84e Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Wed, 8 Oct 2025 10:54:55 +0200
-Subject: [PATCH 19/67] selftest/Samba3: nt4_dc* use
+Subject: [PATCH 19/68] selftest/Samba3: nt4_dc* use
  vfs_default:VFS_OPEN_HOW_RESOLVE_NO_XDEV=no
 
 From 076c22fbd7ecbf22dbfeb1711609f07fd42f88b0, we should always test the
@@ -1346,7 +1346,7 @@ index 6f17d659d96..3b990bcb349 100755
 From 0f873b9e694c2db4c54bb480183583d04dde3bdd Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Fri, 14 Feb 2025 17:14:59 +0100
-Subject: [PATCH 20/67] vfs: Pass the RESOLVE_NO_XDEV from upper layers to
+Subject: [PATCH 20/68] vfs: Pass the RESOLVE_NO_XDEV from upper layers to
  openat2() syscall
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
@@ -1416,7 +1416,7 @@ index d531f277199..f0270e96002 100644
 From ff04fbf4e754c6eca9ea87a13d91bb84613ff9f9 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Wed, 8 Oct 2025 13:18:44 +0200
-Subject: [PATCH 21/67] smbd: Refactor reopen_from_fsp(), factor out name based
+Subject: [PATCH 21/68] smbd: Refactor reopen_from_fsp(), factor out name based
  reopen
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
@@ -1514,7 +1514,7 @@ index f2cbf7d6bf6..8443ddd32d3 100644
 From 1f869b2d814930c4c97a9fff461a3ec2327f4503 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Wed, 8 Oct 2025 13:53:14 +0200
-Subject: [PATCH 22/67] smbd: Refactor reopen_from_fsp(), factor out
+Subject: [PATCH 22/68] smbd: Refactor reopen_from_fsp(), factor out
  automounter mountpoint check
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15805
@@ -1617,7 +1617,7 @@ index 8443ddd32d3..67bb9774429 100644
 From d1f0323322b0c70998e901ad79aafcce795646a4 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Wed, 8 Oct 2025 14:17:27 +0200
-Subject: [PATCH 23/67] smbd: Refactor reopen_from_fsp(), factor out pathref
+Subject: [PATCH 23/68] smbd: Refactor reopen_from_fsp(), factor out pathref
  based
 
 Best viewed ignoring white space changes
@@ -1776,7 +1776,7 @@ index 67bb9774429..69c78ff563c 100644
 From 55bddf76fe649ca7ba30f0645a199255f2698a70 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Wed, 8 Oct 2025 17:09:22 +0200
-Subject: [PATCH 24/67] smbd: Fix crossing direct automounter mount points
+Subject: [PATCH 24/68] smbd: Fix crossing direct automounter mount points
 
 The workaround implemented in commit ac7a16f9cc4bd97ef546d1b7b02605991000d0f9
 to trigger automounts does not work for direct automounts (either with
@@ -1912,7 +1912,7 @@ index 69c78ff563c..ea400c41aa8 100644
 From 4872b32c28d540618462ee186e91716c9ee3807c Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@suse.de>
 Date: Fri, 2 May 2025 11:57:30 +0200
-Subject: [PATCH 25/67] vfs:aio_pthread: Handle VFS_OPEN_HOW_RESOLVE_NO_XDEV
+Subject: [PATCH 25/68] vfs:aio_pthread: Handle VFS_OPEN_HOW_RESOLVE_NO_XDEV
  flag
 
 This module uses openat() instead of openat2() so the flag won't be used and
@@ -1968,7 +1968,7 @@ index bd0c94b8cce..afbaaedf7b5 100644
 From e11fa05e10b1a5fadd7c73c87dcb68b048c73878 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@suse.de>
 Date: Fri, 2 May 2025 12:11:01 +0200
-Subject: [PATCH 26/67] vfs:ceph: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
+Subject: [PATCH 26/68] vfs:ceph: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
 
 Don't return ENOSYS if the flag is set. It will be ignored,
 does not make sense in a ceph virtual filesystem.
@@ -2003,7 +2003,7 @@ index 8ea7eb09099..4add6cf993e 100644
 From 4cd5f6c4c39ac172e3e3e9e2c11fa9be06f2ed38 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Tue, 30 Sep 2025 10:32:36 +0200
-Subject: [PATCH 27/67] vfs:ceph_new: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
+Subject: [PATCH 27/68] vfs:ceph_new: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV flag
 
 Don't return ENOSYS if the flag is set. It will be ignored,
 does not make sense in a ceph filesystem.
@@ -2038,7 +2038,7 @@ index 6ea8e56c155..37cff6fe051 100644
 From 8f4ad32afca03b564d00a5a6795d4b4a50ae8c66 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Thu, 9 Oct 2025 12:30:17 +0200
-Subject: [PATCH 28/67] vfs:glusterfs: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
+Subject: [PATCH 28/68] vfs:glusterfs: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
 
 Don't return ENOSYS if the flag is set. It will be ignored as does not make
 sense in this module.
@@ -2073,7 +2073,7 @@ index 63dc7a30b04..4d7d96f2888 100644
 From b41558ebe158f413d2cfa71478c3eeb5e1a201ec Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@suse.de>
 Date: Fri, 2 May 2025 13:21:52 +0200
-Subject: [PATCH 29/67] vfs:shadow_copy2: Allow RESOLVE_NO_XDEV flag
+Subject: [PATCH 29/68] vfs:shadow_copy2: Allow RESOLVE_NO_XDEV flag
 
 This module updates the path and calls the next VFS module.
 
@@ -2107,7 +2107,7 @@ index 449d08e8830..465a0f9d28e 100644
 From 49ac956d858b455291edd1330a8d428209728ea0 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Thu, 9 Oct 2025 12:52:11 +0200
-Subject: [PATCH 30/67] vfs:streams_depot: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
+Subject: [PATCH 30/68] vfs:streams_depot: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
  flag
 
 The flag is passed down the modules stack.
@@ -2142,7 +2142,7 @@ index 19b9356fd57..bcf5acf79b4 100644
 From 7b875e245ec205ee083c5c4158933e0e42e8a064 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Thu, 9 Oct 2025 12:59:59 +0200
-Subject: [PATCH 31/67] vfs:fruit: Allow RESOLVE_NO_XDEV flag
+Subject: [PATCH 31/68] vfs:fruit: Allow RESOLVE_NO_XDEV flag
 
 For stream opens, it returns a fake fd. The streams will be stored by
 vfs_streams_depot or vfs_streams_xattr.
@@ -2177,7 +2177,7 @@ index 4da7c1efa07..812e3a351d2 100644
 From 97fb984b6c5c5fe1c562cd23980ea8e110438577 Mon Sep 17 00:00:00 2001
 From: Samuel Cabrero <scabrero@samba.org>
 Date: Thu, 9 Oct 2025 13:05:16 +0200
-Subject: [PATCH 32/67] vfs:streams_xattr: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
+Subject: [PATCH 32/68] vfs:streams_xattr: Allow VFS_OPEN_HOW_RESOLVE_NO_XDEV
 
 The open function returns a fake fd. Extended attributes will be stored by
 vfs_xattr_tdb or vfs_default.
@@ -2215,7 +2215,7 @@ index 58e5b1eb189..410cd793cd9 100644
 From 23aa86c38e049eb0f75bdd21d18c670abf2c6134 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
 Date: Tue, 7 Apr 2026 16:28:05 +0200
-Subject: [PATCH 33/67] smbdotconf: Add "automount fs types" to smb.conf
+Subject: [PATCH 33/68] smbdotconf: Add "automount fs types" to smb.conf
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -2340,7 +2340,7 @@ index ea400c41aa8..ae1ce208cba 100644
 From 1405b4a8f4772d603083535d6db153c9189ae18c Mon Sep 17 00:00:00 2001
 From: Volker Lendecke <vl@samba.org>
 Date: Thu, 5 Feb 2026 20:24:12 +0100
-Subject: [PATCH 34/67] CVE-2026-1933 tests: Fix permissions used for creating
+Subject: [PATCH 34/68] CVE-2026-1933 tests: Fix permissions used for creating
  reparse points
 
 SEC_STD_ALL does not lead to fsp->access_mask to include the required
@@ -2382,7 +2382,7 @@ index 075b2a07b17..3039a68a1cd 100644
 From 6af47933d060e03ab1cceff2652658c2dd230872 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 2 Feb 2026 11:43:37 +0100
-Subject: [PATCH 35/67] CVE-2026-1933 smbd: Add access checks to reparse point
+Subject: [PATCH 35/68] CVE-2026-1933 smbd: Add access checks to reparse point
  operations
 
 On a share marked "read only = yes" and on file handles opened R/O
@@ -2440,7 +2440,7 @@ index 60373d7fd4e..75aa745e070 100644
 From aed5ff8b967502a40eefe01f85e292c622931551 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Thu, 19 Feb 2026 12:50:38 +1300
-Subject: [PATCH 36/67] CVE-2026-2340: test whether vfs_worm allows overwrite
+Subject: [PATCH 36/68] CVE-2026-2340: test whether vfs_worm allows overwrite
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=15997
 
@@ -2529,7 +2529,7 @@ index f96c8ec7e47..d38488cb790 100755
 From c8e94fe47601143a86d7b9362313e77d4d19fd2d Mon Sep 17 00:00:00 2001
 From: Pavel Kohout <pavel@aisle.com>
 Date: Fri, 13 Feb 2026 15:51:41 +1300
-Subject: [PATCH 37/67] CVE-2026-2340: vfs_worm: Check destination WORM status
+Subject: [PATCH 37/68] CVE-2026-2340: vfs_worm: Check destination WORM status
  in rename
 
 vfs_worm_renameat() only checked if the source file was WORM-protected,
@@ -2615,7 +2615,7 @@ index 0fcda162cd7..a1dca280279 100644
 From 1af2b41cd7ae0d1b65f6ba44a29a2500a0177d24 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Fri, 27 Feb 2026 11:30:40 +1300
-Subject: [PATCH 38/67] CVE-2026-3012: gpo tests: fix test cleanup
+Subject: [PATCH 38/68] CVE-2026-3012: gpo tests: fix test cleanup
 
 These tests are going to fail soon but as currently written they do
 not clean up after themselves, erroring instead of failing and causing
@@ -2791,7 +2791,7 @@ index 2e4696cd926..0972cd2f63c 100644
 From eb449819e1acaa88249f398e15a19ede9adf49b9 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Mon, 23 Feb 2026 11:01:57 +1300
-Subject: [PATCH 39/67] CVE-2026-3012: do not fetch certificate over http
+Subject: [PATCH 39/68] CVE-2026-3012: do not fetch certificate over http
 
 In the case where a certificate was found via HTTP, it was trusted
 without verification and put in the global CA store.
@@ -2931,7 +2931,7 @@ index 00000000000..4bf4b8e3c72
 From a8fc1666366716af45336f32af48826cefd5435e Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Thu, 26 Feb 2026 14:21:01 +1300
-Subject: [PATCH 40/67] CVE-2026-3012: gp_auto_enrol: skip CAs not found in
+Subject: [PATCH 40/68] CVE-2026-3012: gp_auto_enrol: skip CAs not found in
  LDAP
 
 If a certificate is mentioned in a GPO but is not present as a
@@ -2979,7 +2979,7 @@ index 815436e11e9..de8b310afd9 100644
 From cd0a831279bbe890b64898f5a1892bf8c73cfca7 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Fri, 27 Feb 2026 14:46:04 +1300
-Subject: [PATCH 41/67] CVE-2026-3012: gpo tests should use real certificates
+Subject: [PATCH 41/68] CVE-2026-3012: gpo tests should use real certificates
 
 Or at least, more real than a short arbitrary byte string, so that
 the certificates can be parsed.
@@ -3054,7 +3054,7 @@ index 4bf4b8e3c72..4b787a5ac86 100644
 From 39970373fe70615e28b0fe6e56169b0e3674b95a Mon Sep 17 00:00:00 2001
 From: Volker Lendecke <vl@samba.org>
 Date: Tue, 24 Feb 2026 16:11:15 +0100
-Subject: [PATCH 42/67] CVE-2026-3238 winsserver4: Dissolve direct variable
+Subject: [PATCH 42/68] CVE-2026-3238 winsserver4: Dissolve direct variable
  initialization
 
 Checks are required before the packet is dereferenced
@@ -3141,7 +3141,7 @@ index 6679961dc03..1b7fe5641a6 100644
 From a9c5255d1e46738e8148152721aa49add737e64b Mon Sep 17 00:00:00 2001
 From: Volker Lendecke <vl@samba.org>
 Date: Tue, 24 Feb 2026 16:30:46 +0100
-Subject: [PATCH 43/67] CVE-2026-3238 winsserver4: Validate incoming packets
+Subject: [PATCH 43/68] CVE-2026-3238 winsserver4: Validate incoming packets
 
 Avoid NULL pointer dereferences, leading to a crash in the nbt process
 serving wins.
@@ -3203,7 +3203,7 @@ index 1b7fe5641a6..c637657f07c 100644
 From ae5323f5bacb2d461a663cc34ba33c9c0fa05f8e Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:20:15 +0200
-Subject: [PATCH 44/67] CVE-2026-4480/CVE-2026-4408: lib/util: inline
+Subject: [PATCH 44/68] CVE-2026-4480/CVE-2026-4408: lib/util: inline
  string_sub2() into string_sub() the only caller
 
 This will simplify further changes.
@@ -3273,7 +3273,7 @@ index b7b5588da86..26362ca77b2 100644
 From cc8fb24520b1c11e5b43714333d642fdb02449cb Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:20:15 +0200
-Subject: [PATCH 45/67] CVE-2026-4480/CVE-2026-4408: lib/util: remove unused
+Subject: [PATCH 45/68] CVE-2026-4480/CVE-2026-4408: lib/util: remove unused
  talloc_strdup(insert) from talloc_string_sub2()
 
 The insert string is not modified, so we do not need to copy it.
@@ -3401,7 +3401,7 @@ index 26362ca77b2..4a0c58ab3a7 100644
 From 1a672e8ba0300ab2067e50fd7bb53a7e3fa7a194 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:20:15 +0200
-Subject: [PATCH 46/67] CVE-2026-4480/CVE-2026-4408: lib/util: factor out a
+Subject: [PATCH 46/68] CVE-2026-4480/CVE-2026-4408: lib/util: factor out a
  mask_unsafe_character() helper function
 
 This moves the logic into a single place and
@@ -3604,7 +3604,7 @@ index 3134cfcdea5..e1a82859dac 100644
 From f311078eae4731ca2af8a14c1d4091e7263ca507 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 30 Apr 2026 14:48:26 +0200
-Subject: [PATCH 47/67] CVE-2026-4480/CVE-2026-4408: lib/util: split out
+Subject: [PATCH 47/68] CVE-2026-4480/CVE-2026-4408: lib/util: split out
  realloc_string_sub_raw()
 
 This will allow realloc_string_sub2() to use it in order
@@ -3778,7 +3778,7 @@ index e1a82859dac..041a649fd18 100644
 From 3d28a71755b69b6e0afe5f5d9bbc9aff620b0f4f Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 6 May 2026 17:23:39 +0200
-Subject: [PATCH 48/67] CVE-2026-4480/CVE-2026-4408: s3:lib: fix potential
+Subject: [PATCH 48/68] CVE-2026-4480/CVE-2026-4408: s3:lib: fix potential
  memory leak in talloc_sub_basic()
 
 This makes the code easier to understand...
@@ -3819,7 +3819,7 @@ index 40eb15aee04..5121fcaac1c 100644
 From c73fc960e67474ded96fdeebf3e2779e2b28799b Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 21:11:27 +0200
-Subject: [PATCH 49/67] CVE-2026-4480/CVE-2026-4408: s3:lib: let
+Subject: [PATCH 49/68] CVE-2026-4480/CVE-2026-4408: s3:lib: let
  realloc_string_sub2() use realloc_string_sub_raw()
 
 We don't need this logic more than once!
@@ -3945,7 +3945,7 @@ index 26c5ee761f8..e0639f04eb8 100644
 From fc4aa4b816bfe1c3c128acf2cbfac652899d4cb6 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:21:08 +0200
-Subject: [PATCH 50/67] CVE-2026-4480/CVE-2026-4408: lib/util: let
+Subject: [PATCH 50/68] CVE-2026-4480/CVE-2026-4408: lib/util: let
  mask_unsafe_character() check all control characters
 
 There's no reason to mask only \r and \n.
@@ -4024,7 +4024,7 @@ index 041a649fd18..b183d864671 100644
 From fbe0cdf05b0f8f23a39766158cea9c9886000c67 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:21:08 +0200
-Subject: [PATCH 51/67] CVE-2026-4480/CVE-2026-4408: lib/util: add more unsafe
+Subject: [PATCH 51/68] CVE-2026-4480/CVE-2026-4408: lib/util: add more unsafe
  characters to STRING_SUB_UNSAFE_CHARACTERS
 
 |&<> are unsafe characters for shell processing.
@@ -4058,7 +4058,7 @@ index b183d864671..41f56c73ba2 100644
 From 37158038bc10998a59ff7c2b699c35e0dfecc83d Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 8 May 2026 22:33:32 +0200
-Subject: [PATCH 52/67] CVE-2026-4480/CVE-2026-4408: lib/util: let log_escape()
+Subject: [PATCH 52/68] CVE-2026-4480/CVE-2026-4408: lib/util: let log_escape()
  make use of iscntrl()
 
 using iscntrl() also handles 0x7F (DEL).
@@ -4109,7 +4109,7 @@ index 8f1f34912ee..c6d7a0c9e77 100644
 From e0f1a55382891d113a43184a692f58a7c9832efe Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 7 May 2026 18:10:50 +0200
-Subject: [PATCH 53/67] CVE-2026-4480/CVE-2026-4408: lib/util: add
+Subject: [PATCH 53/68] CVE-2026-4480/CVE-2026-4408: lib/util: add
  talloc_string_sub_{mixed_quoting,unsafe}() helpers
 
 This is the basic helper function for the security problems.
@@ -4443,7 +4443,7 @@ index 41f56c73ba2..b8205055da1 100644
 From b0425235ed880fb510aba1fe0fc07ee5d7304337 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Sat, 9 May 2026 22:02:47 +1200
-Subject: [PATCH 54/67] CVE-2026-4480/CVE-2026-4408: lib/util: add
+Subject: [PATCH 54/68] CVE-2026-4480/CVE-2026-4408: lib/util: add
  test_string_sub unittests
 
 This demonstrates the logic of talloc_string_sub_{mixed_quoting,unsafe}()
@@ -5546,7 +5546,7 @@ index 104fa65f672..c92676f66eb 100644
 From 8ee5805b49b6f5f413e627c8b19d10559bbb2aa2 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Sun, 15 Mar 2026 19:15:14 +0100
-Subject: [PATCH 55/67] CVE-2026-4480: s3:printing: mask and/or single quote
+Subject: [PATCH 55/68] CVE-2026-4480: s3:printing: mask and/or single quote
  jobname passed as %J to "print command"
 
 Fix an unauthenticated remote code execution vulnerability with
@@ -5743,7 +5743,7 @@ index 7c7a14de045..2f642af3f4b 100644
 From 27a1372c85d05f02fd1e7f975798314b95ee75d3 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 8 May 2026 23:27:35 +0200
-Subject: [PATCH 56/67] CVE-2026-4480: s3:testparm: warn about 'print command'
+Subject: [PATCH 56/68] CVE-2026-4480: s3:testparm: warn about 'print command'
  %J usage
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=16033
@@ -5780,7 +5780,7 @@ index 306924ac7c8..c758313d466 100644
 From 498d3a2eba50e0d4eff50c99cd54a8a9af4e7639 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 11 May 2026 14:11:34 +0200
-Subject: [PATCH 57/67] CVE-2026-4480: docs-xml/smbdotconf: clarify '%J' in
+Subject: [PATCH 57/68] CVE-2026-4480: docs-xml/smbdotconf: clarify '%J' in
  'print command'
 
 Admins should use '%J'.
@@ -5818,7 +5818,7 @@ index c84e45f404d..d708287932a 100644
 From 47e15af9f5d77208473b29bac5422665b79191f8 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Thu, 23 Apr 2026 18:56:21 +0200
-Subject: [PATCH 58/67] CVE-2026-4408: lib/util: introduce
+Subject: [PATCH 58/68] CVE-2026-4408: lib/util: introduce
  strstr_for_invalid_account_characters()
 
 This splits out the logic from samaccountname_bad_chars_check()
@@ -5907,7 +5907,7 @@ index 19acff4a983..c5987461fe6 100644
 From cd1dc2df42eda36bf66e8d7d6f69e365e5d7d8a3 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 11 May 2026 20:21:36 +0200
-Subject: [PATCH 59/67] CVE-2026-4408: s3:samr-server: only allow
+Subject: [PATCH 59/68] CVE-2026-4408: s3:samr-server: only allow
  _samr_ValidatePassword as DC
 
 This is only supported with 'rpc start on demand helpers = no',
@@ -5949,7 +5949,7 @@ index e0d0875bd5d..3937dbe3f32 100644
 From 77c8330fb3b01c3d23f9aac611397334ef6f0007 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Wed, 18 Mar 2026 12:24:47 +0100
-Subject: [PATCH 60/67] CVE-2026-4408: s3:samr-server: deny, mask and/or single
+Subject: [PATCH 60/68] CVE-2026-4408: s3:samr-server: deny, mask and/or single
  quote username to 'check password script'
 
 We pass this on to the check password script, prevent remote command
@@ -6118,7 +6118,7 @@ index 6c0c0da0cfc..9afb8799aea 100644
 From 5f898b13ad4361966c8d92a40f50b1a3c6a093ba Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Sat, 2 May 2026 22:12:38 +1200
-Subject: [PATCH 61/67] CVE-2026-4408: s3:samr-server: make
+Subject: [PATCH 61/68] CVE-2026-4408: s3:samr-server: make
  check_password_complexity_internal() non-static, for easier testing
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=16034
@@ -6172,7 +6172,7 @@ index 5e839ac77c0..a3a22012858 100644
 From 1054c2ffdc707cee9778dbc0ff4083ae60d9b359 Mon Sep 17 00:00:00 2001
 From: Douglas Bagnall <douglas.bagnall@catalyst.net.nz>
 Date: Sat, 2 May 2026 22:14:43 +1200
-Subject: [PATCH 62/67] CVE-2026-4408: s3:torture: tests for password
+Subject: [PATCH 62/68] CVE-2026-4408: s3:torture: tests for password
  complexity scripts
 
 This tries to demonstrate the new logic for %u in
@@ -6589,7 +6589,7 @@ index 1d2520099e3..d04008b3df1 100644
 From cd0f499a2478ce5676aa1aefe378d50f11026517 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 8 May 2026 23:27:35 +0200
-Subject: [PATCH 63/67] CVE-2026-4408: s3:testparm: warn about 'check password
+Subject: [PATCH 63/68] CVE-2026-4408: s3:testparm: warn about 'check password
  script' %u usage
 
 BUG: https://bugzilla.samba.org/show_bug.cgi?id=16034
@@ -6637,7 +6637,7 @@ index c758313d466..49dc39b2cab 100644
 From 7c6d55ab1924e93a7c67ab563a7162260cf394eb Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Mon, 11 May 2026 13:52:52 +0200
-Subject: [PATCH 64/67] CVE-2026-4408: docs-xml/smbdotconf: clarify '%u' in
+Subject: [PATCH 64/68] CVE-2026-4408: docs-xml/smbdotconf: clarify '%u' in
  'check password script'
 
 Admins should use SAMBA_CPS_ACCOUNT_NAME.
@@ -6685,7 +6685,7 @@ index 18aa2c6d290..dd162d89f08 100644
 From fbf23d3f6e19dea6331c446e80cebf3018c7e332 Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 17 Apr 2026 10:45:58 +0200
-Subject: [PATCH 65/67] third_party/ngtcp2: import v1.22.1 for CVE-2026-40170
+Subject: [PATCH 65/68] third_party/ngtcp2: import v1.22.1 for CVE-2026-40170
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -24154,7 +24154,7 @@ index f4cfd1c7064..399790c50c1 100644
 From c42695f12eea3b3d113114e535be0de950333278 Mon Sep 17 00:00:00 2001
 From: Andreas Schneider <asn@samba.org>
 Date: Tue, 24 Mar 2026 15:00:21 +0100
-Subject: [PATCH 66/67] wafsamba: Add -D_FORTIFY_SOURCE=3 when stack protector
+Subject: [PATCH 66/68] wafsamba: Add -D_FORTIFY_SOURCE=3 when stack protector
  is enabled
 
 The capability check in SAMBA_CONFIG_H() already tests that the compiler
@@ -24229,7 +24229,7 @@ index 97d44a07ee4..1324c9b8c2e 100755
 From 333ca2ea3f4e5350eda487f8e3088252b1fec49e Mon Sep 17 00:00:00 2001
 From: Stefan Metzmacher <metze@samba.org>
 Date: Fri, 8 May 2026 15:01:08 +0200
-Subject: [PATCH 67/67] pam_winbind: only chown the home directory if it was
+Subject: [PATCH 67/68] pam_winbind: only chown the home directory if it was
  created
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
@@ -24398,6 +24398,91 @@ index a54d0ee4123..6aba1c87aba 100644
  }
  
  /* talk to winbindd */
+-- 
+2.53.0
+
+
+From 382885b8d3df7de571fa790feb732dcf76b462cb Mon Sep 17 00:00:00 2001
+From: Andreas Schneider <asn@samba.org>
+Date: Wed, 4 Feb 2026 15:10:02 +0100
+Subject: [PATCH 68/68] s3:winbind: Do not fallback to NCACN_NP Netlogon/LSA
+ connections for AD domains
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+BUG: https://bugzilla.samba.org/show_bug.cgi?id=15987
+
+Pair-Programmed-With: Stefan Metzmacher <metze@samba.org>
+Signed-off-by: Stefan Metzmacher <metze@samba.org>
+Signed-off-by: Andreas Schneider <asn@samba.org>
+Reviewed-by: Pavel Filipenský <pfilipensky@samba.org>
+
+Autobuild-User(master): Pavel Filipensky <pfilipensky@samba.org>
+Autobuild-Date(master): Mon May 11 21:24:02 UTC 2026 on atb-devel-224
+
+(cherry picked from commit 33628fd9da56afc0fa1a480b7df2f73e4e0d3664)
+
+Autobuild-User(v4-23-test): Björn Jacke <bjacke@samba.org>
+Autobuild-Date(v4-23-test): Thu May 28 01:37:36 UTC 2026 on atb-devel-224
+---
+ source3/winbindd/winbindd_cm.c | 36 ++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
+
+diff --git a/source3/winbindd/winbindd_cm.c b/source3/winbindd/winbindd_cm.c
+index 6e11461e07e..45da7b68540 100644
+--- a/source3/winbindd/winbindd_cm.c
++++ b/source3/winbindd/winbindd_cm.c
+@@ -3154,6 +3154,24 @@ NTSTATUS cm_connect_lsat(struct winbindd_domain *domain,
+ 			return status;
+ 		}
+ 
++		if (domain->secure_channel_type != SEC_CHAN_NULL) {
++			/*
++			 * We tried to connect via ncan_ip_tcp and schannel and
++			 * failed - this is either a trusted domain we can't
++			 * connect to or a firewall blocking access.
++			 *
++			 * This also prevents LSA over TCP
++			 */
++			DBG_ERR("Unable to connect to DC %s of domain %s over "
++				"TCP/IP: %s.\nPlease check your firewall if it "
++				"allows connections to port 135 and port "
++				"range 49152-65535 over TCP/IP!\n",
++				domain->dcname,
++				domain->name,
++				nt_errstr(status));
++			return status;
++		}
++
+ 		/*
+ 		 * we tried twice to connect via ncan_ip_tcp and schannel and
+ 		 * failed - maybe it is a trusted domain we can't connect to ?
+@@ -3320,6 +3338,24 @@ NTSTATUS cm_connect_netlogon(struct winbindd_domain *domain,
+ 			return status;
+ 		}
+ 
++		if (domain->secure_channel_type != SEC_CHAN_NULL) {
++			/*
++			 * We tried to connect via ncan_ip_tcp and schannel and
++			 * failed - this is either a trusted domain we can't
++			 * connect to or a firewall blocking access.
++			 *
++			 * This also prevents LSA over TCP
++			 */
++			DBG_ERR("Unable to connect to DC %s of domain %s over "
++				"TCP/IP: %s.\nPlease check your firewall if it "
++				"allows connections to port 135 and port "
++				"range 49152-65535 over TCP/IP!\n",
++				domain->dcname,
++				domain->name,
++				nt_errstr(status));
++			return status;
++		}
++
+ 		/*
+ 		 * we tried twice to connect via ncan_ip_tcp and schannel and
+ 		 * failed - maybe it is a trusted domain we can't connect to ?
 -- 
 2.53.0
 
