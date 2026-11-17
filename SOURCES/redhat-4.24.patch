@@ -1,0 +1,80 @@
+From 1de6565c25272b536607e7e787d65765a3ad5220 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pavel=20Filipensk=C3=BD?= <pfilipensky@samba.org>
+Date: Thu, 22 Jan 2026 14:27:09 +0100
+Subject: [PATCH] s3:libads: Allocate cli_credentials on a stackframe
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+This fixes:
+ERROR: talloc_free with references at ../../source3/libads/ldap_utils.c:158
+
+What happens:
+
+* `struct cli_credentials *creds` is allocated on `ads` talloc context
+* gensec_set_credentials() creates a talloc_reference to `creds`
+* TALLOC_FREE(creds) sees two parents and complains
+
+All other code is using temporary talloc_stackframe() for `creds`.
+Do it here as well.
+
+Signed-off-by: Pavel Filipenský <pfilipensky@samba.org>
+Reviewed-by: Stefan Metzmacher <metze@samba.org>
+
+Autobuild-User(master): Stefan Metzmacher <metze@samba.org>
+Autobuild-Date(master): Fri Jan 23 11:20:28 UTC 2026 on atb-devel-224
+---
+ source3/libads/ldap_utils.c | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
+
+diff --git a/source3/libads/ldap_utils.c b/source3/libads/ldap_utils.c
+index 9d6d962a2bc..d01afa69697 100644
+--- a/source3/libads/ldap_utils.c
++++ b/source3/libads/ldap_utils.c
+@@ -99,6 +99,7 @@ static ADS_STATUS ads_do_search_retry_internal(ADS_STRUCT *ads, const char *bind
+ 		struct cli_credentials *creds = NULL;
+ 		char *cred_name = NULL;
+ 		NTSTATUS ntstatus;
++		TALLOC_CTX *frame = talloc_stackframe();
+ 
+ 		if (NT_STATUS_EQUAL(ads_ntstatus(status), NT_STATUS_IO_TIMEOUT) &&
+ 		    ads->config.ldap_page_size >= (lp_ldap_page_size() / 4) &&
+@@ -119,18 +120,20 @@ static ADS_STATUS ads_do_search_retry_internal(ADS_STRUCT *ads, const char *bind
+ 			DBG_NOTICE("Search for %s in <%s> failed: %s\n",
+ 				   expr, bp, ads_errstr(status));
+ 			SAFE_FREE(bp);
++			TALLOC_FREE(frame);
+ 			return status;
+ 		}
+ 
+ 		ntstatus = ads->auth.reconnect_state->fn(ads,
+ 				ads->auth.reconnect_state->private_data,
+-				ads, &creds);
++				frame, &creds);
+ 		if (!NT_STATUS_IS_OK(ntstatus)) {
+ 			DBG_WARNING("Failed to get creds for realm(%s): %s\n",
+ 				    ads->server.realm, nt_errstr(ntstatus));
+ 			DBG_WARNING("Search for %s in <%s> failed: %s\n",
+ 				   expr, bp, ads_errstr(status));
+ 			SAFE_FREE(bp);
++			TALLOC_FREE(frame);
+ 			return status;
+ 		}
+ 
+@@ -151,11 +154,11 @@ static ADS_STATUS ads_do_search_retry_internal(ADS_STRUCT *ads, const char *bind
+ 			 * callers depend on it being around.
+ 			 */
+ 			ads_disconnect(ads);
+-			TALLOC_FREE(creds);
++			TALLOC_FREE(frame);
+ 			SAFE_FREE(bp);
+ 			return status;
+ 		}
+-		TALLOC_FREE(creds);
++		TALLOC_FREE(frame);
+ 
+ 		*res = NULL;
+ 
+-- 
+2.53.0
+
